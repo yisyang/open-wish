@@ -1,35 +1,34 @@
 ---
 name: ow-consolidate
-description: Compact artifacts in an explicitly active OW workflow or on request, preserving durable outcomes and acceptance. Honor OW opt-outs; ordinary repository cleanup does not require this skill.
+description: Dispose closed OW changes and tasks, preserving durable needs and useful repository knowledge. Compact intent on request or in an active OW workflow. Honor OW opt-outs.
 ---
 
 # Consolidate
 
-Read `openwish/policy.md`, `ow status`, and `ow context`. If budgets already fail,
-inspect reported files directly before requesting full context.
+Read `openwish/policy.md`, `ow status`, and `ow context`. If budgets fail, inspect
+the reported files directly before requesting full context.
 
-1. Identify completed epics/tasks, duplicate wording, stale facts, and near-limit
-   files. Do not scan all Git history or preserve conversation asks as artifacts.
-2. Promote current contracts/rationale to spec designs, operational profiles and
-   secret references to knowledge, and lasting outcome constraints to their needs.
-   Keep spec design need references intact so later updates retain their purpose.
-3. Remove completed ephemeral instructions once relevant resulting truth is
-   preserved. Keep unresolved limitations, manual checks, and prerequisites visible.
-4. Tighten wording while preserving IDs and acceptance. Merging distinct outcomes
-   or retiring a need changes intent: use Propose under the selected workflow.
-   Clarifications use numbered questions, two or three A/B/C choices, and
-   `(Recommended)` before the preferred choice text, with concise useful effects.
-   Diagnose duplicates by actor/outcome/acceptance, not by shared spec links.
-   An implementation-specific need may belong as a scenario in an existing spec;
-   preserve its observable requirement and resolve references when consolidating.
-5. Preserve the only historical copy in Git before removing completed epics.
-   Resolve live references first. Keep one current state and latest review per
-   need; do not accumulate asks, execution containers, histories, or archive indexes.
-6. Keep all current needs globally complete. Splitting files does not solve an
-   oversized register. If safe compaction cannot fit, clarify product boundaries
-   or genuinely redundant needs without silently weakening intent.
-7. Run `ow check`; inspect stale approvals after semantic edits. Report a compact
-   size summary plus the affected needs/specs and any current decision required.
-
-Routine bounds and replacing latest summaries apply in every phase even when
-this optional semantic maintenance skill is never invoked.
+1. Identify closed changes eligible for disposal and redundant wording. Keep
+   active work and unresolved manual checks visible; task completion alone is
+   insufficient to remove its parent change.
+2. Check that durable intent is in needs, behavior in source, executable checks
+   in tests, and useful rationale/environment references in ordinary repository
+   docs or nearby comments. Do not copy the entire temporary approach into docs.
+   Future maintenance should not require resurrecting a deleted change.
+3. Prefer preserving that knowledge before final review. If an active change needs
+   new edits, refresh checks and review before closure. Already-closed results are
+   historical; substantive follow-up work belongs to a new change.
+4. Run `ow clean C-001 ...` for closed changes. It removes their known change,
+   task, and review files together, preserves unknown files, and preflights the
+   selection. Move useful unknown content deliberately before retrying. Use Git
+   for history when useful; do not automatically commit or build an OW archive,
+   permanent execution register, or need review sidecars.
+5. Compact needs without losing acceptance or constraints. Shared code or shared
+   changes do not imply duplicate outcomes. Merging or retiring needs changes
+   intent; obtain a decision when needed, with numbered A/B/C options and
+   `(Recommended)` before the preferred text. Preserve stable IDs where possible.
+6. Keep all current intent complete within its line/token budget. Splitting files
+   does not solve an oversized register. Clarify boundaries if safe compaction
+   cannot fit, rather than silently truncating constraints.
+7. Run `ow check` and report what was disposed and where useful knowledge lives.
+   Routine work needs no change record merely to perform cleanup.

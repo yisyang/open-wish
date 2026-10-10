@@ -1,6 +1,5 @@
 """Plan version-aware installation before performing filesystem effects."""
 
-import hashlib
 from importlib.resources import files
 import json
 
@@ -82,7 +81,6 @@ def install_skills(root, harnesses, *, confirm_downgrade=None):
     harnesses = normalize_harnesses(harnesses)
     manifest = load_manifest(root)
     outputs = integration_files(harnesses, __version__)
-    legacy = json.loads(asset("legacy-skills.json"))
     target = version_key(__version__)
     plan = []
     for relative, content in outputs.items():
@@ -97,10 +95,8 @@ def install_skills(root, harnesses, *, confirm_downgrade=None):
             plan.append((relative, content, "installed", __version__))
             continue
         installed = declared_version(current) or manifest["files"].get(relative)
-        if installed is None and hashlib.sha256(current.encode("utf-8")).hexdigest() in legacy["sha256"]:
-            installed = legacy["version"]
         if installed is None:
-            raise WishError(f"Unversioned integration file is not a known OW template; preserved: {relative}")
+            raise WishError(f"Integration file has no version or installation record; preserved: {relative}")
         existing = version_key(installed)
         action = "unchanged" if existing == target else ("upgraded" if existing < target else "downgraded")
         plan.append((relative, content, action, installed))

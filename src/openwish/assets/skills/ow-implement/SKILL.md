@@ -1,37 +1,35 @@
 ---
 name: ow-implement
-description: Execute or resume an authorized structured OW plan in dependency order. Continue independent work until completion or genuine blockers. Honor OW opt-outs; routine coding needs no structured plan.
+description: Execute or resume an authorized OW change using local tasks. Continue independent work through verification and review. Honor OW opt-outs and keep routine changes lightweight.
 ---
 
 # Implement
 
-Read `openwish/policy.md`, `ow context N-001 ...`, and `ow ready N-001 ...`.
-Authority and progress belong to needs. Follow each need's explicit mode and
-revision; missing authority blocks only affected work, not other authorized tasks.
-Routine changes identified by Propose implement and verify directly without gate
-receipts. Do not expand them into a structured workflow merely to use this skill.
+Read `openwish/policy.md`, `ow context C-001`, the change approach, and
+`ow ready C-001`. Verify conversation authority before implementation; readiness
+does not grant it. For routine work, implement and verify directly, then report.
 
-1. Select the lowest ready `(group, order)` task. Load its epic and spec designs,
-   including the spec's need references, relevant code, and acceptance conditions.
-2. Mark it in-progress, implement the smallest coherent solution, and preserve all
-   current needs and existing user work. Respect code and artifact budgets.
-3. Run meaningful checks, inspect results, and record concise direct evidence
-   before marking the task done. Never invent a human observation.
-4. Continue using `ow ready` while authorized work remains. A pending review,
-   completed epic, or independent manual blocker does not justify stopping.
-   Task prerequisites, not merely earlier ordinals, determine blocking.
-5. Repair defects within approved intent. Material need/design revisions return
-   to the relevant earlier phase; refresh stale authority under the selected mode.
-   A technical repair or relinking within the same authorized scope can refresh
-   receipts using existing conversation authority; it needs no new permission.
-   Shared spec references are regression coverage. Use the epic's execution scope
-   rather than splitting specs or reopening unrelated needs to satisfy `ready`.
-6. When only genuine human blockers remain, explain the affected need and spec,
-   then ask numbered questions with two or three A/B/C choices. Prefix the
-   preferred choice text with `(Recommended)` and describe useful effects briefly.
-7. When all relevant work is done, automatically enter `ow-review`. Continue
-   remediation and appropriate checks without asking permission for AI review.
+1. Select ready work in listed order, subject to local prerequisites. Read its
+   acceptance and the motivating needs, then inspect relevant code and tests.
+   Set the change and task in-progress as work begins.
+2. Implement the smallest coherent solution. Preserve current needs and existing
+   user work. Prefer functional cores, explicit effects, and discoverable module
+   boundaries consistent with the repository. Keep checks independent of the code's assumptions.
+3. Run meaningful verification and record concise direct evidence before marking
+   a task done. Retain completed tasks for integration review. Manual observations
+   require real evidence; fast-forward cannot invent them.
+4. Continue independent ready work around blocked/manual tasks. A task's list
+   position alone does not block later work. Repair the approach and remaining
+   tasks as the implementation teaches you more; keep technical decisions within
+   existing authority. Material intent/scope changes return to the relevant decision.
+5. Put enduring behavior in code, regression checks in tests, and otherwise
+   unrecoverable rationale near code or in ordinary repository documentation.
+   Never establish another permanent spec or execution ledger.
+6. When only genuine human blockers remain, explain the need and desired outcome,
+   then ask numbered questions with useful A/B/C choices and `(Recommended)` before
+   the preferred text. Do not discard unfinished work to manufacture completion.
+7. When the work is complete, enter `ow-review` automatically. Continue remediation
+   and rechecking within scope without an intermediate permission prompt.
 
-Updates and handoffs lead with the need's purpose and the spec delivering it,
-then the result, verification, and remaining blocker. Use `ow summary N-001 ...`.
-Epic/task IDs may support the explanation but never replace need/spec context.
+Updates lead with **need → outcome → evidence**, then limitations or human input.
+Use `ow summary C-001` when useful. Task IDs support rather than replace purpose.

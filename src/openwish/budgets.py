@@ -51,8 +51,9 @@ def check_budgets(project, *, code=True):
         errors.append(f"Current needs use ~{tokens} tokens; budget is {budget}. Consolidate without losing intent.")
     if len(context.splitlines()) >= 500:
         errors.append("Combined current-needs context must be under 500 lines; splitting files is insufficient.")
-    if len(project["epics"]) > project["config"]["epic_limit"]:
-        errors.append("Too many retained epics. Consolidate completed execution detail into current knowledge.")
+    closed = [key for key, change in project["changes"].items() if change["meta"]["status"] == "closed"]
+    if closed:
+        warnings.append("Closed changes can be disposed after preserving useful knowledge: " + ", ".join(closed))
     if not code:
         return errors, warnings
     exceptions = {}

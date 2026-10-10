@@ -1,45 +1,36 @@
 ---
 name: ow-propose
-description: Interpret substantive software asks in an OW-managed project or an explicit OW request. Reuse durable outcomes and choose a proportional workflow. Respect requests to work without OW; routine coding does not require this skill.
+description: Interpret substantive software asks in an OW-managed project or an explicit OW request. Reuse durable needs and scope disposable changes. Respect OW opt-outs; routine coding does not require this skill.
 ---
 
 # Propose
 
-Respect an OW opt-out before doing anything else. Initialize only when adoption
-was requested. In an OW project, read `openwish/policy.md`, `ow context`, and
-relevant spec designs/code. The proportional workflow below replaces legacy
-generated per-stage approval prompts; honor deliberate project-specific controls.
+Respect OW opt-outs. Initialize only when adoption was requested. Read
+`openwish/policy.md`, `ow context`, and relevant code/tests. Needs are durable;
+changes and tasks are temporary working context. Respect deliberate local controls.
 
-1. Identify actor, desired gains/pains, observable acceptance, and genuine
-   constraints. Treat a requested mechanism as a candidate solution.
-2. First check whether an existing need already covers the outcome. If it is met,
-   recommend keeping the need/product as-is where appropriate. Do not create a
-   duplicate need, reopen working behavior, or persist the ask merely to track it.
-3. Choose the smallest appropriate path. A clear, localized, reversible change
-   within existing intent (e.g. an exact command alias, focused fix, docs, or small
-   refactor) goes directly to implementation, meaningful verification, and a
-   concise result. Update an existing spec if necessary. Do not create/reopen needs,
-   create epics, record gates, change lifecycle dates, or request final acceptance.
-   If a consequential product/compatibility/data/security decision or substantial
-   coordination is involved, use the structured path below. Work already tracked
-   in an active structured plan stays there; do not bypass its authority/manual
-   checks by relabeling it routine. Respect plan-only asks.
-4. For structured work, reuse/reopen the existing outcome under its stable ID.
-   Before creating a need, compare actor, outcome, and acceptance against existing
-   needs and explain its independently valuable difference. A new mechanism,
-   interface, platform, or task is not by itself a new need. Preserve constraints.
-5. Clarify only material uncertainty or conflict. Do not confirm a clear request
-   by restating it as a question. Number questions and use two or three choices,
-   `A.`, `B.`, `C.`. Put
-   `(Recommended)` before the preferred choice text. Add concise effects on needs
-   and implementation when useful. Recommendations depend on existing intent and
-   evidence; do not automatically ignore a request for an unmet outcome.
-6. Create/revise/reopen the interpreted needs using `openwish/artifacts.md`. Store their
-   durable definitions, not the original ask or an ask summary. Reopening resets
-   authority; explicitly set fast-forward again only when requested.
-7. Continue internally to `ow-align` and `ow-plan` to prepare one coherent scope.
-   Preparation needs no gate receipt. Plan records combined authorization from
-   the user's instruction or one meaningful decision when authority is missing.
+1. Identify actor, valuable outcome, observable acceptance, and genuine constraints.
+   Compare with existing needs before adding one. Formats, commands, interfaces,
+   and mechanisms usually serve existing intent. A new need requires an
+   independently valuable difference; preserve IDs when revising intent.
+2. If the outcome already exists, explain it. If a different mechanism is still
+   useful, scope that improvement under the existing need. Keep asks in conversation.
+3. Clear, localized, reversible work within intent goes straight to inspection,
+   implementation, meaningful verification, and reporting. Create no change file
+   or need just to track it; request no final acceptance ceremony. Keep work already
+   in an active change there, including manual checks. Honor plan-only requests.
+4. For substantive work, create/reuse a bounded change referencing the motivating
+   needs directly: `ow new change C-001 --title "Improvement" --need N-001`.
+   Follow `openwish/artifacts.md`. Needs store outcomes and constraints; the change
+   stores purpose, working approach, verification, and tasks. Do not create specs,
+   epics, need-owned execution state, or stage receipts.
+5. Clarify consequential uncertainty or conflict rather than restating clear
+   instructions. Use numbered questions with two or three A/B/C choices and
+   `(Recommended)` before the preferred text. Preserve current constraints pending
+   an actual intent decision. Leave inferred needs' `confirmed_at` empty.
+6. Continue to `ow-align` and `ow-plan` to prepare coherent work. Conversation
+   authority covers implementation; preparation requires no stage approvals.
+   Explicit fast-forward applies only to its change, never to the durable need.
 
-If there is no need revision or unfinished work, provide a concise explanation
-using the existing need and spec, then finish without generating artifacts.
+If no intent revision or useful work remains, explain the existing outcome and
+finish without generating records.

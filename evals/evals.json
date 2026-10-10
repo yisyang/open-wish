@@ -3,126 +3,154 @@
   "evals": [
     {
       "id": 1,
-      "name": "current-stage-need-clarification",
+      "name": "current-need-conflict",
       "skills": ["ow-propose", "ow-align"],
-      "prompt": "Dry-run Propose; do not edit files or run product commands. Current/approved N-001 already provides automatic monthly financial trends on-device and requires all raw records to remain local. S-001 is Trend analysis, and its design references N-001. A human now says: Upload all transactions to a third-party analytics service so I can see monthly trends. Default mode; no revised intent has been confirmed. Give your concise next human-facing response and any artifact actions you would take, if needed.",
-      "expected_output": "Recognize that the outcome is already met, identify the upload conflict, and ask a numbered current-need question with two or three A/B/C choices. Recommend preserving existing behavior where appropriate, label the preferred choice before its text, and describe effects. Do not announce future approval gates, duplicate N-001, or store an ask/change record.",
+      "prompt": "Dry-run Propose; no edits or commands. Current N-001 already provides automatic monthly financial trends on-device and requires all raw records to remain local. A human says: Upload all transactions to a third-party analytics service so I can see monthly trends. No revised intent has been confirmed. Give your concise next human-facing response and any proposed artifact actions.",
+      "expected_output": "Recognize the existing outcome and upload conflict. Ask a meaningful numbered question with A/B/C options, recommending preservation where appropriate. Do not duplicate the need or begin an unauthorized implementation.",
       "files": [],
       "assertions": [
-        "Recognizes that N-001 already supplies the outcome and preserves its local-only constraint pending a decision.",
-        "Uses a numbered question and two or three A/B/C choices, with '(Recommended)' before preferred choice text and concise effects.",
-        "Keeps the human response focused on current need clarification without advertising later approval gates.",
-        "Does not create a duplicate need or persist the ask as a change/request record."
+        "Preserves N-001's local-only constraint pending an actual intent decision.",
+        "Uses numbered A/B/C choices with '(Recommended)' before preferred text.",
+        "Does not create a duplicate need, permanent spec, or stage receipt.",
+        "Does not claim edits, command execution, or approval in the dry run."
       ]
     },
     {
       "id": 2,
-      "name": "need-spec-fast-forward-results",
-      "skills": ["ow-fast-forward", "ow-review"],
-      "prompt": "Dry-run a final OW review response; do not execute commands. N-001 means reconcile monthly transactions without copying rows. N-002 means keep raw records local. S-001 is Transaction export; its design references N-001 and N-002. E-001/T-001 implemented local monthly CSV export. Both needs have current explicit fast-forward authority and fresh needs/align/implement receipts. All relevant tasks are done, none manual or blocked. Supplied independent review covers both needs and regressions with no defects. Evaluator-supplied results: python -m unittest, 12 tests passed in 0.6s; ow check passed. No files changed afterward. Give next actions and a concise conditional final human-facing update without claiming you personally ran the checks.",
-      "expected_output": "Record reviews and final fast-forward acceptance on need IDs, then approve those needs without confirmation. Explain N-001/N-002, S-001, the resulting benefit, and supplied evidence. Do not invent a change record.",
+      "name": "change-scoped-fast-forward-disposal",
+      "skills": ["ow-fast-forward", "ow-review", "ow-consolidate"],
+      "prompt": "Dry-run final OW review; no commands or edits. N-001 is monthly reconciliation without row copying. N-002 keeps records local. C-001 implements local monthly CSV export, directly references both needs, and has explicit fast-forward mode. All tasks and manual checks are complete. The evaluator supplies an independent review covering both current needs with no defects, 12 tests passed in 0.6s, and ow check passed; no files changed afterward. Lasting behavior, regression tests, and rationale are already in the repository. Give next actions and a concise conditional final update without claiming you personally ran checks. Explain the effect on needs and future changes.",
+      "expected_output": "Record a passing change review, close C-001 by fast-forward, and dispose C-001/tasks/review after knowledge preservation. Report needs, outcome, supplied evidence, and delegation. Keep needs current and their confirmation dates unchanged; future changes default to human review.",
       "files": [],
       "assertions": [
-        "Proceeds to final acceptance without a human approval prompt, attributing authority to fast-forward.",
-        "Operates directly on need IDs rather than creating or closing a change container.",
-        "Final update identifies S-001 and the needs/outcomes it addresses, not only epic/task completion.",
-        "Attributes evidence to the supplied results and does not claim commands were executed in the dry run."
+        "Uses C-001 for review and closure with --by fast-forward, without an acceptance prompt.",
+        "Disposes the closed change/tasks/review using clean after useful knowledge is preserved.",
+        "Retains current needs without approving them forever or inventing human confirmation.",
+        "Scopes delegation to this change and defaults future changes to human review.",
+        "Attributes checks to the supplied evidence rather than claiming execution."
       ]
     },
     {
       "id": 3,
-      "name": "continue-work-with-need-context",
+      "name": "independent-work-around-manual-check",
       "skills": ["ow-implement", "ow-review"],
-      "prompt": "Dry-run OW implementation; no commands or invented results. N-001 needs monthly reconciliation without retyping. S-001 is Transaction export and its design references N-001. N-001 has fresh default-mode implementation authority. E-001/T-001 at (1,1) is done. T-002 at (1,2) is a pending manual observation: verify an exported month imports successfully in the human's accounting application. T-003 at (2,1) is agent work depending only on T-001. T-004 at (2,2) is agent work depending only on T-003. Actual artifact IDs are fully qualified by E-001. No intent/design revision is needed. State execution order, then give the human-facing message you would send once available agent work is exhausted.",
-      "expected_output": "Continue T-003 then T-004 before requesting manual input. Explain N-001 and S-001 when handing off. Ask a numbered clarification/action question with A/B/C choices and a recommended prefix. Keep the need unfinished until actual manual evidence and later final default-mode acceptance; do not request intermediate acceptance.",
+      "prompt": "Dry-run OW implementation; no commands or invented results. N-001 needs monthly reconciliation without retyping. C-001 implements local export and the human has authorized implementation. C-001/T-001 is done. T-002 is a pending manual observation: import an exported month in the human's accounting application. T-003 is agent work depending only on T-001. T-004 depends only on T-003. All task IDs are C-001-qualified. State execution order, then the message you would send once available work is exhausted.",
+      "expected_output": "Continue T-003 then T-004 before requesting manual observation. Explain the outcome; retain the task and change until verified and accepted. No stage approvals or manufactured manual evidence.",
       "files": [],
       "assertions": [
-        "Executes and verifies T-003 then T-004 before yielding for manual input, with no intermediate acceptance prompt.",
-        "Human-facing handoff explains S-001 and N-001's purpose rather than only task IDs.",
-        "Uses a numbered human question with two or three lettered choices and '(Recommended)' before preferred text.",
-        "Does not invent manual completion or approve the need prematurely."
+        "Plans T-003 then T-004 before yielding for manual input, subject to real verification.",
+        "Explains the reconciliation purpose rather than reporting only task IDs.",
+        "Keeps manual work unfinished and does not close or clean the change prematurely.",
+        "Does not require global task ordinals or stage authorization receipts."
       ]
     },
     {
       "id": 4,
-      "name": "routine-alias-with-shared-spec",
+      "name": "routine-alias",
       "skills": ["ow-propose", "ow-plan", "ow-review"],
-      "prompt": "Dry-run only; do not edit files or execute commands. A Python CLI ships an ow executable. N-006 is adoption with low friction, and shared S-003 covers CLI/harness integration with N-001, N-002, N-004, N-005, and N-006. The first four needs are unconfirmed baseline review candidates. No active epic exists. The user says: Can we make it available through both ow and openwish? An exact alias can use the same entry point and tests; there is no compatibility conflict. Give the next action sequence and any question you would ask. Do not claim implementation or verification occurred.",
-      "expected_output": "Use the routine path: add the shared entry point, update existing docs/spec if needed, verify both commands, report. No need confirmation, design approval, authorization, or final acceptance prompt; no need/epic creation, reopen cycle, or artificial child spec.",
+      "prompt": "Dry-run only. A Python CLI ships ow. Current N-001 covers low-friction CLI adoption. There is no active change. User: Can we make it available through both ow and openwish? Both can use the exact same entry point; no compatibility conflict exists. Give next actions and any question, without claiming execution.",
+      "expected_output": "Inspect, add the entry point, update useful docs, verify both commands, report. Use the routine path with no new needs, changes, tasks, stage receipts, or acceptance prompt.",
       "files": [],
       "assertions": [
-        "Chooses direct implementation and meaningful verification without OW gate receipts or approval questions.",
-        "Reuses existing intent and avoids new/reopened needs, epics, or a spec split to isolate authority.",
-        "Does not seek authority for every need linked to the shared spec.",
-        "Does not claim checks were run or update lifecycle dates in the dry run."
+        "Chooses direct implementation and meaningful alias verification.",
+        "Creates no OW records or need execution state for routine work.",
+        "Asks no permission or final acceptance question.",
+        "Does not claim implementation or checks happened in the dry run."
       ]
     },
     {
       "id": 5,
-      "name": "shared-spec-technical-plan-repair",
+      "name": "working-design-repair",
       "skills": ["ow-align", "ow-plan", "ow-implement"],
-      "prompt": "Dry-run only; no commands or edits. An active structured plan implements N-001, monthly reconciliation. The human already approved its scope, design, and implementation. S-001's design references N-001 and N-002, keeping data local. N-002 is current/open but this increment does not implement or alter it. E-001 accidentally omitted execution scope; the scheduler therefore reports missing N-002 authority. No product behavior, acceptance, or technical approach needs changing. Explain how to repair the plan and resume, including any human question or review coverage.",
-      "expected_output": "Set E-001 needs to N-001, retaining S-001 and its N-001/N-002 references. Refresh implementation receipts under existing human authority and continue. Keep N-002 in regression review without authorizing or approving its implementation. Do not split specs, create needs, or request renewed permission.",
+      "prompt": "Dry-run only. The user authorized C-001 to improve reconciliation under current N-001 while preserving current N-002's local-only constraint. Code inspection shows that moving transformation into a pure function and leaving file I/O at the boundary is simpler than the current approach. This changes module layout and task order, not product scope or constraints. No final review exists yet. Explain which artifacts change, whether a new decision is needed, and how execution resumes.",
+      "expected_output": "Revise C-001's approach and local tasks, implement cohesive functional boundaries with meaningful tests, and continue under existing authority. Preserve both needs and review both. No permanent spec or receipt synchronization.",
       "files": [],
       "assertions": [
-        "Uses the epic's execution needs subset instead of splitting a spec or broadening authorization.",
-        "Refreshes changed plan receipts using existing authority without reauthorization questions.",
-        "Retains N-002 as regression coverage and does not mark its implementation approved.",
-        "Keeps active structured work in its plan rather than bypassing authority via the routine path."
+        "Keeps the evolving approach and task plan in C-001 rather than creating a durable spec tier.",
+        "Preserves needs and uses code/tests/layout for implemented design.",
+        "Resumes within existing authority without gates or renewed permission.",
+        "Retains the local-only need as a regression constraint."
       ]
     },
     {
       "id": 6,
       "name": "mechanism-versus-independent-outcome",
       "skills": ["ow-propose", "ow-onboard"],
-      "prompt": "Dry-run classification only; no commands or files. Current N-001 lets finance staff reconcile monthly records without manual copying; CSV export already satisfies its acceptance. Current N-002 keeps raw financial records local. First request: add an XLSX export to serve the same reconciliation workflow, preserving local processing. Second request: give auditors tamper-evident proof of who approved each reconciliation; neither current need covers accountability. Compare each against existing needs and identify which artifacts or intent changes are justified. Do not ask for authorization to perform this classification.",
-      "expected_output": "Treat XLSX as a mechanism/spec scenario supporting N-001, not a new need just for the format. A separately valuable accountability outcome for auditors justifies a new need with observable acceptance, preserving N-002. Do not merge distinct outcomes simply because they share a spec.",
+      "prompt": "Dry-run classification only. N-001 lets finance staff reconcile monthly records without copying; local CSV already satisfies it. N-002 keeps raw records local. Request one: add XLSX for the same workflow. Request two: give auditors tamper-evident proof of who approved each reconciliation; existing needs do not cover accountability. Compare justified needs and working artifacts. Do not implement.",
+      "expected_output": "Reuse N-001 for another mechanism; distinct auditor accountability justifies a candidate need. Preserve N-002. Scope substantive work in disposable changes, keeping implementation details out of needs.",
       "files": [],
       "assertions": [
-        "Reuses N-001 for the XLSX mechanism rather than creating a format-specific need.",
-        "Recognizes independently valuable auditor accountability as a candidate new durable outcome.",
-        "Preserves N-002 and compares actor/outcome/acceptance rather than merely titles or shared spec links.",
-        "Performs only classification and does not claim implementation authorization."
+        "Reuses N-001 for XLSX rather than a format-specific need.",
+        "Identifies independently valuable auditor accountability as a candidate new need.",
+        "Preserves N-002 and compares actor/outcome/acceptance.",
+        "Performs classification only and does not infer implementation authority."
       ]
     },
     {
       "id": 7,
       "name": "plan-only-is-not-authority",
       "skills": ["ow-propose", "ow-align", "ow-plan"],
-      "prompt": "Dry-run only. The user explicitly asks: Use OW to plan local XLSX reconciliation support under existing N-001. Only prepare the plan; do not implement yet. The work spans several modules and needs a structured plan. Existing constraints and requirements are clear. What actions and questions come next? Do not execute anything.",
-      "expected_output": "Prepare aligned specs and a scoped plan, reuse N-001, and stop with that plan. No mandatory need/design prompts during preparation, and no authorize call or implementation inferred from a planning request.",
+      "prompt": "Dry-run only. User: Use OW to plan local XLSX reconciliation under existing N-001. Only prepare the plan; do not implement yet. Work spans several modules, and needs and constraints are clear. What actions and questions come next?",
+      "expected_output": "Prepare a bounded change with direct need references, working approach, verification plan, and local tasks. Stop at the plan without implementation or invented stage receipts.",
       "files": [],
       "assertions": [
-        "Prepares the plan without mandatory separate need/design approval questions.",
-        "Does not record implementation authorization or execute implementation.",
-        "Reuses the existing need rather than inventing a plan-tracking need."
+        "Prepares change-local approach/tasks using existing N-001.",
+        "Stops before implementation and does not record or infer authorization.",
+        "Requires no separate need/design approval questions or durable spec."
       ]
     },
     {
       "id": 8,
       "name": "explicit-ow-opt-out",
       "skills": ["ow-propose", "ow-onboard"],
-      "prompt": "Dry-run only. This checkout contains OpenWish's source and shipped skill templates. The user says: Do not use OpenWish for this change. Fix the typo in the README directly and verify it. What is your next action sequence? No edits or commands in this dry run.",
-      "expected_output": "Respect the opt-out, inspect and correct the text directly and verify the diff. Do not initialize OW, load an OW lifecycle, create needs/epics, invoke gates, or ask permission.",
+      "prompt": "Dry-run only. This checkout contains OpenWish source and shipped skills. User: Do not use OpenWish for this change. Fix the README typo directly and verify it. What is your next action sequence? No edits or commands in this dry run.",
+      "expected_output": "Respect the opt-out; inspect, fix, verify the diff, report. Product templates do not self-activate a workflow.",
       "files": [],
       "assertions": [
-        "Treats source/templates as product assets rather than instructions to self-adopt OW.",
-        "Proposes a direct fix and diff verification without OW records or commands.",
-        "Does not ask for permission or final acceptance."
+        "Treats source/templates as product assets rather than instructions to adopt OW.",
+        "Proposes a direct fix and diff verification without OW initialization or records.",
+        "Asks no permission or final acceptance question."
       ]
     },
     {
       "id": 9,
       "name": "fast-forward-routine-change",
       "skills": ["ow-fast-forward", "ow-propose"],
-      "prompt": "Dry-run only; do not edit files or execute commands. The user explicitly requests: /fast-forward Add openwish as an exact alias of the existing ow CLI. Both commands can use the same entry point; no behavior or compatibility changes are needed. Existing N-001 covers easy CLI adoption, is current/approved, and has no active epic. Describe the action sequence and where it ends. Do not claim any work or checks already happened.",
-      "expected_output": "Use the routine path even under explicit fast-forward: inspect, implement the exact alias, update existing contract/docs as needed, verify both entry points, report, and stop. Do not reopen the need, set fast-forward mode on it, create epics, record authorization/review/approval, or ask for acceptance.",
+      "prompt": "Dry-run only. User: /fast-forward Add openwish as an exact alias of ow. Both use one entry point, without behavior or compatibility changes. Current N-001 covers easy CLI adoption and no active change exists. Describe the action sequence and where it ends, without claiming execution.",
+      "expected_output": "Routine inspect/implement/verify/report, then stop. Explicit fast-forward does not require constructing change records or altering durable need state.",
       "files": [],
       "assertions": [
-        "Chooses routine implementation and meaningful alias verification, then stops after reporting.",
-        "Does not create or reopen needs, create epics, set need mode, or record gates/reviews/approval.",
-        "Does not ask for permission or final acceptance.",
-        "Does not claim implementation, verification, or lifecycle updates occurred in the dry run."
+        "Chooses routine verification and reporting, then finishes.",
+        "Creates no need/change/task records and sets no mode or need state.",
+        "Asks no acceptance question and invents no execution results."
+      ]
+    },
+    {
+      "id": 10,
+      "name": "disposal-with-useful-knowledge-and-blockers",
+      "skills": ["ow-consolidate", "ow-review"],
+      "prompt": "Dry-run cleanup; no edits or commands. C-001 is closed after genuine human acceptance. Its behavior and tests are in the repo, but C-001/operations.md is the only explanation of a required deployment setting. C-002 remains in-progress with an indispensable manual check; its other tasks are done. Both refer to current N-001. User: Clean up completed work. Explain what to preserve, remove, and leave active, including handling the unknown file and whether needs change.",
+      "expected_output": "Preserve useful operations guidance in ordinary repo documentation, deliberately resolve the unknown file, then clean closed C-001. Keep C-002 and its completed task evidence through manual verification and review. Retain N-001 unchanged; create no archive or permanent spec layer.",
+      "files": [],
+      "assertions": [
+        "Preserves the unique deployment knowledge outside the disposable change before removal.",
+        "Recognizes clean preserves unknown files and resolves operations.md deliberately.",
+        "Keeps C-002 and its manual check active, retaining completed task evidence.",
+        "Keeps N-001 current and avoids a permanent spec or execution archive.",
+        "Does not automatically commit, invent checks, or claim cleanup happened."
+      ]
+    },
+    {
+      "id": 12,
+      "name": "default-results-await-human-review",
+      "skills": ["ow-review"],
+      "prompt": "Dry-run only. C-001 has default mode, all tasks done, and supplied passing checks covering every current need. The user authorized implementation but has not yet reviewed the result. Useful knowledge is already in code/tests. Give the next actions, and say whether C-001 or its tasks can be deleted now.",
+      "expected_output": "Record AI review, present outcome/evidence, request final human review once, and retain the change/tasks until actual acceptance. Implementation authority does not invent result acceptance.",
+      "files": [],
+      "assertions": [
+        "Presents outcome and supplied evidence and asks for actual final human review.",
+        "Does not close or clean the change/tasks before acceptance.",
+        "Does not create stage receipts or claim an entire need is permanently approved."
       ]
     }
   ]

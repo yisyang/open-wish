@@ -4,7 +4,8 @@ The distribution name and Python module are `openwish`. The installed commands
 are the exact aliases `ow` (canonical in documentation) and `openwish`. Users
 install with `uv tool install openwish` and upgrade with
 `uv tool upgrade openwish`, followed by `ow init` in each project whose installed
-skills they want to update.
+skills they want to update. Before v1.0.0, only the current artifact schema is
+supported; releases do not include migrations or legacy compatibility.
 
 ## One-time human setup
 
@@ -47,7 +48,7 @@ release workflow:
 5. Install each artifact separately using `uv tool install` into temporary tool
    directories, outside the checkout. Check the actual `ow` and `openwish`
    executables, all four harness selections, packaged assets, project validation,
-   and no-op reinitialization.
+    no-op reinitialization, and the change/review/closure/disposal lifecycle.
 6. Upload the tested distributions as the `python-dists` workflow artifact.
 
 `.github/workflows/release.yml` publishes those same artifacts without rebuilding:
@@ -70,11 +71,11 @@ the production trigger is publishing the GitHub release.
 3. Confirm the build and publication jobs succeed, then exercise the package:
 
    ```sh
-   uvx --index-url https://test.pypi.org/simple/ --from openwish==0.4.0 ow --version
+    uvx --index-url https://test.pypi.org/simple/ --from openwish==0.5.0 ow --version
    ```
 
-TestPyPI and PyPI have independent version histories. Testing `0.4.0` on TestPyPI
-does not prevent publishing `0.4.0` to PyPI. An already uploaded filename cannot
+TestPyPI and PyPI have independent version histories. Testing `0.5.0` on TestPyPI
+does not prevent publishing `0.5.0` to PyPI. An already uploaded filename cannot
 be overwritten; use a new version for revised artifacts on the same registry.
 
 ## Each production release
@@ -82,15 +83,15 @@ be overwritten; use a new version for revised artifacts on the same registry.
 1. Update `pyproject.toml` and `src/openwish/__init__.py` to the same stable version.
    Update the README's displayed version and add the release's changes to the root
    [CHANGELOG.md](../CHANGELOG.md), newest first. Use version-only headings such as
-   `## v0.4.0`, and use that entry for GitHub release notes.
+   `## v0.5.0`, and use that entry for GitHub release notes.
    Bundled skill/adapter changes require a version bump for existing installations.
 2. Merge the release commit after Check passes.
-3. Create a tag such as `v0.4.0` pointing to that commit, then publish a GitHub
+3. Create a tag such as `v0.5.0` pointing to that commit, then publish a GitHub
    release for that tag. Leave **Set as a pre-release** unchecked.
 4. The Release workflow reruns Check for the tagged revision and publishes only
    after the tests, version checks, metadata validation, and install checks pass.
 5. Confirm the version appears at <https://pypi.org/project/openwish/> and verify
-   installation with `uv tool install openwish==0.4.0` in a clean tool environment.
+   installation with `uv tool install openwish==0.5.0` in a clean tool environment.
 
 If a build or check fails, no publication occurs. Fix the issue before creating
 the next release. If an upload fails, inspect PyPI to see which artifacts arrived;
@@ -101,11 +102,11 @@ the workflow deliberately does not silently skip existing distribution files.
 Run from the repository root with Python 3.11+ and uv available:
 
 ```sh
-python3 scripts/check_release.py --tag v0.4.0
+python3 scripts/check_release.py --tag v0.5.0
 PYTHONPATH=src python3 -m unittest discover -s tests -v
 uv build --no-sources
 uvx twine check --strict dist/*
-python3 scripts/smoke_dist.py dist --expected-version 0.4.0
+python3 scripts/smoke_dist.py dist --expected-version 0.5.0
 ```
 
 Use a fresh output directory or remove obsolete distribution files before building

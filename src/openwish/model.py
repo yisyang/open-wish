@@ -1,14 +1,14 @@
-"""Pure graph, context, and task scheduling operations."""
+"""Pure projections and local task scheduling for durable needs and changes."""
 
 import json
 import math
 
 from .storage import WishError
 
-IMPLEMENTATION = ("open", "in-progress", "review", "approved")
 CURRENCY = ("current", "retired")
+CHANGE_STATES = ("open", "in-progress", "review", "closed")
 TASK_STATES = ("open", "in-progress", "blocked", "done")
-GATES = ("needs", "align", "implement", "review")
+MODES = ("default", "fast-forward")
 
 
 def select_needs(project, keys):
@@ -21,73 +21,51 @@ def select_needs(project, keys):
     return sorted(set(keys))
 
 
-def spec_needs(project, spec):
-    return project["specs"][spec]["design"]["meta"]["needs"]
+def select_changes(project, keys):
+    """Accept changes or needs as a convenience; an empty selection means all."""
+    keys = [keys] if isinstance(keys, str) else list(keys)
+    if not keys:
+        return sorted(project["changes"])
+    selected = set()
+    for key in keys:
+        if key in project["changes"]:
+            selected.add(key)
+        elif key in project["needs"]:
+            selected.update(cid for cid, change in project["changes"].items()
+                            if key in change["meta"]["needs"])
+        else:
+            raise WishError(f"Unknown need or change: {key}")
+    return sorted(selected)
 
 
-def direct_specs(project, keys):
-    return sorted(key for key in project["specs"] if set(keys).intersection(spec_needs(project, key)))
+def change_tasks(project, key):
+    return [task for task in project["tasks"] if task["change"] == key]
 
 
-def epic_needs(project, key):
-    """Execution scope can be narrower than the specs' regression coverage."""
-    meta = project["epics"][key]["meta"]
-    if "needs" in meta:
-        return meta["needs"]
-    # Older epics retain their original scope until deliberately narrowed.
-    return sorted({nid for sid in meta["specs"] for nid in spec_needs(project, sid)})
-
-
-def need_scope(project, keys):
-    """Derive execution work from needs; no separate work container is persisted."""
-    keys = select_needs(project, keys)
-    specs = direct_specs(project, keys)
-    epics = sorted(key for key in project["epics"]
-                   if set(keys).intersection(epic_needs(project, key)))
-    return {"needs": keys, "specs": specs, "epics": epics}
-
-
-def connected_specs(project, keys):
-    """Include execution contracts and their prerequisites/consumers for review."""
-    scope = need_scope(project, keys)
-    affected = set(scope["specs"])
-    for eid in scope["epics"]:
-        affected.update(project["epics"][eid]["meta"]["specs"])
-    edges = {}
-    for key, spec in project["specs"].items():
-        meta = spec["meta"]
-        links = set(meta.get("depends_on", []))
-        if meta.get("parent"):
-            links.add(meta["parent"])
-        edges[key] = links
-    while True:
-        expanded = affected | {link for key in affected for link in edges.get(key, [])}
-        expanded |= {key for key, links in edges.items() if links.intersection(affected)}
-        if expanded == affected:
-            return sorted(affected)
-        affected = expanded
+def review_needs(project, key):
+    """All current intent constrains a change, including needs outside its purpose."""
+    return sorted(set(project["changes"][key]["meta"]["needs"]) |
+                  {nid for nid, need in project["needs"].items()
+                   if need["meta"]["currency"] == "current"})
 
 
 def needs_context(project):
-    """A live projection: spec links and statuses are never copied into needs."""
-    lines = ["# Current needs (including previously approved needs)", ""]
+    lines = ["# Current needs (binding after delivery)", ""]
     for key, need in sorted(project["needs"].items()):
         meta = need["meta"]
         if meta.get("currency") != "current":
             continue
-        specs = [f"{sid} ({s['meta'].get('implementation', 'open')})"
-                 for sid, s in sorted(project["specs"].items())
-                 if key in spec_needs(project, sid)]
         lines.extend([
             f"## {key}: {meta.get('title', '')}",
-            f"Currency: current; implementation: {meta.get('implementation', 'open')}",
             f"Actor: {meta.get('actor', '')}",
             f"Outcome: {meta.get('outcome', '')}",
             f"Acceptance: {json.dumps(meta.get('acceptance', []), ensure_ascii=False)}",
-            f"Confirmed: {meta.get('confirmed_at') or 'unconfirmed'}; "
-            f"verified: {meta.get('verified_at') or 'unverified'}",
-            f"Specs: {', '.join(specs) or 'none'}",
+            f"Confirmed: {meta.get('confirmed_at') or 'unconfirmed'}",
         ])
+        extra = {name: value for name, value in meta.items() if name not in
+                 {"id", "title", "currency", "actor", "outcome", "acceptance", "confirmed_at"}}
+        if extra:
+            lines.append("Additional intent: " + json.dumps(extra, ensure_ascii=False))
         if need["body"]:
             lines.append(need["body"])
         lines.append("")
@@ -100,7 +78,6 @@ def estimate_tokens(text):
 
 
 def topological_order(nodes):
-    """Deterministic Kahn traversal; references are validated separately."""
     remaining = {key: set(deps) for key, deps in nodes.items()}
     ordered = []
     while remaining:
@@ -112,30 +89,24 @@ def topological_order(nodes):
     return ordered
 
 
-def task_key(task):
-    return task["group"], task["order"], task["id"]
-
-
-def task_lineage(project, task):
-    return [{"id": key, "title": project["specs"][key]["meta"]["title"],
-             "needs": [{"id": nid, "title": project["needs"][nid]["meta"]["title"],
-                        "outcome": project["needs"][nid]["meta"]["outcome"]}
-                       for nid in spec_needs(project, key)]}
-            for key in project["epics"][task["epic"]]["meta"]["specs"]]
-
-
-def ready_tasks(project, keys):
+def ready_tasks(project, keys=()):
+    """List readiness, not permission. Conversation authority belongs to the harness."""
+    selected = set(select_changes(project, keys))
     tasks = {task["id"]: task for task in project["tasks"]}
-    scope = set(need_scope(project, keys)["epics"])
     ready, waiting = [], []
-    for task in sorted(project["tasks"], key=task_key):
-        if task["epic"] not in scope or task["status"] == "done":
+    for task in project["tasks"]:
+        change = project["changes"][task["change"]]["meta"]
+        if task["change"] not in selected or change["status"] == "closed" or task["status"] == "done":
             continue
-        dependencies_done = all(tasks[dep]["status"] == "done" for dep in task["depends_on"])
-        item = {**task, "lineage": task_lineage(project, task),
-                "execution_needs": epic_needs(project, task["epic"])}
-        if task["kind"] == "agent" and dependencies_done and task["status"] != "blocked":
-            ready.append(item)
-        else:
-            waiting.append(item)
+        needs = [{"id": nid, "title": project["needs"][nid]["meta"]["title"],
+                  "outcome": project["needs"][nid]["meta"]["outcome"]} for nid in change["needs"]]
+        item = {**task, "needs": needs}
+        unfinished = [dep for dep in task.get("depends_on", []) if tasks[dep]["status"] != "done"]
+        if unfinished:
+            item["blocker"] = "Unfinished prerequisites: " + ", ".join(unfinished)
+        elif task.get("kind", "agent") == "manual":
+            item["blocker"] = "Manual observation required"
+        elif task["status"] == "blocked":
+            item["blocker"] = task.get("evidence") or "Resolve the task's blocker"
+        (waiting if "blocker" in item else ready).append(item)
     return ready, waiting

@@ -1,183 +1,182 @@
-# OW artifact reference
+# OW artifact reference — schema 3
 
-OW operates on need IDs. Asks stay in conversation. Stable IDs are `N-001`,
-`S-001`, and `E-001`; Markdown records use TOML headers between `+++` lines.
-These records support structured work. Routine, clear changes within existing
-intent need no new records, reopen cycle, or gate receipts; see `policy.md`.
+Needs are the only mandatory durable product knowledge. Changes and their tasks
+are temporary execution context. Markdown uses TOML frontmatter between `+++`
+lines. Routine work within clear intent may proceed without execution records.
 
 ```text
 openwish/
-  config.json                 # product and budgets (schema version 2)
-  installation.json           # installed harnesses and per-file OW versions
-  policy.md                   # workflow and human communication
+  config.json                 # schema 3, product, context/source budgets
+  installation.json           # harness installer bookkeeping
+  policy.md                   # project-owned workflow guidance
   artifacts.md                # this reference
-  needs/N-001.md              # durable outcome and lifecycle
-  needs/N-001.state.json      # current implementation revision and decisions
-  needs/N-001.review.json     # latest direct verification results
-  specs/S-001/spec.md         # behavioral contract, prerequisite/parent links
-  specs/S-001/design.md       # technical design and authoritative need references
-  epics/E-001/design.md       # bounded implementation increment, linked to specs
-  epics/E-001/tasks.json      # ordered, verifiable work
-  knowledge/environment.md    # current operational facts
+  needs/N-001.md              # durable intent
+  changes/C-001/change.md     # temporary purpose, approach, verification plan
+  changes/C-001/tasks.json    # local work checklist and optional dependencies
+  changes/C-001/review.json   # one latest result; created by record-review
+src/                         # implementation and discoverable module boundaries
+tests/                       # executable checks against expected outcomes
+docs/                        # optional useful rationale and operational guidance
 ```
 
-Run `ow init` for a terminal harness multi-select or `ow init --harness opencode
-claude` for explicit selection. Re-running installs missing skills, overwrites
-older versions, preserves equal versions, and asks before downgrading newer ones.
-Existing project knowledge is preserved. `installation.json` is a bounded current
-inventory, not a history; generated skills and adapters also carry version stamps.
+Configuration and installed guidance support the tool; they are not additional
+product artifact layers. There are no specs, epics, need state sidecars, or gates.
 
 ## Needs
 
-Create with `ow new need N-001 --title "Monthly reconciliation"` and fill in:
+Create with `ow new need N-001 --title "Monthly reconciliation"`, then fill in:
 
 ```toml
 +++
 id = "N-001"
 title = "Monthly reconciliation"
 currency = "current"
-implementation = "open"
 actor = "Operations staff"
-outcome = "Reconcile a month's transactions without manually copying records."
+outcome = "Reconcile monthly transactions without copying records."
 acceptance = ["Representative reconciliation completes without retyping rows."]
 confirmed_at = ""
-verified_at = ""
 +++
 ```
 
-Use an optional short body for essential constraints. Everything in a current
-need enters the global context. Do not add an `ask` field or duplicate spec links.
+Use the body for genuine constraints and essential intent rationale. All current
+need content enters global context. `confirmed_at` is empty for inferred intent
+and an ISO date only after actual human confirmation.
+Currency is `current | retired`. Needs have no implementation status, mode,
+reopen cycle, copied change links, or approval state. Retiring a need changes intent.
 
-If a need requires more implementation, run `ow reopen N-001`. Its ID and history
-survive; implementation becomes open, revision increases, gates reset, and mode
-returns to default. Reopening a retired need also reactivates it, so confirm that
-intent first. Existing task results remain evidence; Plan assesses what now remains.
+## Changes
 
-## Specs and need references
+```sh
+ow new change C-001 --title "Local transaction export" --need N-001 --need N-002
+```
 
-`ow new spec S-001 --title "Transaction export"` creates both files. The contract
-header in `spec.md` contains `id`, `title`, `implementation`, `depends_on = []`,
-and `parent = ""`. The body states behavior and observable acceptance scenarios.
-
-The **design** contains the need references:
+Each `--need` references an existing need motivating the change. One change can
+serve many needs; one need can have many changes. Other current needs remain
+regression constraints. Use a fresh change ID for follow-up work; IDs need only be
+unique in the working tree, but avoiding historical reuse makes Git easier to read.
 
 ```toml
 +++
-id = "S-001"
-needs = ["N-001"]
+id = "C-001"
+title = "Local transaction export"
+needs = ["N-001", "N-002"]
+status = "open"
+mode = "default"
 +++
 ```
 
-Below that header, explain how the design satisfies N-001 and preserves affected
-constraints. The reference is authoritative here; the CLI derives the need's spec
-list and all task lineage from it. Designs can reference multiple needs.
-Prerequisite and containment graphs are separate and acyclic.
+The body explains **purpose**, **approach**, and **verification** for this bounded
+improvement. Keep it concise and revise it when the working design changes. Source
+and tests carry the resulting implementation; the change need not survive delivery.
 
-## Epics and tasks
+Status is `open | in-progress | review | closed`. Edit `in-progress` when work
+starts. `record-review` sets `review` for a pass and `in-progress` for blocked
+findings. `close` records `closed`, `closed_by`, and an ISO `closed_at` timestamp.
+Closed changes are historical, not live claims about subsequent code revisions.
 
-`ow new epic E-001 --title "Export implementation"` creates `design.md` with
-`id`, `title`, and `specs = ["S-001"]`. Describe only this bounded increment.
-Split larger work into multiple task groups or epics; retain durable design in specs.
+Mode is `default | fast-forward`. Explicitly requested delegation can use
+`--fast-forward` at creation or `ow mode fast-forward C-001`. Mode changes stale
+the pending review. Each new change defaults to normal human review independently.
+There is no command granting implementation authority: use actual conversation
+instructions, honor plan-only scope, and clarify material decisions when needed.
 
-Add `needs = ["N-001"]` to the epic header to select its execution scope. This
-must be a nonempty subset of the needs referenced by its spec designs. It selects
-which outcomes this increment implements; it does not replace the designs' full
-regression coverage. If omitted, all linked needs are selected for compatibility.
-Use this field instead of splitting a shared spec just to avoid unrelated gates.
+## Tasks
+
+Edit `changes/C-001/tasks.json`:
 
 ```json
 {
   "tasks": [
     {
-      "id": "E-001/T-001",
+      "id": "C-001/T-001",
       "title": "Export the selected month's transactions",
-      "group": 1,
-      "order": 1,
+      "status": "open",
+      "acceptance": "Export contains exactly the selected month's records.",
       "depends_on": [],
       "kind": "agent",
-      "status": "open",
       "files": ["src/transactions/export.py"],
-      "acceptance": "Export contains exactly the selected month's records.",
       "evidence": ""
     }
   ]
 }
 ```
 
-Task status is `open | in-progress | blocked | done`; kind is `agent | manual`.
-Task IDs are globally qualified, e.g. `E-002/T-001` can depend on `E-001/T-001`.
-Group/order pairs are unique within work supporting a need, including across epics.
-Prerequisites must have lower pairs; independent needs may reuse ordinal pairs.
-`done` needs concise direct evidence. Do not invent human observations.
+Required fields: `id`, `title`, `status`, `acceptance`. Optional fields default to
+`depends_on = []`, `kind = "agent"`, `files = []`, and `evidence = ""`.
+`done` requires nonempty direct evidence. Status is
+`open | in-progress | blocked | done`; kind is `agent | manual`.
 
-## Need-owned decisions and review
+Task IDs are qualified by their owning change. Dependencies must reference tasks
+within that same change and form an acyclic graph. List order is the scheduling
+preference; prerequisites control readiness. There are no global group/order
+pairs. Independent work continues while a manual observation or blocked task waits.
+For tightly coupled cross-change work, combine the tasks into one bounded change.
+Otherwise coordinate changes against already delivered code and interfaces.
 
-A need's state contains only `revision`, `mode`, `no_work_reason`, and `gates`.
-It has no title, ask, independent identity, stored need group, or copied work list.
-Specs are derived from design references; epic execution scope selects tasks.
-Missing state for an imported need defaults to revision 1 with no approvals.
+Keep completed task results until the change closes. An empty tasks array is valid
+for verification-only work; it does not excuse missing review or actual checks.
 
-```sh
-ow context N-001 N-002
-ow authorize N-001 N-002 --by human
-ow ready N-001 N-002
-```
-
-`authorize` preflights needs, alignment, and implementation together before
-writing receipts. Use it after preparing the scope, design, and plan, when an
-actual human instruction or combined decision authorizes them. It does not record
-final acceptance. Preparation itself requires no gate receipts. If authority is
-missing, ask one combined question rather than three restatements of the request.
-Plan-only requests do not authorize implementation. Lower-level `ow gate needs`,
-`ow gate align`, and `ow gate implement` remain available for intentional staged
-collaboration. Refreshing receipts for technical repairs within the authorized
-scope does not require asking the same question again.
-
-The IDs select needs for that command; they do not create a persistent grouping.
-
-For explicit fast-forward, use `ow new need ... --fast-forward`, `ow reopen
-N-001 --fast-forward`, or `ow mode fast-forward N-001 N-002` for already-open
-needs. Then use `ow authorize ... --by fast-forward`. Changing mode invalidates
-authority; reopening never inherits fast-forward implicitly.
-
-If existing implementation already satisfies a need, set its state's concise
-`no_work_reason` before alignment rather than inventing epics. This does not waive
-existing unfinished tasks or verification. Redundant asks require no records at all.
+## Review, closure, and disposal
 
 ```sh
-ow record-review N-001 --summary "Monthly reconciliation no longer requires copying rows" \
-  --check "python -m unittest tests.test_export: 6 passed in 0.4s" --covered-need N-001
-ow summary N-001
-ow gate review N-001 --by human
-ow approve N-001
+ow context C-001
+ow ready C-001
+ow check
+ow record-review C-001 --summary "Monthly reconciliation no longer needs row copying" \
+  --check "python -m unittest tests.test_export: 6 passed in 0.4s" \
+  --covered-need N-001 --covered-need N-002
+ow summary C-001
+# After the human actually reviews and accepts the results:
+ow close C-001 --by human
+# After ensuring useful knowledge lives in needs, code, tests, or ordinary docs:
+ow clean C-001
 ```
 
-Include every ID in `ow context N-001`'s `review_needs` with repeated
-`--covered-need` flags. They include affected adjacent current needs. One command
-can review multiple selected needs; each keeps its own latest bounded result.
-Use `--verdict blocked` for unresolved findings. Passing review requires all
-relevant tasks done and is bound to plan, source content, and task evidence.
+Include all `review_needs` from the context manifest, including current needs
+outside the change's purpose. Coverage means assessing intent and regressions;
+record actual relevant checks and explain why unaffected constraints remain safe.
+The CLI checks structure, not whether an agent's reasoning or evidence is truthful.
 
-`approve` preserves currency. A shared spec becomes approved only when every
-linked current need is approved. `ready` exposes missing authority per task and
-continues to list other authorized work. It includes spec titles and the needs
-they address. Authority is required for the epic's execution needs, while review
-still covers adjacent needs. `summary` provides need → spec → outcome context.
+Use `--verdict blocked` for unresolved findings. A passing review requires all
+tasks done and direct results. Its fingerprint covers current/linked needs, the
+working approach, task definitions/results, policy/config, and Git-visible
+repository content outside `openwish/`. Non-Git projects use filesystem discovery.
+Ignored/generated content is outside that snapshot; record relevant external
+observations honestly. Changed inputs require refreshed verification before closure.
 
-## Bounds and consolidation
+Default closure requires actual human acceptance. Explicit fast-forward uses
+`ow close C-001 --by fast-forward` after the same checks; it does not claim human
+review. Neither form edits needs or confirms that an entire need is fully delivered.
 
-Config has `version: 2`, `product`, `needs_token_budget` (6000), `epic_limit` (8),
-and `code_exceptions`. A source exception is an exact path with a reason:
+`ow clean` only removes closed changes' known files (`change.md`, `tasks.json`,
+`review.json`). It preflights all selected changes and preserves unknown files and
+symlinks. Git may hold history; there is no OW archive or permanent review ledger.
+Retain unresolved work. A closed change remains removable after later repository
+edits because its accepted review is historical.
 
-```json
-{"path": "src/routes.py", "kind": "low-complexity", "reason": "Flat declarative dispatch with no nested logic."}
+## Inspection and installation
+
+```sh
+ow status --json
+ow context                        # every current need, without truncation
+ow context N-001                   # plus linked changes and review scope
+ow ready                          # all active changes; accepts need/change IDs
+ow summary N-001                  # outcome and any retained execution evidence
+ow check --json
+ow check --artifacts-only
 ```
 
-Source data formats are exempt. A `data` exception must name a data-format file.
-No exception permits an OW artifact of 500 or more lines.
+`--root PATH` works before the subcommand; otherwise OW discovers project roots
+from the current directory and parents. `check`, `status`, and `ready` support JSON.
+Schema mismatches fail before writes. Only the current schema is supported.
 
-After completion, promote durable facts and remove obsolete completed epics once
-active references and prerequisites are reconciled. Preserve the only historical
-copy in Git before removing it. Keep needs, one current state, and one latest
-review; never append requests, episodes, or review histories. Retired needs and
-their sidecars can leave the working tree once live references are reconciled.
+Run `ow init` for a harness multi-select, or `ow init --harness opencode claude`
+for explicit selection. Reinitialization preserves project-owned knowledge and
+policy, upgrades older integrations, leaves equal versions untouched, and asks
+before downgrades. `ow skills --harness NAME` uses the same version-aware installer.
+
+Config contains `version: 3`, `product`, `needs_token_budget` (default 6000), and
+`code_exceptions`. Each exception has an exact `path`, a `kind` of `data` or
+`low-complexity`, and a meaningful `reason`. OW artifacts stay under 500 lines;
+source exceptions do not relax artifact or global current-needs limits. Closed
+changes produce a cleanup reminder rather than an arbitrary working-set limit.

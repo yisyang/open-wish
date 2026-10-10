@@ -73,9 +73,13 @@ def document(metadata, body):
     return f"+++\n{header}\n+++\n\n{body.strip()}\n"
 
 
-def write_text(path, text, *, create=False):
+def check_text(path, text):
     if len(text.splitlines()) >= 500:
         raise WishError(f"OW artifacts must be under 500 lines: {path}")
+
+
+def write_text(path, text, *, create=False):
+    check_text(path, text)
     path.parent.mkdir(parents=True, exist_ok=True)
     if create:
         try:
@@ -105,43 +109,42 @@ def write_json(path, value, *, create=False):
     write_text(path, json.dumps(value, indent=2, ensure_ascii=False) + "\n", create=create)
 
 
-def initial_state(*, fast_forward=False, revision=1):
-    return {"revision": revision, "mode": "fast-forward" if fast_forward else "default",
-            "no_work_reason": "", "gates": {}}
+SCHEMA_VERSION = 3
+
+
+def project_config(root):
+    config = read_json(contained(root, "openwish/config.json"))
+    if type(config.get("version")) is not int or config["version"] != SCHEMA_VERSION:
+        raise WishError(f"Unsupported OW schema; expected {SCHEMA_VERSION}.")
+    return config
 
 
 def load_project(root):
     root = Path(root).resolve()
     base = contained(root, "openwish")
-    result = {"root": root, "config": read_json(contained(root, "openwish/config.json"))}
-    if result["config"].get("version") != 2:
-        raise WishError("Unsupported OW schema; expected 2. See docs/migration.md for the v0.1 prototype.")
-    patterns = {"needs": "needs/*.md", "specs": "specs/*/spec.md",
-                "epics": "epics/*/design.md"}
+    result = {"root": root, "config": project_config(root)}
+    # Inspect managed directories before globbing: pathlib does not consistently
+    # traverse directory symlinks across Python versions.
+    for relative in ("needs", "changes"):
+        contained(root, f"openwish/{relative}")
+    patterns = {"needs": "needs/*.md", "changes": "changes/*/change.md"}
     for kind, pattern in patterns.items():
         result[kind] = {}
         for path in sorted(base.glob(pattern)):
             path = contained(root, path.relative_to(root))
             metadata, body = read_document(path)
             key = metadata.get("id")
-            prefix = {"needs": "N", "specs": "S", "epics": "E"}[kind]
+            prefix = {"needs": "N", "changes": "C"}[kind]
             identifier(key, prefix)
             expected = path.stem if kind == "needs" else path.parent.name
             if key != expected or key in result[kind]:
                 raise WishError(f"Duplicate or misplaced {key}: {path}")
             result[kind][key] = {"meta": metadata, "body": body, "path": path}
-            if kind == "needs":
-                state_path = contained(root, f"openwish/needs/{key}.state.json")
-                result[kind][key]["state"] = read_json(state_path) if state_path.exists() else initial_state()
-            if kind == "specs":
-                design = contained(root, f"openwish/specs/{key}/design.md")
-                design_meta, design_body = read_document(design)
-                result[kind][key]["design"] = {"meta": design_meta, "body": design_body, "path": design}
     result["tasks"] = []
-    for key, epic in result["epics"].items():
-        path = contained(root, epic["path"].parent.relative_to(root) / "tasks.json")
+    for key, change in result["changes"].items():
+        path = contained(root, change["path"].parent.relative_to(root) / "tasks.json")
         tasks = read_json(path).get("tasks")
         if not isinstance(tasks, list) or not all(isinstance(t, dict) for t in tasks):
             raise WishError(f"Expected a tasks array in {path}")
-        result["tasks"].extend({**task, "epic": key} for task in tasks)
+        result["tasks"].extend({**task, "change": key} for task in tasks)
     return result

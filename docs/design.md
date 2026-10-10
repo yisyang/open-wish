@@ -1,215 +1,171 @@
-# OpenWish framework design
+# OpenWish framework design — 0.5
 
 ## Core invariant
 
-Every proposed solution is evaluated against all current needs, including those
-with approved implementations. Needs define durable outcomes; specs are revisable
-contracts; designs select solutions; epics and tasks organize bounded execution.
+Every solution is evaluated against all current needs, including delivered
+outcomes. Needs preserve durable intent. Code expresses implemented behavior;
+tests check expected behavior. Working design and coordination are disposable.
 
-Asks are transient conversation input. They do not become stored asks, summaries,
-or change records. OW creates, revises, and reopens durable needs under stable IDs.
-Need selections passed to a command are temporary arguments, not persisted groups.
+```text
+Needs ← referenced by → Changes → contain Tasks
+```
 
-The framework optimizes for useful software, low regression risk, small context,
-and fast remediation. Documentation and automation have to earn their overhead.
+Need/change references are many-to-many. Task dependencies are local to a change,
+so disposal cannot break another change's execution graph. Asks stay in conversation.
+Changes describe bounded improvements, rather than building a permanent ask ledger.
 
-## Architecture
+## Repository architecture
 
-The Python 3.11+ CLI uses the standard library. Functional graph/context/validation
-operations are separated from filesystem effects. Markdown with TOML frontmatter
-holds human-readable intent and contracts. JSON holds small operational records.
-TOML parsing uses `tomllib`; there is no bespoke YAML parser or runtime dependency.
+Python 3.11+ and the standard library provide the CLI. Markdown with TOML
+frontmatter holds needs and temporary changes. JSON holds task lists, latest
+reviews, configuration, and installer bookkeeping. `tomllib` handles TOML.
 
 | Module | Responsibility |
 | --- | --- |
-| `storage.py` | Root discovery, safe paths, bounded atomic writes, artifact loading |
-| `model.py` | Derived needs view, dependency impact, topological order, ready tasks |
-| `validation.py` | Typed artifact contracts, link integrity, cycles, forward dependencies |
-| `budgets.py` | Artifact/context limits, Git-aware source discovery, source-size checks |
-| `workflow.py` | Need revisions, semantic fingerprints, approvals, review freshness |
-| `views.py` | Need → spec → outcome summaries and current implementation status |
-| `scaffold.py` | Project initialization and artifact creation |
-| `integrations.py` | Version-aware skill installation, manifest, host adapters |
+| `storage.py` | Root discovery, safe paths, bounded atomic writes, schema-3 loading |
+| `model.py` | Pure need/change selection, complete intent context, task readiness |
+| `validation.py` | Typed records, references, local acyclic prerequisites |
+| `budgets.py` | Context/artifact limits, Git-aware source discovery, source-size checks |
+| `workflow.py` | Latest review, one result fingerprint, closure, conservative cleanup |
+| `views.py` | Derived status and need → outcome → evidence summaries |
+| `scaffold.py` | Initialization and need/change creation |
+| `integrations.py` | Version-aware canonical skill installation and thin host adapters |
 | `versions.py` | OW version stamps and SemVer precedence |
 | `terminal.py` | Harness multi-select and downgrade confirmation |
 | `cli.py` | Command parsing and concise human/machine output |
 
-Skills handle interpretation, conflict discovery, design, implementation, and
-review inside an existing coding harness. The CLI does not dispatch models or
-pretend a structural validation pass establishes satisfaction of user needs.
+Keep functional model operations separate from filesystem effects. Favor cohesive
+modules and explicit dependencies; there is no need for a class hierarchy or a
+second persistent design model. The harness supplies reasoning and code execution.
 
-## Authority and modes
+## Durable needs
 
-OW is opt-in. Routine, clear, localized changes within existing intent use direct
-implementation and verification without lifecycle/gate records. Skills choose this
-path by scope and consequences, not merely line count. Existing contracts are
-updated where needed, but a command alias does not become a new durable need.
+`needs/N-001.md` records title, actor, outcome, observable acceptance, currency,
+human confirmation date, and optional body constraints/rationale. Currency is
+`current | retired`. Need IDs survive intent revisions. `confirmed_at` is empty
+for inference and changes only on actual human confirmation.
 
-Structured work retains four revision-bound receipts: needs, alignment,
-implementation, and final review. Receipts are freshness checks, not a mandate
-for four separate questions. Propose, Align, and Plan prepare one coherent scope
-without requiring earlier receipts. `ow authorize` preflights all three preparation
-stages and the full selected need set before recording them together. An actual
-instruction to implement can authorize its scope; otherwise request one combined
-decision. Plan-only requests stop before authorization. Lower-level `ow gate`
-commands support deliberate staged collaboration.
+Needs have no implementation status, mode, gate receipts, review sidecars, or
+reopen lifecycle. Changes derive their need links directly. Closing one change
+does not claim the entirety of a need is delivered or erase its future relevance.
+Closure does not infer human confirmation of intent.
 
-Structured default work still requests final human acceptance. `fast-forward`
-records bypass authority for selected need revisions and skips authorization and
-acceptance prompts while retaining quality checks. Technical repairs/relinking
-within the same authorized scope can refresh stale receipts using the existing
-conversation authority. Changed outcomes, constraints, or consequential decisions
-require renewed authority. Fingerprints detect edits, not semantic materiality.
+## Temporary changes and tasks
 
-The CLI records `by=human` or `by=fast-forward`, timestamp, and input fingerprint.
-Skills record human authority only from the corresponding instruction or decision.
-Only human need confirmation advances `confirmed_at`; accepted implementation
-verification advances `verified_at`. No process infers confirmation from file reads.
+`changes/C-001/change.md` references its motivating needs and holds purpose,
+approach, and verification. Status is `open | in-progress | review | closed`;
+mode is `default | fast-forward`. Implementation choices evolve here while work
+is active, then survive in code, types, schemas, tests, and useful nearby rationale.
 
-Approval records are bounded slots in each need's state, not an event stream. Replacing an earlier
-gate removes downstream gate records. Semantic changes make existing records
-stale even when someone edits artifacts directly. Git retains prior decisions.
+`tasks.json` contains a list with required ID, title, status, and acceptance.
+Optional prerequisites, kind, files, and evidence keep simple tasks small. Task
+status is `open | in-progress | blocked | done`. Done tasks require direct evidence.
+IDs are qualified by their change; dependencies are within-change and acyclic.
+List order is a preference, not an implicit dependency. There are no group/order
+constraints or global task ordinals. An empty list supports verification-only work.
 
-`ow reopen` preserves the need ID and increments its implementation revision.
-It resets authority to default unless fast-forward is explicitly requested again.
-State contains only revision, mode, a possible no-work rationale, and gate receipts.
-Spec/epic/task associations are derived rather than copied into state.
+`ready` accepts need/change selections or defaults to all active changes. It lists
+agent-ready tasks and explains waiting prerequisites, manual observations, and
+explicit blockers. Continue independent work while human input is unavailable.
+Readiness never supplies authority. Interdependent work belongs in one bounded
+change; independent changes coordinate through delivered code/interfaces.
 
-## Communication
+## Authority and result review
 
-Ask only material questions; do not restate clear instructions for confirmation.
-Clarifications and necessary combined decisions use numbered questions,
-two or three A/B/C choices, and `(Recommended)` before the preferred choice text.
-Concise effect clauses explain consequences for needs and the product.
+OW adoption is opt-in. Routine changes use direct implementation and verification.
+Substantive changes prepare intent, approach, and tasks together. Conversation
+instructions authorize scope; plan-only requests stop before implementation.
+Consequential uncertainty requires a decision. Technical repairs within scope
+require no repeated permission. There are no stage authorization records.
 
-Final updates explain the need, the delivering spec, the outcome, and verification.
-Spec designs own the authoritative need references. Epics reference specs, and
-task lineage is derived from these links so task-level work retains its purpose.
+Default work presents results for human review. After actual acceptance, `close
+C-001 --by human` records closure provenance and time. Explicit fast-forward
+delegates acceptance only for this change, recorded with `--by fast-forward`.
+It does not confirm inferred needs, invent checks, or waive manual observations.
+New changes default to normal review, even when their needs were previously
+served by fast-forwarded work. The CLI records supplied provenance, not proof
+that a human conversation occurred.
 
-## Revision model
+Each change has one disposable `review.json`, replaced on review. Passing review
+requires completed tasks, direct checks, an outcome summary, and coverage of all
+current needs plus linked retired needs when applicable. Coverage means semantic
+assessment of constraints and relevant regressions; the agent explains unaffected
+needs and checks affected behavior. Structural validation cannot prove correctness.
 
-- Needs gate: need ID/revision, mode, project policy/config, all current need
-  definitions, and the selected need (including retirement when applicable).
-- Alignment gate: needs inputs plus scoped/adjacent specs, designs, and durable
-  operational knowledge.
-- Implementation gate: alignment inputs plus epic designs and task definitions.
-- Review: implementation inputs, task results, latest review, and repository
-  content outside the OW knowledge tree.
+One fingerprint protects review freshness while results await acceptance. It covers:
 
-Implementation statuses, progress evidence, and confirmation/check dates do not
-invalidate earlier intent/design authority. Plan changes do. Repository changes
-after AI review invalidate review freshness; verification must be refreshed.
+- Current and directly linked need content.
+- The change's purpose/approach, need references, and mode.
+- Local task definitions and results.
+- Project config/policy and repository content outside `openwish/`.
 
-Fingerprints are intentionally conservative. Unrelated current-need edits can
-invalidate an alignment because all current needs constrain a solution. Accepted
-implementation decisions are historical, not evergreen approvals of later code.
+Repository discovery uses Git tracked and unignored untracked files; non-Git
+projects use filesystem traversal. Build/dependency directories and symlinks are
+excluded. External/manual observations remain explicit reported evidence. Source
+hashing is intentionally conservative; code changes require refreshed review.
+Other changes' temporary plans and runtime status/closure metadata are excluded.
+This is one pending-result check, not a receipt chain. Closed reviews are historical.
 
-## State and execution
+## Closure and disposal
 
-Need currency and implementation are independent. Opening a new implementation
-does not erase need currency. A regression returns implementation to open or
-in-progress. Retiring a need is an intent change, not a task completion action.
+Before final review, lasting behavior/checks belong in source/tests, changed
+intent in needs, and unrecoverable rationale in ordinary repo docs or comments.
+Keep unresolved limitations visible. Completed task evidence stays until closure.
 
-Spec prerequisites and containment are separate acyclic graphs. The impact view
-includes prerequisites and consumers; semantic adjacency still needs AI review.
-Task dependencies form a DAG with explicit global task IDs and unique increasing
-`(group, order)` pairs within work supporting each need. Independent needs can
-reuse ordinal pairs. The lowest authorized ready task executes first.
-A blocked manual task does not prevent an independent later task from executing.
+`close` preflights every selected change, then records status, timestamp, and
+acceptance provenance. It never writes needs. `clean` preflights closed changes
+and removes only `change.md`, `tasks.json`, and `review.json`. Unknown files,
+directories, or symlinks cause refusal before deletion. Needs, code, tests, other
+changes, and project policy are retained. There is no archive or history ledger.
+Git may retain useful history; cleanup does not require an automatic commit.
 
-An epic's optional `needs` selects execution outcomes from its linked spec designs.
-Validation requires a nonempty, duplicate-free subset of known covered need IDs.
-Omission retains legacy all-linked-needs execution semantics. Work selection,
-task ordinal checks, plan fingerprints, and completion use this execution scope.
-Changing it invalidates implementation authority. Shared execution requires
-authority for all selected current open needs; shared spec coverage alone does not.
-Review still covers all connected current needs, including unselected constraints.
-Every spec linked by a selected epic, plus its prerequisites and consumers, is
-included in review coverage and semantic fingerprints even when that spec does
-not directly reference a selected execution need.
-Missing authority is a task-level blocker, so other authorized work still proceeds.
-A spec becomes approved only when all linked current needs are approved.
+Closed changes may be cleaned after subsequent code edits: their review records
+past acceptance, not a live guarantee. Follow-up implementation uses a new change.
+Batch semantic preflight prevents known conflicts from causing partial operations;
+individual file replacements are atomic. Multi-file operations are not filesystem
+transactions and OS failures can require inspecting the remaining files.
 
-Task states include blocked/done because task execution and need implementation
-are different concepts. No implicit skipped or waived task state exists. A manual
-observation cannot be completed by changing approval mode.
+## Context and bounds
 
-The agent continues until no authorized ready work remains. It then either
-presents indispensable human blockers or the final compact review package.
-Review remediation loops back into implementation without an intermediate approval
-prompt. Material intent changes return to the appropriate earlier decision.
+All current need content enters context. Global limits are under 500 lines and a
+configurable estimated-token budget, default 6,000 using UTF-8 bytes/3. Detailed
+changes are loaded only for relevant work. Each OW artifact remains under 500 lines.
 
-## Bounded knowledge
+Source size uses nonblank physical lines as a cross-language proxy: under 500 is
+the soft target, under 1000 the hard maximum. Data formats are exempt. Exact-path
+low-complexity exceptions require rationale and do not exempt OW artifacts.
+Closed changes prompt cleanup rather than failing an arbitrary working-set count.
 
-Per-artifact hard limits and a global current-needs budget address different
-failure modes. All current need content is included; no hidden summary truncation
-can remove constraints from global reasoning. The default 6,000-token estimate
-uses UTF-8 bytes/3 and is configurable rather than tied to a particular model.
+## Integration and compatibility
 
-Code uses nonblank physical lines as a conservative cross-language LOC proxy.
-Data formats are exempt; exceptional low-complexity source requires an exact
-path and rationale. OW knowledge/planning artifacts never inherit source exemptions.
+Eight canonical skills describe activities, not eight artifact tiers. They are
+packaged once, with thin adapters for OpenCode, Claude Code, Codex, and generic
+Agent Skills. Explicit-only fast-forward controls and body checks travel with
+the integration. Existing installer behavior is retained:
 
-Each need's latest review replaces its previous result. Completed epics
-are consolidated after current truths are promoted and live references resolved.
-The working set defaults to eight retained epics; Git stores historical detail.
+- Interactive multi-selection; repeatable explicit harness flags for automation.
+- Codex/generic shared paths deduplicated.
+- Per-file version stamps and a bounded installation manifest.
+- Older integrations upgraded, equal versions untouched, downgrades confirmed.
+- Unversioned files without an installation record preserved.
+- All selected integrations preflighted before writes; deselection does not uninstall.
+- Package/module/skill versions advance together.
 
-## Integrations
+Only the current schema (3) is supported. Before v1.0.0, breaking changes require
+no migration tooling or legacy compatibility. `init`, `skills`, and normal project
+commands reject unsupported schemas before writing. Reinitialization preserves
+local config, policy, needs, and work in current-schema projects.
 
-Canonical skill bodies are packaged once, then copied to the selected host's
-documented skill directory. OpenCode receives thin command adapters; Claude Code
-uses skill commands; Codex uses standard `.agents/skills` discovery. Fast-forward
-is explicit-only in hosts that expose invocation control. Its body also checks
-explicit authorization so the policy travels across hosts.
+## Verification
 
-`ow init` presents a terminal multi-select when no harness flags are supplied.
-Arrow keys move, Space toggles, Enter applies, and Q/Esc cancels before writes.
-Previously selected harnesses are preselected. Basic/narrow terminals fall back
-to numbered selection. Explicit repeatable `--harness` flags support scripts.
-Codex and generic selections share one set of files in `.agents`.
+Tests cover many-to-many need links, local task readiness, manual blockers, cycles,
+malformed artifacts, complete context, safe cleanup, provenance, stale reviews,
+and schema refusal without writes. CLI scenarios execute default and fast-forward
+flows in temporary projects and verify that disposal retains intent and product files.
+Installer/terminal tests protect preservation, multi-harness preflight, upgrades,
+downgrades, and terminal restoration. Distribution checks exercise installed wheel
+and source packages, both CLI aliases, assets, and the change lifecycle.
 
-Generated skills carry `metadata.openwish-version`; command adapters and Codex
-policy files carry version comments. A bounded `openwish/installation.json`
-records harnesses and per-file versions, preserving ownership/version knowledge
-if a local edit removes its stamp. A valid file stamp takes precedence over the
-manifest. Exact v0.2 templates are recognized by bundled hashes; unknown
-unversioned files produce a conflict without partial installation.
-
-The installer preflights every selected harness before writing. SemVer precedence
-determines replacement: older files are overwritten, equal versions receive no
-writes, and newer files require explicit downgrade confirmation. Build metadata
-does not affect precedence. Declining preserves newer files while independent
-installs/upgrades proceed. Without a terminal, necessary confirmation fails before
-any writes. The manifest retains each file's actual version after mixed outcomes.
-
-Initialization can run again on existing schema-2 projects without rewriting
-configuration, needs, specs, policy, or knowledge. It updates selected integration
-files only; deselected harnesses are not uninstalled. The CLI and bundled skill
-version advance together. Canonical skill content edits require a version bump
-to deploy automatically into existing projects.
-
-## Verification strategy
-
-Behavior tests focus on state transitions, stale decisions/reviews, scheduler
-dependencies, manual blockers, format budgets, malformed artifacts, and preservation
-of user files. End-to-end CLI scenarios exercise both default and fast-forward
-workflows in temporary projects. Packaging checks verify skills ship with the CLI.
-Pseudo-terminal tests exercise real key input, multiple selections, cancellation,
-terminal restoration, and both downgrade decisions. Installer tests check equal
-version no-write behavior, upgrades, legacy detection, and multi-harness preflight.
-
-Semantic skill scenarios cover lightweight changes, need reuse, combined authority,
-plan-only requests, OW opt-outs, preserving current constraints, fast-forward
-acceptance, and continuing around human blockers. These
-complement deterministic tests; they cannot prove every model will follow a skill.
-
-## Reference influences
-
-- [Spec Kit](https://github.com/github/spec-kit): repeatable process templates,
-  principles, phase guidance, and harness integrations.
-- [OpenSpec](https://github.com/Fission-AI/OpenSpec): approachable commands,
-  lightweight artifacts, and brownfield adoption.
-- [OpenCode V2 commands](https://opencode.ai/v2/docs/commands) and
-  [skills](https://opencode.ai/v2/docs/skills).
-- [Claude Code skills](https://code.claude.com/docs/en/skills).
-- [Codex skills](https://developers.openai.com/codex/build-skills).
+Semantic skill scenarios cover intent reuse, conflicts, plan-only scope, opt-outs,
+routine work, manual blockers, change-scoped delegation, and disposal. They
+complement deterministic tests and do not prove behavior across every model/harness.

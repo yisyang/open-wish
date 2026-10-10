@@ -1,30 +1,29 @@
 # Workflow skill evaluations
 
-`evals.json` is the current semantic regression set for the need-first workflow.
-Run each prompt in a fresh session with the listed skills and project policy;
-compare with a snapshot of the previous skills when assessing a revision.
+`evals.json` is the semantic regression set for the schema-3 workflow. Run each
+prompt in a fresh session with the listed skills and project policy. Compare with
+a snapshot of previous skills when assessing a revision.
 
 | Scenario | Behaviors to check |
 | --- | --- |
-| Already-satisfied monthly trends versus a conflicting upload request | Preserve current intent; avoid duplicate needs and request records; use numbered A/B/C clarification choices; discuss only the current decision |
-| Final fast-forward review | Operate on need IDs; skip final confirmation; explain the spec and its user outcomes; preserve evidence provenance |
-| Independent work waiting on a manual observation | Continue ready tasks; hand off with need/spec context and lettered choices; retain unfinished verification honestly |
-| Routine command alias under a shared spec | No gates, new needs, reopen cycle, epics, spec split, or final acceptance prompt |
-| Technical repair of a shared-spec execution scope | Narrow the epic's execution needs; preserve regression coverage; reuse existing authority |
-| New export format versus auditor accountability | Reuse the existing outcome for a mechanism; recognize a genuinely independent outcome |
-| Explicit plan-only request | Prepare without stage prompts; stop before authorization/implementation |
-| Explicit OW opt-out in the OW source tree | Work directly; product assets do not self-activate the workflow |
-| Explicit fast-forward for a routine alias | Finish after direct verification/reporting; do not fall through into structured lifecycle steps |
+| Existing monthly trends versus conflicting upload request | Preserve current intent; clarify the actual choice; avoid duplicate needs |
+| Final fast-forward results | Review/close/clean the change; retain needs; scope delegation; preserve evidence provenance |
+| Independent work around manual observation | Continue ready tasks; retain manual checks and completed task evidence |
+| Routine alias | Implement and verify directly without records or acceptance ceremony |
+| Working design repair | Revise the disposable approach/tasks; use code/tests/layout; reuse existing authority |
+| New format versus accountability | Distinguish mechanism from independently valuable outcome |
+| Plan-only | Prepare change and local tasks, then stop before implementation |
+| Explicit opt-out | Source templates do not impose self-adoption |
+| Fast-forward routine work | Finish after verification/reporting without structured records |
+| Disposal with unique knowledge and active blockers | Preserve useful facts in repo docs; retain unfinished work; handle unknown files deliberately |
+| Default result review | Retain change/tasks until actual human acceptance |
 
-Grade the actual human-facing response, not the agent's claim that it followed
-the policy. The preferred option must start with `(Recommended)` after its
-letter when a real question is needed. A routine change must not prompt at all;
-structured preparation must not manufacture per-stage confirmation questions.
+Grade actual responses rather than claims of compliance. A real decision uses
+numbered A/B/C choices with `(Recommended)` before preferred text; routine work
+needs no question. Prefer concise need → outcome → evidence communication.
 
-These are instruction-following dry runs, not live product execution or proof
-of reliability across harnesses. Keep direct response evidence in the temporary
-evaluation workspace rather than this source checkout. Do not reuse older
-evaluation scores for this revised prompt set.
-
-Human feedback can be supplied directly in chat. A browser review submission is
-not received until its actual feedback data is available to the agent.
+These are instruction-following dry runs, not product execution or proof of
+reliability across harnesses. Keep outputs and comparative scores in a temporary
+workspace rather than this source checkout. Do not reuse scores from earlier
+versions of the prompts. Human feedback can be supplied directly in chat or via
+the skill-creator review viewer; a submission is received only when its data is available.

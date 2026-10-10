@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "openwish"
-version = "0.4.0"
+version = "0.5.0"
 description = "Need-Driven Development for humans and coding agents"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -37,4 +37,4 @@ where = ["src"]
 include = ["openwish*"]
 
 [tool.setuptools.package-data]
-openwish = ["assets/*.md", "assets/*.json", "assets/skills/*/SKILL.md"]
+openwish = ["assets/*.md", "assets/skills/*/SKILL.md"]

@@ -1,280 +1,193 @@
-from openwish.scaffold import new_artifact
-from openwish.storage import WishError, read_json
-from openwish.workflow import (approve_needs, authorized_tasks, gate_valid, record_gate,
-                               record_review, reopen_needs, set_mode, validate_review)
+from openwish.model import needs_context
+from openwish.storage import WishError, read_json, write_json
+from openwish.views import status_data, summary
+from openwish.workflow import (clean_changes, close_changes, record_review, set_mode, validate_review)
 
 from tests.support import ProjectCase
 
 
 class WorkflowTests(ProjectCase):
-    def test_combined_authorization_keeps_final_acceptance_separate(self):
-        self.fixture()
-        record_gate(self.project(), ["N-001"], "implement", "human", through=True)
-        need = self.project()["needs"]["N-001"]
-        self.assertEqual(set(need["state"]["gates"]), {"needs", "align", "implement"})
-        self.assertTrue(need["meta"]["confirmed_at"])
-        self.assertTrue(gate_valid(self.project(), "N-001", "implement"))
+    def reviewed(self, *, mode="default"):
+        self.fixture(mode=mode)
         self.finish_tasks()
         self.review()
-        with self.assertRaisesRegex(WishError, "missing or stale"):
-            approve_needs(self.project(), ["N-001"])
 
-    def test_combined_authorization_preflights_plan_and_entire_selection(self):
-        self.fixture()
-        self.add_second_need()
-        before = self.project()["needs"]["N-001"]["state"]
-        with self.assertRaisesRegex(WishError, "linked spec"):
-            record_gate(self.project(), ["N-001", "N-002"], "implement", "human", through=True)
-        self.assertEqual(self.project()["needs"]["N-001"]["state"], before)
+    def test_default_closure_retains_needs_and_provenance(self):
+        self.reviewed()
+        path = self.root / "openwish/needs/N-001.md"
+        before = path.read_bytes()
+        close_changes(self.project(), ["C-001"], "human")
+        change = self.project()["changes"]["C-001"]["meta"]
+        self.assertEqual((change["status"], change["closed_by"]), ("closed", "human"))
+        self.assertTrue(change["closed_at"])
+        self.assertEqual(path.read_bytes(), before)
+        self.assertIn("N-001", needs_context(self.project()))
+
+    def test_review_does_not_close_change_or_approve_entire_need(self):
+        self.reviewed()
+        self.assertEqual(self.project()["changes"]["C-001"]["meta"]["status"], "review")
+        self.assertNotIn("implementation", self.project()["needs"]["N-001"]["meta"])
         self.assertEqual(self.project()["needs"]["N-001"]["meta"]["confirmed_at"], "")
-        self.write_tasks([])
-        with self.assertRaisesRegex(WishError, "epics with tasks"):
-            record_gate(self.project(), ["N-001"], "implement", "human", through=True)
-        self.assertEqual(self.project()["needs"]["N-001"]["state"], before)
 
-    def test_combined_fast_forward_requires_mode_and_preserves_provenance(self):
-        self.fixture()
+    def test_fast_forward_requires_explicit_change_mode(self):
+        self.reviewed()
         with self.assertRaisesRegex(WishError, "explicitly enabling"):
-            record_gate(self.project(), ["N-001"], "implement", "fast-forward", through=True)
-        set_mode(self.project(), ["N-001"], "fast-forward")
-        record_gate(self.project(), ["N-001"], "implement", "fast-forward", through=True)
+            close_changes(self.project(), ["C-001"], "fast-forward")
+        set_mode(self.project(), "C-001", "fast-forward")
+        with self.assertRaisesRegex(WishError, "stale"):
+            close_changes(self.project(), ["C-001"], "fast-forward")
+        self.review()
+        close_changes(self.project(), ["C-001"], "fast-forward")
+        self.assertEqual(self.project()["changes"]["C-001"]["meta"]["closed_by"], "fast-forward")
         self.assertEqual(self.project()["needs"]["N-001"]["meta"]["confirmed_at"], "")
-        self.assertTrue(gate_valid(self.project(), "N-001", "implement"))
-
-    def test_individual_gates_require_sequential_decisions_for_a_need(self):
-        self.fixture()
-        with self.assertRaisesRegex(WishError, "missing or stale"):
-            record_gate(self.project(), ["N-001"], "implement", "human")
-        with self.assertRaisesRegex(WishError, "explicitly enabling"):
-            record_gate(self.project(), ["N-001"], "needs", "fast-forward")
-        self.approve()
-        self.assertEqual(self.project()["needs"]["N-001"]["meta"]["implementation"], "in-progress")
-        self.finish_tasks()
-        self.review()
-        with self.assertRaisesRegex(WishError, "missing or stale"):
-            approve_needs(self.project(), ["N-001"])
-        record_gate(self.project(), ["N-001"], "review", "human")
-        approve_needs(self.project(), ["N-001"])
-        meta = self.project()["needs"]["N-001"]["meta"]
-        self.assertEqual((meta["currency"], meta["implementation"]), ("current", "approved"))
-        self.assertTrue(meta["confirmed_at"] and meta["verified_at"])
-
-    def test_fast_forward_approves_without_claiming_human_confirmation(self):
-        self.fixture(mode="fast-forward")
-        self.approve(by="fast-forward")
-        self.finish_tasks()
-        self.review()
-        record_gate(self.project(), ["N-001"], "review", "fast-forward")
-        approve_needs(self.project(), ["N-001"])
-        need = self.project()["needs"]["N-001"]
-        self.assertEqual(need["meta"]["confirmed_at"], "")
-        self.assertEqual(need["meta"]["implementation"], "approved")
-        self.assertTrue(all(gate["by"] == "fast-forward" for gate in need["state"]["gates"].values()))
-
-    def test_need_revision_invalidates_downstream_authority(self):
-        self.fixture()
-        self.approve()
-        self.edit_document("needs/N-001.md", outcome="Reconcile offline")
-        self.assertFalse(gate_valid(self.project(), "N-001", "implement"))
-        with self.assertRaisesRegex(WishError, "missing or stale"):
-            self.review()
-
-    def test_progress_preserves_plan_but_task_definition_invalidates_it(self):
-        self.fixture()
-        self.approve()
-        self.finish_tasks()
-        self.assertTrue(gate_valid(self.project(), "N-001", "implement"))
-        self.write_tasks([self.task(acceptance="Export offline")])
-        self.assertFalse(gate_valid(self.project(), "N-001", "implement"))
-        self.assertTrue(gate_valid(self.project(), "N-001", "align"))
-
-    def test_renewing_a_decision_clears_later_receipts(self):
-        self.fixture()
-        self.approve()
-        record_gate(self.project(), ["N-001"], "needs", "human")
-        self.assertEqual(set(self.project()["needs"]["N-001"]["state"]["gates"]), {"needs"})
+        self.add_change()
+        self.assertEqual(self.project()["changes"]["C-002"]["meta"]["mode"], "default")
 
     def test_fast_forward_cannot_skip_manual_work(self):
         self.fixture(mode="fast-forward")
         self.write_tasks([self.task(kind="manual")])
-        self.approve(by="fast-forward")
         with self.assertRaisesRegex(WishError, "Unfinished work"):
             self.review()
 
-    def test_code_edits_after_review_require_refreshed_verification(self):
+    def test_review_requires_direct_results_and_all_current_intent(self):
         self.fixture()
-        self.approve()
+        self.add_need()
         self.finish_tasks()
-        self.review()
-        (self.root / "app.py").write_text("raise RuntimeError('regression')\n", encoding="utf-8")
-        with self.assertRaisesRegex(WishError, "repository files changed"):
-            record_gate(self.project(), ["N-001"], "review", "human")
+        with self.assertRaisesRegex(WishError, "N-002"):
+            self.review()
+        with self.assertRaisesRegex(WishError, "direct verification"):
+            record_review(self.project(), "C-001", "Fine", [], ["N-001", "N-002"])
+        self.review(needs=["N-001", "N-002"])
+        self.assertEqual(validate_review(self.project(), "C-001")["verdict"], "pass")
 
-    def test_new_untracked_file_invalidates_review(self):
-        self.fixture()
-        self.approve()
-        self.finish_tasks()
+    def test_repository_add_edit_and_delete_each_invalidate_review(self):
+        self.reviewed()
+        path = self.root / "new.py"
+        path.write_text("pass\n", encoding="utf-8")
+        with self.assertRaisesRegex(WishError, "stale"):
+            close_changes(self.project(), ["C-001"], "human")
         self.review()
-        (self.root / "new.py").write_text("pass\n", encoding="utf-8")
-        with self.assertRaisesRegex(WishError, "repository files changed"):
-            validate_review(self.project(), "N-001")
+        path.write_text("raise RuntimeError()\n", encoding="utf-8")
+        with self.assertRaisesRegex(WishError, "stale"):
+            validate_review(self.project(), "C-001")
+        self.review()
+        path.unlink()
+        with self.assertRaisesRegex(WishError, "stale"):
+            validate_review(self.project(), "C-001")
 
-    def test_revised_task_results_invalidate_review(self):
-        self.fixture()
-        self.approve()
-        self.finish_tasks()
-        self.review()
+    def test_need_approach_evidence_and_policy_edits_each_invalidate_review(self):
+        self.reviewed()
+        for relative in ("needs/N-001.md", "changes/C-001/change.md", "policy.md"):
+            with self.subTest(path=relative):
+                path = self.root / "openwish" / relative
+                path.write_text(path.read_text() + "\nA consequential clarification.\n", encoding="utf-8")
+                with self.assertRaisesRegex(WishError, "stale"):
+                    validate_review(self.project(), "C-001")
+                self.review()
         self.write_tasks([self.task(status="done", evidence="Different checks were performed")])
-        with self.assertRaisesRegex(WishError, "task results changed"):
-            validate_review(self.project(), "N-001")
+        with self.assertRaisesRegex(WishError, "stale"):
+            validate_review(self.project(), "C-001")
 
-    def test_review_requires_direct_results_and_need_coverage(self):
+    def test_new_current_need_requires_review_but_unrelated_plan_edits_do_not(self):
+        self.reviewed()
+        self.add_change()
+        self.assertEqual(validate_review(self.project(), "C-001")["verdict"], "pass")
+        self.add_need()
+        with self.assertRaisesRegex(WishError, "missing current"):
+            validate_review(self.project(), "C-001")
+
+    def test_blocked_review_cannot_close_and_latest_review_replaces_it(self):
         self.fixture()
-        self.approve()
-        self.finish_tasks()
-        with self.assertRaisesRegex(WishError, "affected needs"):
-            record_review(self.project(), ["N-001"], "Fine", ["check passed"], [], "pass")
-        with self.assertRaisesRegex(WishError, "direct check"):
-            record_review(self.project(), ["N-001"], "Fine", [], ["N-001"], "pass")
-
-    def test_mode_is_need_owned_and_invalidates_authority(self):
-        self.fixture(mode="fast-forward")
-        self.approve(by="fast-forward")
-        set_mode(self.project(), ["N-001"], "default")
-        self.assertFalse(gate_valid(self.project(), "N-001", "implement"))
-
-    def test_reopening_keeps_identity_and_resets_fast_forward(self):
-        self.fixture(mode="fast-forward")
-        self.approve(by="fast-forward")
+        record_review(self.project(), "C-001", "Waiting for observation", ["Import check unavailable"],
+                      ["N-001"], "blocked")
+        with self.assertRaisesRegex(WishError, "not passing"):
+            close_changes(self.project(), ["C-001"], "human")
         self.finish_tasks()
         self.review()
-        record_gate(self.project(), ["N-001"], "review", "fast-forward")
-        approve_needs(self.project(), ["N-001"])
-        with self.assertRaisesRegex(WishError, "Reopen"):
-            record_gate(self.project(), ["N-001"], "needs", "human")
-        reopen_needs(self.project(), ["N-001"])
-        need = self.project()["needs"]["N-001"]
-        self.assertEqual((need["meta"]["id"], need["meta"]["implementation"]), ("N-001", "open"))
-        self.assertEqual(need["state"], {"revision": 2, "mode": "default", "no_work_reason": "", "gates": {}})
-        with self.assertRaisesRegex(WishError, "approved plan changed"):
-            validate_review(self.project(), "N-001")
-        self.assertFalse((self.root / "openwish/changes").exists())
+        self.assertEqual(read_json(self.root / "openwish/changes/C-001/review.json")["verdict"], "pass")
+        self.assertEqual(len(list((self.root / "openwish/changes/C-001").glob("*review*"))), 1)
 
-    def test_latest_review_is_replaced_on_the_need(self):
+    def test_zero_task_verification_change_needs_no_invented_work(self):
         self.fixture()
-        self.approve()
-        self.finish_tasks()
+        self.write_tasks([])
         self.review()
-        self.review()
-        path = self.root / "openwish/needs/N-001.review.json"
-        self.assertEqual(read_json(path)["verdict"], "pass")
-        self.assertEqual(len(list(path.parent.glob("*.review.json"))), 1)
+        close_changes(self.project(), ["C-001"], "human")
 
-    def add_second_need(self):
-        new_artifact(self.root, "need", "N-002", "Private reconciliation")
-        self.edit_document("needs/N-002.md", actor="Operations staff", outcome="Keep records local",
-                           acceptance=["No raw records leave the device"])
+    def test_batch_closure_preflights_all_changes_before_writing(self):
+        self.reviewed()
+        self.add_change()
+        with self.assertRaises(WishError):
+            close_changes(self.project(), ["C-001", "C-002"], "human")
+        self.assertEqual(self.project()["changes"]["C-001"]["meta"]["status"], "review")
 
-    def test_shared_spec_work_requires_authority_for_both_open_needs(self):
-        self.fixture()
-        self.add_second_need()
-        self.edit_document("specs/S-001/design.md", needs=["N-001", "N-002"])
-        self.approve()
-        ready, waiting = authorized_tasks(self.project(), ["N-001"])
-        self.assertFalse(ready)
-        self.assertIn("N-002", waiting[0]["blocker"])
-        for stage in ("needs", "align", "implement"):
-            record_gate(self.project(), ["N-002"], stage, "human")
-        self.assertEqual(len(authorized_tasks(self.project(), ["N-001", "N-002"])[0]), 1)
+    def test_batch_closure_preflights_rendered_artifact_budget(self):
+        self.reviewed()
+        self.add_change()
+        path = self.root / "openwish/changes/C-002/change.md"
+        text = path.read_text()
+        path.write_text(text + "Working detail.\n" * (498 - len(text.splitlines())), encoding="utf-8")
+        self.review("C-002")
+        self.assertEqual(len(path.read_text().splitlines()), 498)
+        with self.assertRaisesRegex(WishError, "under 500"):
+            close_changes(self.project(), ["C-001", "C-002"], "human")
+        for change in self.project()["changes"].values():
+            self.assertEqual(change["meta"]["status"], "review")
 
-    def test_scoped_epic_does_not_authorize_or_block_on_regression_needs(self):
-        self.fixture()
-        self.add_second_need()
-        self.edit_document("specs/S-001/design.md", needs=["N-001", "N-002"])
-        self.edit_document("epics/E-001/design.md", needs=["N-001"])
-        record_gate(self.project(), ["N-001"], "implement", "human", through=True)
-        ready, waiting = authorized_tasks(self.project(), ["N-001", "N-002"])
-        self.assertEqual([task["id"] for task in ready], ["E-001/T-001"])
-        self.assertFalse(waiting)
-        self.assertEqual(authorized_tasks(self.project(), ["N-002"]), ([], []))
-        self.assertEqual(self.project()["needs"]["N-002"]["state"]["gates"], {})
-        self.assertEqual([need["id"] for need in ready[0]["lineage"][0]["needs"]], ["N-001", "N-002"])
-        self.finish_tasks()
-        with self.assertRaisesRegex(WishError, "affected needs.*N-002"):
+    def test_cleanup_disposes_work_and_leaves_intent_and_product_byte_identical(self):
+        self.reviewed()
+        close_changes(self.project(), ["C-001"], "human")
+        before = {p.relative_to(self.root): p.read_bytes() for p in self.root.rglob("*")
+                  if p.is_file() and "changes" not in p.parts}
+        clean_changes(self.project(), ["C-001"])
+        self.assertFalse((self.root / "openwish/changes/C-001").exists())
+        after = {p.relative_to(self.root): p.read_bytes() for p in self.root.rglob("*")
+                 if p.is_file() and "changes" not in p.parts}
+        self.assertEqual(before, after)
+        self.assertEqual(self.project()["tasks"], [])
+        self.assertEqual(status_data(self.project())["needs"][0]["changes"], [])
+        self.assertIn("N-001", needs_context(self.project()))
+
+    def test_cleanup_rejects_unclosed_changes_and_unknown_files_without_partial_deletion(self):
+        self.reviewed()
+        with self.assertRaisesRegex(WishError, "only closed"):
+            clean_changes(self.project(), ["C-001"])
+        close_changes(self.project(), ["C-001"], "human")
+        self.add_change()
+        self.review("C-002")
+        close_changes(self.project(), ["C-002"], "human")
+        path = self.root / "openwish/changes/C-002/important.md"
+        path.write_text("Irreplaceable knowledge\n", encoding="utf-8")
+        with self.assertRaisesRegex(WishError, "Unknown file preserved"):
+            clean_changes(self.project(), ["C-001", "C-002"])
+        self.assertTrue((self.root / "openwish/changes/C-001/change.md").exists())
+        self.assertEqual(path.read_text(), "Irreplaceable knowledge\n")
+
+    def test_cleanup_rejects_symlinks_without_touching_their_targets(self):
+        self.reviewed()
+        close_changes(self.project(), ["C-001"], "human")
+        path = self.root / "openwish/changes/C-001/notes.md"
+        path.symlink_to(self.root / "app.py")
+        with self.assertRaisesRegex(WishError, "symlink"):
+            clean_changes(self.project(), ["C-001"])
+        self.assertTrue((self.root / "app.py").exists())
+        self.assertTrue((path.parent / "change.md").exists())
+
+    def test_closed_results_are_historical_and_can_be_cleaned_after_later_code_changes(self):
+        self.reviewed()
+        close_changes(self.project(), ["C-001"], "human")
+        (self.root / "app.py").write_text("# later implementation\n", encoding="utf-8")
+        self.assertEqual(status_data(self.project())["changes"][0]["review"], "historical")
+        self.assertIn("Historical check", summary(self.project(), ["C-001"]))
+        with self.assertRaisesRegex(WishError, "closed"):
             self.review()
-        record_review(self.project(), ["N-001"], "Export remains private", ["Local export passed"],
-                      ["N-001", "N-002"], "pass")
-        record_gate(self.project(), ["N-001"], "review", "human")
-        approve_needs(self.project(), ["N-001"])
-        self.assertEqual(self.project()["needs"]["N-002"]["meta"]["implementation"], "open")
-        self.assertEqual(self.project()["specs"]["S-001"]["meta"]["implementation"], "open")
+        clean_changes(self.project(), ["C-001"])
 
-    def test_changing_execution_scope_invalidates_authority(self):
-        self.fixture()
-        self.add_second_need()
-        self.edit_document("specs/S-001/design.md", needs=["N-001", "N-002"])
-        self.edit_document("epics/E-001/design.md", needs=["N-001"])
-        self.approve()
-        self.edit_document("epics/E-001/design.md", needs=["N-001", "N-002"])
-        self.assertFalse(gate_valid(self.project(), "N-001", "implement"))
-        ready, waiting = authorized_tasks(self.project(), ["N-001"])
-        self.assertFalse(ready)
-        self.assertIn("N-002", waiting[0]["blocker"])
-
-    def test_scoped_epic_retains_all_linked_specs_for_review_and_freshness(self):
-        self.fixture()
-        self.add_second_need()
-        new_artifact(self.root, "spec", "S-002", "Privacy")
-        self.edit_document("specs/S-002/design.md", needs=["N-002"])
-        self.edit_document("epics/E-001/design.md", specs=["S-001", "S-002"], needs=["N-001"])
-        record_gate(self.project(), ["N-001"], "implement", "human", through=True)
-        ready, waiting = authorized_tasks(self.project(), ["N-001"])
-        self.assertEqual([task["id"] for task in ready], ["E-001/T-001"])
-        self.assertFalse(waiting)
-        self.finish_tasks()
-        with self.assertRaisesRegex(WishError, "affected needs.*N-002"):
-            self.review()
-        record_review(self.project(), ["N-001"], "Export remains private", ["Local export passed"],
-                      ["N-001", "N-002"], "pass")
-        self.edit_document("specs/S-002/spec.md", title="Revised privacy contract")
-        self.assertFalse(gate_valid(self.project(), "N-001", "implement"))
-        with self.assertRaisesRegex(WishError, "approved plan changed"):
-            validate_review(self.project(), "N-001")
-        self.assertEqual(self.project()["needs"]["N-002"]["state"]["gates"], {})
-
-    def test_shared_spec_is_not_approved_until_both_needs_are_approved(self):
-        self.fixture()
-        self.add_second_need()
-        self.edit_document("specs/S-001/design.md", needs=["N-001", "N-002"])
-        keys = ["N-001", "N-002"]
-        for stage in ("needs", "align", "implement"):
-            record_gate(self.project(), keys, stage, "human")
-        self.finish_tasks()
-        record_review(self.project(), keys, "Reconciliation works locally", ["Local export check passed"], keys, "pass")
-        record_gate(self.project(), keys, "review", "human")
-        approve_needs(self.project(), ["N-001"])
-        self.assertEqual(self.project()["specs"]["S-001"]["meta"]["implementation"], "review")
-        approve_needs(self.project(), ["N-002"])
-        self.assertEqual(self.project()["specs"]["S-001"]["meta"]["implementation"], "approved")
-
-    def test_unapproved_independent_work_does_not_block_authorized_tasks(self):
-        self.fixture()
-        self.add_second_need()
-        new_artifact(self.root, "spec", "S-002", "Privacy")
-        self.edit_document("specs/S-002/design.md", needs=["N-002"])
-        new_artifact(self.root, "epic", "E-002", "Privacy work")
-        self.edit_document("epics/E-002/design.md", specs=["S-002"])
-        from openwish.storage import write_json
-        write_json(self.root / "openwish/epics/E-002/tasks.json", {"tasks": [self.task("E-002/T-001")]})
-        self.approve()
-        ready, waiting = authorized_tasks(self.project(), ["N-001", "N-002"])
-        self.assertEqual([t["id"] for t in ready], ["E-001/T-001"])
-        self.assertEqual([t["id"] for t in waiting], ["E-002/T-001"])
-
-    def test_batch_gate_preflights_every_need_before_writing_receipts(self):
-        self.fixture()
-        self.add_second_need()
-        self.approve(through="needs")
-        with self.assertRaisesRegex(WishError, "missing or stale"):
-            record_gate(self.project(), ["N-001", "N-002"], "align", "human")
-        self.assertNotIn("align", self.project()["needs"]["N-001"]["state"]["gates"])
+    def test_malformed_review_is_actionable_and_prevents_closure(self):
+        self.reviewed()
+        path = self.root / "openwish/changes/C-001/review.json"
+        review = read_json(path)
+        for field, value in (("checks", []), ("needs", None), ("at", "not-a-date")):
+            with self.subTest(field=field):
+                write_json(path, {**review, field: value})
+                with self.assertRaises(WishError):
+                    close_changes(self.project(), ["C-001"], "human")

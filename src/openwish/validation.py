@@ -1,18 +1,22 @@
-"""Structural checks, separate from the agent's semantic alignment review."""
+"""Structural checks; product alignment and evidence quality require reasoning."""
 
-from datetime import date
+from datetime import date, datetime
 import re
 
-from .model import CURRENCY, GATES, IMPLEMENTATION, TASK_STATES, need_scope, topological_order
-from .storage import WishError
+from .model import CHANGE_STATES, CURRENCY, MODES, TASK_STATES, topological_order
+from .storage import SCHEMA_VERSION, WishError, contained
 
 
 def string_list(value):
-    return isinstance(value, list) and all(isinstance(item, str) and item for item in value)
+    return isinstance(value, list) and all(isinstance(item, str) and item.strip() for item in value)
 
 
 def nonempty(value):
     return isinstance(value, str) and bool(value.strip())
+
+
+def header_value(value):
+    return isinstance(value, (str, bool, int)) or (isinstance(value, list) and all(header_value(v) for v in value))
 
 
 def validate(project):
@@ -32,14 +36,11 @@ def validate(project):
             require(key in targets, f"{label}: unknown {field} reference {key}")
 
     config = project["config"]
-    legacy = project["root"] / "openwish/changes"
-    require(not (legacy.exists() and any(legacy.rglob("*"))),
-            "Legacy change records remain; reconcile durable needs using docs/migration.md.")
-    require(config.get("version") == 2, "config: unsupported schema version (expected 2)")
+    require(type(config.get("version")) is int and config["version"] == SCHEMA_VERSION,
+            "config: unsupported schema version (expected 3)")
     require(nonempty(config.get("product")), "config: product is required")
-    for field in ("needs_token_budget", "epic_limit"):
-        require(type(config.get(field)) is int and config[field] > 0,
-                f"config: {field} must be a positive integer")
+    require(type(config.get("needs_token_budget")) is int and config["needs_token_budget"] > 0,
+            "config: needs_token_budget must be a positive integer")
     exceptions = config.get("code_exceptions")
     require(isinstance(exceptions, list), "config: code_exceptions must be an array")
     for exception in exceptions if isinstance(exceptions, list) else []:
@@ -48,124 +49,84 @@ def validate(project):
                 and exception.get("kind") in ("data", "low-complexity"),
                 "config: each code exception needs path, reason, and kind (data or low-complexity)")
 
-    for kind in ("needs", "specs", "epics"):
+    base = project["root"] / "openwish"
+    for path in (base / "changes").glob("*"):
+        contained(project["root"], path.relative_to(project["root"]))
+        require(path.is_dir() and path.name in project["changes"],
+                f"Unrecognized change artifact: {path.name}; preserve and reconcile it before use.")
+
+    for kind in ("needs", "changes"):
         for key, record in project[kind].items():
-            meta = record["meta"]
-            require(nonempty(meta.get("title")), f"{key}: title is required")
-            if kind != "epics":
-                require(meta.get("implementation") in IMPLEMENTATION,
-                        f"{key}: invalid implementation status")
-            if kind == "needs":
-                require(meta.get("currency") in CURRENCY, f"{key}: invalid currency")
-                require("ask" not in meta, f"{key}: persist the need, not an ask field")
-                for field in ("actor", "outcome"):
-                    require(nonempty(meta.get(field)), f"{key}: {field} is required")
-                require(string_list(meta.get("acceptance")) and bool(meta.get("acceptance")),
-                        f"{key}: acceptance must contain observable satisfaction conditions")
-                for field in ("confirmed_at", "verified_at"):
-                    value = meta.get(field)
-                    try:
-                        if not isinstance(value, str):
-                            raise ValueError()
-                        if value:
-                            date.fromisoformat(value)
-                    except ValueError:
-                        errors.append(f"{key}: {field} must be an ISO date string or empty")
-            elif kind == "specs":
-                design = record["design"]
-                require(design["meta"].get("id") == key, f"{key}: design ID must match its spec")
-                links(design["meta"], "needs", project["needs"], f"{key} design")
-                require(bool(design["meta"].get("needs")), f"{key}: design must link at least one need")
-                require("needs" not in meta, f"{key}: keep authoritative need references in design.md")
-                require(nonempty(design["body"]), f"{key}: technical design is required")
-                links(meta, "depends_on", project["specs"], key)
-                parent = meta.get("parent", "")
-                require(isinstance(parent, str), f"{key}: parent must be an ID or empty string")
-                if isinstance(parent, str) and parent:
-                    require(parent in project["specs"], f"{key}: unknown parent {parent}")
-                require((record["path"].parent / "design.md").is_file(), f"{key}: design.md is missing")
-                require(nonempty(record["body"]), f"{key}: behavioral contract is required")
-            else:
-                links(meta, "specs", project["specs"], key)
-                require(bool(meta.get("specs")), f"{key}: link at least one spec")
-                if "needs" in meta:
-                    links(meta, "needs", project["needs"], key)
-                    require(bool(meta["needs"]), f"{key}: execution scope must contain at least one need")
-                require(nonempty(record["body"]), f"{key}: implementation design is required")
+            require(all(header_value(value) for value in record["meta"].values()),
+                    f"{key}: header values must be strings, booleans, integers, or arrays of these values")
+
+    for key, record in project["needs"].items():
+        meta = record["meta"]
+        for field in ("title", "actor", "outcome"):
+            require(nonempty(meta.get(field)), f"{key}: {field} is required")
+        require(meta.get("currency") in CURRENCY, f"{key}: invalid currency")
+        require("ask" not in meta, f"{key}: persist the need, not an ask field")
+        require(string_list(meta.get("acceptance")) and bool(meta.get("acceptance")),
+                f"{key}: acceptance must contain observable satisfaction conditions")
+        confirmed = meta.get("confirmed_at", "")
+        try:
+            if not isinstance(confirmed, str):
+                raise ValueError()
+            if confirmed:
+                date.fromisoformat(confirmed)
+        except ValueError:
+            errors.append(f"{key}: confirmed_at must be an ISO date string or empty")
+
+    for key, record in project["changes"].items():
+        meta = record["meta"]
+        require(nonempty(meta.get("title")), f"{key}: title is required")
+        links(meta, "needs", project["needs"], key)
+        require(bool(meta.get("needs")), f"{key}: link at least one need")
+        require(meta.get("status") in CHANGE_STATES, f"{key}: invalid change status")
+        require(meta.get("mode") in MODES, f"{key}: invalid mode")
+        require(nonempty(record["body"]), f"{key}: purpose, approach, and verification are required")
+        if meta.get("status") == "closed":
+            require(meta.get("closed_by") in ("human", "fast-forward"), f"{key}: missing closure provenance")
+            require(meta.get("closed_by") != "fast-forward" or meta.get("mode") == "fast-forward",
+                    f"{key}: fast-forward closure requires explicit change mode")
+            try:
+                datetime.fromisoformat(meta.get("closed_at", ""))
+            except (TypeError, ValueError):
+                errors.append(f"{key}: closed_at must be an ISO timestamp")
 
     task_ids = set()
     for task in project["tasks"]:
         key = task.get("id")
-        valid_id = isinstance(key, str) and re.fullmatch(rf"{task['epic']}/T-[0-9]{{3,}}", key)
-        require(valid_id, f"{task['epic']}: task ID must be {task['epic']}/T-NNN")
+        valid_id = isinstance(key, str) and re.fullmatch(rf"{task['change']}/T-[0-9]{{3,}}", key)
+        require(valid_id, f"{task['change']}: task ID must be {task['change']}/T-NNN")
         if isinstance(key, str):
             require(key not in task_ids, f"Duplicate task ID: {key}")
             task_ids.add(key)
-        for field in ("group", "order"):
-            require(type(task.get(field)) is int and task[field] > 0,
-                    f"{key}: {field} must be a positive integer")
         require(task.get("status") in TASK_STATES, f"{key}: invalid task status")
-        require(task.get("kind") in ("agent", "manual"), f"{key}: kind must be agent or manual")
+        require(task.get("kind", "agent") in ("agent", "manual"), f"{key}: kind must be agent or manual")
         for field in ("title", "acceptance"):
             require(nonempty(task.get(field)), f"{key}: {field} is required")
-        require(string_list(task.get("files")), f"{key}: files must be an array of paths")
-        require(isinstance(task.get("evidence"), str), f"{key}: evidence must be a string")
+        require(string_list(task.get("files", [])), f"{key}: files must be an array of paths")
+        require(isinstance(task.get("evidence", ""), str), f"{key}: evidence must be a string")
         if task.get("status") == "done":
             require(nonempty(task.get("evidence")), f"{key}: completed tasks need direct evidence")
+        if project["changes"][task["change"]]["meta"].get("status") == "closed":
+            require(task.get("status") == "done", f"{key}: closed changes cannot contain unfinished work")
     for task in project["tasks"]:
-        links(task, "depends_on", task_ids, task.get("id"))
-
-    for key, need in project["needs"].items():
-        state = need["state"]
-        require(type(state.get("revision")) is int and state["revision"] > 0, f"{key}: revision must be positive")
-        require(state.get("mode") in ("default", "fast-forward"), f"{key}: invalid mode")
-        require(isinstance(state.get("no_work_reason"), str), f"{key}: no_work_reason must be a string")
-        require(set(state).issubset({"revision", "mode", "no_work_reason", "gates"}),
-                f"{key}: need state only stores revision, mode, no_work_reason, and gates")
-        gates = state.get("gates")
-        if not isinstance(gates, dict):
-            errors.append(f"{key}: gates must be an object")
-            continue
-        for gate, record in gates.items():
-            require(gate in GATES and isinstance(record, dict), f"{key}: invalid gate {gate}")
-            if isinstance(record, dict):
-                require(record.get("by") in ("human", "fast-forward"), f"{key}/{gate}: invalid approver")
-                require(nonempty(record.get("fingerprint")), f"{key}/{gate}: missing fingerprint")
-                require(nonempty(record.get("at")), f"{key}/{gate}: missing timestamp")
-
+        links(task, "depends_on", task_ids, task.get("id"), optional=True)
     if errors:
         return errors
-    # Only operate on graphs after all input types and references are sound.
-    for key, epic in project["epics"].items():
-        meta = epic["meta"]
-        if "needs" in meta:
-            covered = {nid for sid in meta["specs"] for nid in project["specs"][sid]["design"]["meta"]["needs"]}
-            require(set(meta["needs"]).issubset(covered),
-                    f"{key}: execution needs must be covered by its spec designs")
-    for relation in ("depends_on", "parent"):
-        graph = {}
-        for key, spec in project["specs"].items():
-            value = spec["meta"].get(relation)
-            graph[key] = value if isinstance(value, list) else ([value] if value else [])
-        try:
-            topological_order(graph)
-        except WishError as error:
-            errors.append(f"Specs ({relation}): {error}")
+
     tasks = {task["id"]: task for task in project["tasks"]}
     try:
-        topological_order({key: task["depends_on"] for key, task in tasks.items()})
+        topological_order({key: task.get("depends_on", []) for key, task in tasks.items()})
     except WishError as error:
         errors.append(str(error))
     for task in tasks.values():
-        for dep in task["depends_on"]:
+        for dep in task.get("depends_on", []):
             prerequisite = tasks[dep]
-            require((prerequisite["group"], prerequisite["order"]) < (task["group"], task["order"]),
-                    f"{task['id']}: prerequisite {dep} must have a lower group/order")
+            require(prerequisite["change"] == task["change"],
+                    f"{task['id']}: prerequisites must stay within the change so it can be disposed independently")
             if task["status"] == "done":
                 require(prerequisite["status"] == "done", f"{task['id']}: prerequisite {dep} is unfinished")
-    for key in project["needs"]:
-        scope = need_scope(project, [key])
-        scoped = [t for t in tasks.values() if t["epic"] in scope["epics"]]
-        ordinals = [(t["group"], t["order"]) for t in scoped]
-        require(len(set(ordinals)) == len(ordinals), f"{key}: task group/order pairs must be unique")
     return errors

@@ -1,38 +1,33 @@
 ---
 name: ow-fast-forward
-description: Run OpenWish needs through NDD without approval prompts, including final acceptance. Use only for an explicit human fast-forward request or explicit instruction to skip OW approvals.
+description: Run OpenWish work through implementation, review, and disposal without approval prompts, including final acceptance. Use only after explicit human fast-forward or delegation of OW acceptance.
 disable-model-invocation: true
 ---
 
 # Fast-forward
 
-Use this workflow only after an explicit fast-forward request; loading the skill
-alone grants no authority. Respect OW opt-outs and plan-only requests. Read
-`openwish/policy.md`. Explicit fast-forward delegates acceptance for the selected
-needs' current implementation revisions. Follow the same quality phases without asking
-for confirmation, design approval, implementation permission, or final acceptance.
+Use only after explicit delegation; loading this skill grants no authority.
+Respect OW opt-outs and plan-only requests. Read `openwish/policy.md`.
+Delegation belongs to this change, never to a durable need or unrelated future work.
 
-1. Interpret the ask against existing needs. Keep the ask in conversation; do not
-   create a request/change record, ask summary, or independent execution container.
-2. Routine changes still use Propose's lightweight path: implement, verify, report,
-   then finish without creating needs/epics, recording gates, or running the
-   structured steps below. For structured work, reuse existing needs. If
-   implementation must resume, use `ow reopen N-001 ...
-   --fast-forward`. For open needs use `ow mode fast-forward N-001 ...`. Create a
-   distinct new need only when necessary with `ow new need ... --fast-forward`.
-   If current outcomes already satisfy the request, explain that and do no extra work.
-3. Follow Propose, Align, Plan, Implement, and Review, reading each skill on entry.
-   Record preparation with `ow authorize N-001 ... --by fast-forward` and final
-   acceptance with `ow gate review N-001 ... --by fast-forward`. Skip all approval
-   questions; do not fabricate human confirmation or verification dates.
-4. Resolve routine decisions from all current needs and minimal coherent work.
-   For genuine blocking ambiguity or contradictory intent, first exhaust
-   independent work, then use numbered questions and the best two or three A/B/C
-   choices, with `(Recommended)` before the preferred text and concise effects.
-5. Complete actual verification and review. This mode does not manufacture access,
-   manual observations, or passing checks. Never mark unfinished tasks done.
-6. After a passing review, record fast-forward acceptance and approve the needs.
-   Report need → spec → outcome and direct evidence without another approval prompt.
-
-Future reopening defaults to normal human-controlled workflow unless explicitly
-fast-forwarded again. This mode is not authority for unrelated future needs.
+1. Interpret the ask against existing needs. Preserve actor/outcome/acceptance and
+   constraints; create a new need only for independently valuable intent. Leave
+   inferred needs unconfirmed. Keep conversation asks out of permanent records.
+2. Routine work still uses the lightweight path: inspect, implement, verify, report,
+   and stop. Create no records, set no mode, and ask no acceptance question.
+3. For substantive work, create/reuse a bounded change. Use `ow new change C-001
+   --title "Improvement" --need N-001 --fast-forward`, or `ow mode fast-forward
+   C-001` for an active change explicitly covered by this request.
+4. Follow Propose, Align, Plan, Implement, and Review, reading each on entry.
+   Keep design in the change and behavior/checks in code/tests. Skip redundant
+   confirmations and all stage receipts. A plan-only request still stops at planning.
+5. Resolve routine technical choices from current intent. Continue independent
+   work before presenting genuine blocking ambiguity, conflicts, access issues,
+   or manual observations. Use numbered A/B/C choices with `(Recommended)` before
+   the preferred text when a decision is indispensable.
+6. Verify and review honestly; do not fabricate checks or mark manual work done.
+   After a fresh passing review, use `ow close C-001 --by fast-forward` and
+   `ow-consolidate`/`ow clean C-001` once useful knowledge is preserved.
+7. Report **need → outcome → evidence** and limitations without another approval
+   prompt. Attribute acceptance to delegation, not human review. New changes use
+   default mode unless explicitly fast-forwarded again.

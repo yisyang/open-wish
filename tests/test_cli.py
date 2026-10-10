@@ -18,54 +18,50 @@ class CliTests(ProjectCase):
         self.assertNotIn("Traceback", result.stderr)
         return result
 
-    def test_end_to_end_fast_forward_is_addressed_by_need_id(self):
+    def test_end_to_end_fast_forward_disposes_work_and_preserves_needs(self):
         self.fixture(mode="fast-forward")
         self.cli("check")
-        for stage in ("needs", "align", "implement"):
-            self.cli("gate", stage, "N-001", "--by", "fast-forward")
         ready = json.loads(self.cli("ready", "N-001", "--json").stdout)
         self.assertEqual(len(ready["ready"]), 1)
-        self.assertEqual(ready["ready"][0]["lineage"][0]["id"], "S-001")
+        self.assertEqual(ready["ready"][0]["needs"][0]["id"], "N-001")
         self.finish_tasks()
-        self.cli("record-review", "N-001", "--summary", "Reconciliation verified",
+        self.cli("record-review", "C-001", "--summary", "Reconciliation verified",
                  "--check", "Representative export: passed", "--covered-need", "N-001")
-        self.cli("gate", "review", "N-001", "--by", "fast-forward")
-        self.cli("approve", "N-001")
+        self.cli("close", "C-001", "--by", "fast-forward")
         status = json.loads(self.cli("status", "--json").stdout)
-        self.assertNotIn("changes", status)
-        self.assertEqual(status["needs"][0]["implementation"], "approved")
-        self.assertIn("approved", self.cli("context").stdout)
-        self.assertFalse((self.root / "openwish/changes").exists())
+        self.assertEqual(status["changes"][0]["closed_by"], "fast-forward")
+        self.cli("clean", "C-001")
+        self.assertIn("N-001", self.cli("context").stdout)
+        self.assertFalse((self.root / "openwish/changes/C-001").exists())
+        self.assertEqual(self.project()["needs"]["N-001"]["meta"]["confirmed_at"], "")
+        self.cli("check")
 
-    def test_combined_authorization_and_scoped_shared_spec_through_cli(self):
+    def test_many_to_many_scope_and_regression_review_through_cli(self):
         self.fixture()
         self.cli("new", "need", "N-002", "--title", "Privacy")
         self.edit_document("needs/N-002.md", actor="Staff", outcome="Keep data local",
                            acceptance=["No uploads"])
-        self.edit_document("specs/S-001/design.md", needs=["N-001", "N-002"])
-        self.edit_document("epics/E-001/design.md", needs=["N-001"])
-        self.cli("authorize", "N-001", "--by", "human")
+        self.cli("new", "change", "C-002", "--title", "Shared improvement", "--need", "N-001", "--need", "N-002")
         ready = json.loads(self.cli("ready", "N-001", "--json").stdout)
         self.assertEqual(len(ready["ready"]), 1)
         self.assertFalse(ready["waiting"])
-        self.assertEqual(ready["ready"][0]["execution_needs"], ["N-001"])
-        self.assertIn("Execution needs: N-001", self.cli("ready", "N-001").stdout)
+        self.assertIn("N-001", self.cli("ready", "C-001").stdout)
         self.finish_tasks()
-        self.cli("record-review", "N-001", "--summary", "Local reconciliation verified",
+        self.cli("record-review", "C-001", "--summary", "Local reconciliation verified",
+                 "--check", "Local export passed", "--covered-need", "N-001", success=False)
+        self.cli("record-review", "C-001", "--summary", "Local reconciliation verified",
                  "--check", "Local export passed", "--covered-need", "N-001", "--covered-need", "N-002")
-        self.cli("approve", "N-001", success=False)
-        self.cli("gate", "review", "N-001", "--by", "human")
-        self.cli("approve", "N-001")
-        self.assertEqual(self.project()["needs"]["N-001"]["meta"]["implementation"], "approved")
-        self.assertEqual(self.project()["needs"]["N-002"]["meta"]["implementation"], "open")
+        self.cli("close", "C-001", "--by", "human")
+        self.cli("clean", "C-001")
+        self.assertEqual(self.project()["changes"]["C-002"]["meta"]["status"], "open")
+        self.assertEqual(self.project()["needs"]["N-002"]["meta"]["currency"], "current")
 
-    def test_final_summary_contains_need_spec_outcome_and_evidence(self):
+    def test_final_summary_contains_need_change_outcome_and_evidence(self):
         self.fixture()
-        self.approve()
         self.finish_tasks()
         self.review()
         output = self.cli("summary", "N-001").stdout
-        for text in ("N-001", "Reconcile without retyping", "S-001", "Export records", "passed"):
+        for text in ("N-001", "Reconcile without retyping", "C-001", "Improve reconciliation", "passed"):
             self.assertIn(text, output)
 
     def test_empty_project_passes_and_has_a_context(self):
@@ -73,15 +69,15 @@ class CliTests(ProjectCase):
         self.assertEqual(result, {"errors": [], "warnings": []})
         self.assertIn("Current needs", self.cli("context").stdout)
 
-    def test_need_template_requires_completion_before_decisions(self):
+    def test_need_template_requires_completion_before_work(self):
         self.cli("new", "need", "N-001", "--title", "New need")
         self.assertIn("actor is required", self.cli("check", "--json", success=False).stdout)
 
-    def test_ready_reports_missing_authority_without_authorizing_work(self):
+    def test_ready_does_not_require_stage_receipts(self):
         self.fixture()
         result = json.loads(self.cli("ready", "N-001", "--json").stdout)
-        self.assertEqual(result["ready"], [])
-        self.assertIn("Missing or stale", result["waiting"][0]["blocker"])
+        self.assertEqual(len(result["ready"]), 1)
+        self.assertEqual(result["waiting"], [])
 
     def test_malformed_json_has_an_actionable_error(self):
         (self.root / "openwish/config.json").write_text("{broken", encoding="utf-8")
@@ -95,31 +91,28 @@ class CliTests(ProjectCase):
     def test_root_flag_works_from_another_directory(self):
         self.assertIn("PASS", self.cli("--root", str(self.root), "check", cwd=self.root.parent).stdout)
 
-    def test_no_work_need_can_be_verified_without_inventing_tasks(self):
+    def test_verification_only_change_can_close_without_inventing_tasks(self):
         self.fixture(mode="fast-forward")
-        self.edit_state(no_work_reason="Existing implementation satisfies the design")
-        (self.root / "openwish/epics/E-001/design.md").unlink()
-        (self.root / "openwish/epics/E-001/tasks.json").unlink()
-        for stage in ("needs", "align", "implement"):
-            self.cli("gate", stage, "N-001", "--by", "fast-forward")
-        self.cli("record-review", "N-001", "--summary", "Existing behavior verified",
+        self.write_tasks([])
+        self.cli("record-review", "C-001", "--summary", "Existing behavior verified",
                  "--check", "Representative export passed", "--covered-need", "N-001")
-        self.cli("gate", "review", "N-001", "--by", "fast-forward")
-        self.cli("approve", "N-001")
+        self.cli("close", "C-001", "--by", "fast-forward")
 
-    def test_reopen_resets_authority_without_creating_a_new_need(self):
-        self.fixture(mode="fast-forward")
-        self.approve(by="fast-forward")
-        self.cli("reopen", "N-001")
-        state = self.project()["needs"]["N-001"]["state"]
-        self.assertEqual((state["revision"], state["mode"], state["gates"]), (2, "default", {}))
-        self.assertEqual(len(self.project()["needs"]), 1)
+    def test_mode_is_scoped_to_change(self):
+        self.fixture()
+        self.cli("mode", "fast-forward", "C-001")
+        self.cli("new", "change", "C-002", "--title", "Follow-up", "--need", "N-001")
+        self.assertEqual(self.project()["changes"]["C-002"]["meta"]["mode"], "default")
 
-    def test_legacy_schema_fails_explicitly_without_touching_files(self):
+    def test_unsupported_schema_fails_without_touching_files(self):
         path = self.root / "openwish/config.json"
-        original = path.read_text().replace('"version": 2', '"version": 1')
+        original = path.read_text().replace('"version": 3', '"version": 999')
         path.write_text(original, encoding="utf-8")
-        self.assertIn("expected 2", self.cli("check", success=False).stderr)
+        before = {p: p.read_bytes() for p in self.root.rglob("*") if p.is_file()}
+        for args in (("check",), ("init", "--harness", "opencode"),
+                     ("skills", "--harness", "opencode"), ("new", "need", "N-001", "--title", "Need")):
+            self.assertIn("expected 3", self.cli(*args, success=False).stderr)
+        self.assertEqual(before, {p: p.read_bytes() for p in self.root.rglob("*") if p.is_file()})
         self.assertEqual(path.read_text(), original)
 
     def test_init_supports_multiple_and_repeated_harness_flags(self):

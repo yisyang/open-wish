@@ -4,4 +4,3 @@ include .python-version
 recursive-include docs *.md
 recursive-include scripts *.py
 recursive-include tests *.py
-recursive-include tests/fixtures *.md

@@ -1,162 +1,137 @@
 # OpenWish policy
 
-OpenWish (OW) practices Need-Driven Development (NDD). Its durable unit is a
-need. Humans express asks in conversation; OW creates, revises, or reopens needs.
-Do not persist asks, ask summaries, request logs, or separate change records.
-Default scope is one product/domain in one repository, including a monorepo.
+Humans ask. AI identifies needs, aligns design and engineering, implements, and
+reviews. Humans review the results.
 
-OW is opt-in. An installed skill, source tree, or mention of OpenWish is not a
-request to run its workflow. Respect instructions to work directly without OW.
-Do not initialize a repository merely because a software change was requested.
+Needs preserve durable intent. Changes hold temporary purpose, design, and
+verification plans. Tasks organize work within a change. Dispose changes and
+tasks after completion and review; code and tests carry the implemented solution.
+Default to one product/domain per repository, including a monorepo.
 
-## Needs and current truth
+## Adoption and proportion
 
-- Capture actor, desired outcome, pain reduced/gain delivered, and observable
-  acceptance. Distinguish suggested solutions from genuine constraints.
-- Currency is `current | retired`. Implementation is
-  `open | in-progress | review | approved`. These dimensions are independent.
-- An approved implementation does not retire its need. Load **all current needs**,
-  including approved ones, with `ow context`. Retrieve relevant retired needs
-  when interpreting history. Never silently retire or weaken a need.
-- Match existing intent before creating a need. If the outcome is already met,
-  explain that; do not invent work or create a duplicate need to represent an ask.
-- For structured work, reopen an existing need when it requires further implementation.
-  Preserve its ID. Create a new need only for a distinct durable outcome.
-- Compare actor, outcome, and acceptance, not titles or implementation surfaces.
-  An alias, another platform, a bug fix, or a different mechanism usually belongs
-  to an existing outcome. Put solution details in specs, not new needs. Before
-  creating a need, explain what independently valuable outcome existing needs
-  cannot cover without conflating different goals. Shared spec links alone are
-  not evidence of duplicate needs.
-- `confirmed_at` records human confirmation of intent; `verified_at` records the
-  latest accepted implementation check. Reading a file does not advance either.
-- Existing behavior is evidence of what exists, not proof of what humans want.
-  Passing tests establish delivery evidence, not automatically real-world benefit.
+OW is opt-in. Installed skills and source templates do not mandate adoption.
+Respect requests to work directly without OW. Initialize only when asked to adopt it.
 
-## Human communication
+Clear, localized, reversible work within existing intent follows inspect →
+implement → verify → report. It needs no change file, new need, or acceptance
+ceremony. Substantial work, consequential choices, and work that needs resumable
+coordination use a change. Keep work already tracked in a change there, including
+unresolved manual checks. A small change may have one task; a verification-only
+change may have none.
 
-Ask only questions whose answers can change the work. An unambiguous instruction
-is already authority for its stated scope; do not ask the human to repeat it as
-a confirmation. Keep process instructions internal unless asked. Respect requests
-to discuss, propose, or plan only; those do not authorize implementation.
+## Durable needs
 
-For every clarification or confirmation:
+- Capture actor, independently valuable outcome, observable acceptance, and
+  genuine constraints. Keep internal designs, algorithms, and task lists in the
+  working change or implementation rather than expanding needs into specs.
+- Match actor/outcome/acceptance before adding a need. A new format, command,
+  platform, or mechanism often serves an existing outcome. Create a new need
+  only for a separately valuable outcome; preserve stable IDs when intent evolves.
+- Currency is `current | retired`. Load all current needs with `ow context` before
+  alignment and review. Delivered outcomes still constrain future work. Retiring
+  or weakening a need requires an actual intent decision, not implementation convenience.
+- Needs have no execution lifecycle. Closing a change neither retires its needs
+  nor proves their complete satisfaction. Multiple changes can serve the same need.
+- `confirmed_at` records actual human confirmation of intent. Leave inference
+  unconfirmed. Existing code establishes behavior, not human intent.
+- Keep asks in conversation. Store interpreted durable intent and a bounded
+  working improvement, rather than conversation transcripts or request journals.
 
-1. Number questions `1.`, `2.`, `3.` and state the relevant need IDs and conflict.
-2. Offer the best two or three meaningful choices labeled `A.`, `B.`, `C.`.
-   In documentation, indent these choice lines by two spaces.
-3. Put `(Recommended)` **before the preferred choice text**, after its letter.
-4. Add a concise effect clause when it helps explain what will happen to needs
-   or the product. Do not invent an option just to fill three slots.
-5. Prefer preserving existing intent when it already delivers the desired outcome.
-   Recommendations follow the evidence, rather than automatically rejecting asks.
+## Design and engineering
 
-Example when N-001 already provides local monthly trends:
+Inspect code, tests, interfaces, and repository conventions to reconstruct the
+current design. Needs define expected outcomes; code defines implemented behavior;
+tests check the connection. Review tests against intent so a passing suite does
+not merely repeat an implementation mistake.
 
-> 1. N-001 already provides monthly trends and requires data to remain local.
-> Uploading transactions conflicts with that requirement. What should I do?
->   A. (Recommended) Keep N-001 as-is. No new need or product modification.
->   B. Add third-party upload while keeping trends local. Revise N-001 to allow
->   uploads only to approved third-party domains.
->   C. Add third-party upload and trend computation with local viewing. Revise
->   N-001's local-only constraint for approved third-party domains.
+Keep temporary design in the change's approach: affected modules, alternatives
+that matter, compatibility, effects, and how current constraints are preserved.
+Use cohesive modules, explicit dependencies, functional cores, and effects at
+boundaries where appropriate. Prefer the smallest coherent implementation and
+established dependencies. Repository layout and public interfaces should make
+responsibilities discoverable. Preserve rationale that cannot be recovered from
+code in a nearby comment or ordinary repository document when useful.
 
-Structured final updates lead with **need → spec → outcome**, followed by direct verification
-and any remaining blocker. Read the spec design's need references; do not report
-only epic/task IDs or assume that humans remember why a task matters. For example:
+Changes reference needs directly, many-to-many. All current needs are regression
+constraints, including those outside a change's motivating scope. Distinguish
+incompatible intent from an implementation that does not yet satisfy compatible
+needs; adapt the implementation when possible.
 
-> N-001 — Local monthly insights, through S-001 — Trend analysis: monthly trends
-> now compute locally. Regression checks passed; financial records stay on-device.
+## Authority and communication
 
-## Workflow and authority
+An unambiguous instruction to implement supplies authority for that scope.
+Clarify only uncertainty or conflict that can materially change the work. Respect
+discussion-only and plan-only requests. Technical plan repairs within authorized
+intent need no renewed permission. A consequential intent or scope change needs
+a real decision. Readiness is a scheduling result, not permission to implement.
+Authority lives in conversation; there are no stage gates or authorization receipts.
 
-Scale the process to the decision, not the number of phases:
+For meaningful choices, use numbered questions with two or three A/B/C options,
+put `(Recommended)` before the preferred choice text, and briefly explain effects.
+Do not restate clear instructions as confirmation questions.
 
-- **Routine path (default for small, clear changes):** inspect relevant current
-  needs and code, implement, verify, and report. Examples include an exact CLI
-  alias, a focused bug fix, documentation, and small refactors that preserve intent.
-  Use this path when the change is localized, reversible, and within clear intent,
-  with no unresolved product trade-off or consequential compatibility, data,
-  security, or migration decision. No new needs, revision/reopen, epics, gate
-  receipts, or final acceptance prompt are required. Update an existing spec only
-  when its contract/design would otherwise become inaccurate. Do not advance need
-  lifecycle or confirmation/verification dates as a side effect.
-  Work already tracked in an active structured plan stays in that plan; do not
-  relabel it routine to bypass missing authority or unfinished manual checks.
-- **Structured path:** use for a new durable outcome, changed constraints,
-  consequential trade-offs, or substantial/coordinated work. Propose, Align, and
-  Plan prepare one coherent scope. Clarify material ambiguity early; otherwise
-  proceed through preparation without stage-by-stage confirmation. Obtain at most
-  one combined scope/design/implementation decision if the conversation has not
-  already authorized that scope. A clear instruction to implement can supply this
-  authority when the prepared solution stays within it; a speculative suggestion
-  or plan-only request cannot. Record it with `ow authorize N-001 ... --by human`.
-  Implement, verify, and remediate continuously. Ask once for final acceptance
-  after available work is complete, unless explicitly fast-forwarded.
+Explain results as **need → outcome → evidence**, with change/task IDs only when
+useful. Distinguish observed results from assumptions and unperformed checks.
 
-Preparation phases are quality checks, not separate permission boundaries.
-The lower-level `ow gate` commands remain for deliberate staged collaboration.
-Record only actual human authority, not an agent's own assessment. Technical
-plan repairs and artifact relinking within the authorized scope need refreshed
-receipts, not renewed human permission. Material changes to outcomes, constraints,
-or consequential trade-offs need a new decision. The CLI detects changed inputs;
-the agent judges whether the existing conversation authority still covers them.
+Default structured work presents results for human review. Record closure with
+`ow close C-001 --by human` only after actual acceptance of those results.
+Explicit fast-forward delegates this final acceptance for that change alone:
+use `ow new change ... --fast-forward` or `ow mode fast-forward C-001`, then
+`ow close C-001 --by fast-forward`. Loading a skill or reading a file grants no
+authority. New changes default to normal human review; delegation is never
+inherited through shared needs. Fast-forward does not supply missing manual
+observations, access, or passing checks, and does not override a plan-only request.
 
-An explicit `/fast-forward` enables that mode on the selected needs' current
-implementation revisions. For structured work, follow all phases and checks,
-using `ow authorize ... --by fast-forward` and final `ow gate review ... --by
-fast-forward` without approval or confirmation prompts, including final
-acceptance. Never invent human confirmation dates, test results, or manual actions.
-Reopening a need resets authority to default unless fast-forward is explicitly
-requested again. Mode applies to need revisions, not subsequent unrelated asks.
+## Execution and review
 
-Ask only for genuinely blocking ambiguity, conflicting needs, missing access, or
-manual verification. Use the numbered choices above. Continue independent ready
-work before presenting human blockers; pending acceptance of one result is not
-a reason to stop other authorized work. Do not ask to run AI review.
+1. Prepare needs, approach, and tasks together. Continue to implementation when
+   authorized; a plan-only request stops at the prepared change.
+2. Run `ow ready C-001` and work in listed order subject to local prerequisites.
+   Tasks use `open | in-progress | blocked | done`. Optional dependencies stay
+   within the change so completed changes can be removed independently. Coordinate
+   separate changes through delivered code/interfaces; combine tightly coupled work.
+3. Verify each task before marking it done. Record concise direct evidence.
+   Retain completed tasks until change closure. Continue independent work around
+   manual blockers, then present indispensable human input with its purpose.
+4. Review the actual diff and outcomes against all current needs. Assess which
+   need checks are affected and explain unaffected constraints briefly. Run
+   meaningful regression checks and `ow check`; routine verification should take
+   under five minutes, with necessary slower checks identified explicitly.
+5. Remediate and recheck without asking permission for AI review. Record one latest
+   review per change using `ow record-review`, covering all IDs listed by
+   `ow context C-001` under `review_needs`. Unresolved findings use `--verdict blocked`.
+6. A passing review requires completed tasks. Changes to needs, approach, task
+   evidence, policy/config, or repository content make pending review stale.
+   Refresh the relevant verification and review before closure. This is one result
+   freshness check, not a chain of stage approvals.
 
-## Design and execution
+## Completion and disposal
 
-- Classify conflicts: need/need, need/implementation, spec/spec, or task/design.
-  Show concrete scenarios and adjacent needs. Compatible needs require adapting
-  the solution rather than silently discarding a constraint.
-- Spec **designs** own the authoritative need references. Specs may address API
-  entities, UI modules, or cross-cutting capabilities. Need/spec links are many-to-many.
-  Keep `parent` containment separate from prerequisite `depends_on` links.
-- Epics reference specs; tasks belong to epics. An epic's optional `needs` array
-  selects the outcomes this increment implements from its spec designs' need
-  references. Other linked needs remain regression constraints, not additional
-  authorization requirements. Legacy epics without this field select all linked
-  needs. Do not split specs or invent needs just to bypass an authority blocker.
-- Tasks have explicit prerequisites and increasing `(group, order)` pairs across
-  the work for a need. No lower ordinal depends on a higher one. Execute the
-  earliest authorized ready task; independent later work can pass a manual blocker.
-- Preserve approved intent when resolving technical inconsistencies. Material
-  intent/design revisions return to the relevant phase; stale receipts cannot
-  authorize newer work. Task progress itself does not invalidate a plan.
-- Prefer the smallest coherent implementation, security, reliability,
-  maintainability, functional cores, and established dependencies.
-- Use meaningful verification with a routine feedback loop under five minutes.
-  Identify necessary slower checks explicitly. Missing observations are not passes.
-- Keep direct results and useful pointers, not evidence chains or repeated reviews
-  of reviews. Review the implementation and adjacent needs, not just checkboxes.
+Before final review, put lasting behavior and regression checks in code/tests,
+intent changes in needs, and essential rationale/environment references in ordinary
+repository documentation. Preserve unresolved limitations visibly; never conceal
+unfinished work by deleting a task or calling it routine.
 
-## Bounds and consolidation
+After results are accepted, close the change and use `ow clean C-001` to remove
+its change document, tasks, and review. Keep history in Git when history is useful;
+do not create an OW archive, execution ledger, or need-owned review sidecar.
+No automatic commit is required. Cleanup preserves unknown files and refuses
+unfinished changes. If preserving knowledge requires new edits after review,
+refresh the review before closing; after closure treat new implementation work
+as a new change. Future maintainers should be able to work from needs and the
+repository without recovering a deleted change.
 
-- Every OW knowledge/planning artifact is **under 500 lines**, including JSON.
+## Bounds
+
+- Each OW artifact is under 500 lines. Compact near 400 lines.
 - All current needs together stay under 500 lines and the configured estimated
-  token budget (default 6,000). `ow context` derives a complete view without truncation.
-- Code has an **under 500 LOC soft target** and **under 1000 LOC hard maximum**.
-  Source data formats are exempt; low-complexity source exceptions need exact
-  paths and reasons. These exemptions never bypass OW artifact limits.
-- LOC uses nonblank physical lines; estimated tokens use UTF-8 bytes/3. They are
-  budgeting proxies, not proofs of low complexity or model-specific token counts.
-- Overwrite latest summaries, compact before 400 lines, and bound retained epics
-  (default eight). Git stores history. Do not build append-only journals or archives.
-- Promote current contracts, environment profiles, and secret references before
-  removing completed execution detail. Retain unresolved limitations and checks.
-- Tighten wording without losing acceptance conditions. Retiring or semantically
-  merging needs requires intent confirmation under the selected workflow.
+  token budget (default 6,000). Include their complete content without truncation.
+- Source has an under-500 nonblank LOC soft target and under-1000 hard maximum.
+  Exact-path, justified data/low-complexity exceptions never exempt OW artifacts.
+- Token estimation uses UTF-8 bytes/3; these limits are proxies for manageable
+  context, not substitutes for thoughtful design.
+- Replace latest working summaries rather than accumulating journals. Compact
+  wording without silently losing acceptance, constraints, or independent outcomes.
 
-Read `openwish/artifacts.md` when editing artifacts. Run `ow check` before gates
-or final review. Structural validation complements semantic alignment and review.
+Read `openwish/artifacts.md` for schema 3 and command examples.

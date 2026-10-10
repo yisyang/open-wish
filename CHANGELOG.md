@@ -2,6 +2,54 @@
 
 Release notes for OpenWish, newest first. Update this file for every release.
 
+## v0.5.0
+
+OW now preserves durable needs and uses disposable changes/tasks for execution.
+Humans ask. AI identifies needs, aligns design and engineering, implements, and
+reviews. Humans review the results.
+
+### Changed
+
+- Artifact **schema 3** replaces Needs → Specs → Epics → Tasks with many-to-many
+  Needs → Changes and change-local Tasks. Working design lives in the change;
+  implemented behavior and executable checks live in the repository.
+- Needs retain intent, currency, and actual confirmation provenance. Execution
+  status and delegation belong to changes. Closing an increment does not retire,
+  confirm, or permanently approve an entire need.
+- Task lists use local optional prerequisites and list order, without global
+  group/order pairs. Independent work continues around manual blockers.
+- One disposable review per change checks current/linked needs and relevant
+  regressions. Its freshness binds intent, working approach, tasks/evidence,
+  policy/config, and repository content while awaiting result acceptance.
+- All eight bundled skills, documentation, and semantic scenarios follow the new
+  model, with functional cores and discoverable repository design as defaults.
+
+### Added
+
+- `ow new change C-001 --title ... --need N-001` scopes bounded work directly to needs.
+- `ow close C-001 --by human` records actual result acceptance; `--by fast-forward`
+  uses explicitly delegated change mode after the same verification requirements.
+- `ow clean C-001` disposes closed changes, tasks, and reviews. It preflights the
+  full selection and preserves unknown files, symlinks, needs, and product code.
+- `context`, `ready`, and `summary` accept need/change selections. Status derives
+  active work from changes and treats retained closed reviews as historical.
+
+### Removed
+
+- Persistent specs/epics, need-owned execution/review sidecars, stage gates,
+  `authorize`, `approve`, and `reopen`. Conversation authority governs scope;
+  substantive results still receive human review unless explicitly delegated.
+- Mandatory operational knowledge scaffolding and arbitrary retained-epic limits.
+  Useful rationale belongs near code or in ordinary repository documentation.
+
+### Compatibility
+
+Before v1.0.0, OW supports only the current schema, with no migration tooling or
+legacy compatibility. Unversioned-template recognition and historical need-field
+handling have been removed. Unsupported schemas are rejected before writes.
+Schema-3 reinitialization keeps project-owned knowledge and local policy.
+Package and bundled integrations are 0.5.0.
+
 ## v0.4.0
 
 Workflow overhead is now proportional to the work, with execution authorization
@@ -59,9 +107,8 @@ execution scope. Adding or changing that header invalidates affected authority
 and reviews; reconcile the plan and refresh receipts under the applicable
 conversation authority.
 
-Project-owned policy and artifact-reference files are preserved. Merge the new
-proportional-workflow and execution-scope guidance into those files as described
-in [the migration guide](docs/migration.md#upgrading-from-02-or-03).
+Project-owned policy and artifact-reference files were preserved, with guidance
+for merging the proportional workflow and execution scope into local policy.
 
 ## v0.3.1
 

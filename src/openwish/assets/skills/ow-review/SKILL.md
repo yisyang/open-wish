@@ -1,39 +1,38 @@
 ---
 name: ow-review
-description: Review structured OW implementation and regressions, then present outcomes for acceptance. Routine changes get a concise verified result without acceptance gates. Honor OW opt-outs.
+description: Review an OW change against needs, code, tests, and regressions; present results and close accepted work. Routine changes receive concise verified results without a closure ceremony. Honor OW opt-outs.
 ---
 
 # Review
 
-Read `openwish/policy.md`, `ow context N-001 ...`, affected spec designs and their
-need references, task evidence, and the actual code diff. Review from intent.
-For the routine path, inspect the diff, run meaningful checks, remediate, and
-report the result without OW records, lifecycle updates, or an acceptance prompt.
-The remaining steps apply to structured work only, replacing legacy generated
-blanket approval requirements while honoring deliberate project-specific controls.
+Read `openwish/policy.md`, `ow context C-001`, the working approach/tasks, and
+the actual code diff. Review from intent. For routine work, verify, remediate,
+report, and stop without creating records or asking final acceptance.
 
-1. Check selected needs and affected adjacent current needs, including previously
-   approved ones. Verify contracts, error paths, security, reliability, and
-   maintainability with meaningful evidence. Distinguish delivery from user outcomes.
-2. Repair defects within approved intent and rerun affected checks. Material
-   revisions return to the appropriate phase. Continue unfinished authorized work
-   before requesting any final acceptance; never invent manual observations.
-3. Run `ow check`. Record the latest direct review using `ow record-review N-001
-   ... --summary "user outcome" --check "command/observation: result" --covered-need
-   N-001 ...`. Include every context manifest `review_needs` ID. Use `--verdict
-   blocked` for unresolved findings. Each need owns its latest bounded review.
-4. Passing review requires all relevant tasks done. Repository, plan, or evidence
-   edits afterward require refreshed verification and a replacement review.
-5. Present a concise result using **need → spec → outcome**, then verification and
-   limitations. Use `ow summary N-001 ...`; read S-001's design to identify N-001.
-   Do not report only task completion or assume the human remembers the purpose.
-6. In default mode, after available authorized work is exhausted, ask explicitly
-   for final acceptance using a numbered question with two or three A/B/C choices
-   and `(Recommended)` before the preferred choice text. After acceptance run
-   `ow gate review N-001 ... --by human`, then `ow approve N-001 ...`.
-7. In fast-forward mode, skip that confirmation: record the passing review,
-   `ow gate review N-001 ... --by fast-forward`, and `ow approve N-001 ...`.
-   Attribute acceptance to fast-forward, not explicit human review.
-
-Needs remain current and binding. Follow-up work reopens existing needs or creates
-distinct new ones; redundant asks generate no records. Keep one latest review.
+1. Assess the change against all current needs and its linked needs. Inspect
+   relevant error paths, compatibility, reliability, security, and maintainability.
+   Determine affected checks and explain unaffected constraints briefly. Passing
+   tests alone do not prove user benefit or excuse tests that repeat a code mistake.
+2. Remediate within authorized intent and rerun affected checks. Continue available
+   work before requesting human input. Retain unresolved manual observations and
+   limitations honestly. Material intent changes require an actual decision.
+3. Ensure the repository will remain understandable after disposal: preserve
+   lasting behavior/tests, updated needs, and useful rationale before final review.
+4. Run `ow check`, then `ow record-review C-001 --summary "user outcome" --check
+   "command/observation: result" --covered-need N-001 ...`. Include every
+   `review_needs` ID from the context manifest. Unresolved findings use
+   `--verdict blocked`. Each change retains one latest review, not a history.
+5. Passing review requires all tasks done. Later changes to needs, approach,
+   evidence, policy/config, or repository content require refreshed verification
+   and review before closure. `ow summary C-001` shows whether results are fresh.
+6. Present **need → outcome → evidence**, plus limitations. In default mode, ask
+   once for final human review/acceptance after available work is complete. Use a
+   numbered question and meaningful A/B/C choices with `(Recommended)` before the
+   preferred text. Only after actual acceptance run `ow close C-001 --by human`.
+7. In explicitly selected fast-forward mode, close with `--by fast-forward`
+   after the same checks, without an acceptance question. Attribute delegation
+   honestly; never claim a human reviewed or confirmed inferred needs.
+8. After closure, follow `ow-consolidate` and `ow clean C-001` to dispose the
+   change, tasks, and review once useful knowledge is preserved. Needs remain
+   current. Further implementation uses a new change with default mode unless
+   explicitly delegated again; closing one increment does not complete a need forever.

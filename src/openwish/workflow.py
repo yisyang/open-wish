@@ -1,33 +1,29 @@
-"""Revision-bound decisions and review belong to individual needs."""
+"""One disposable review per change, followed by explicit closure and cleanup."""
 
-from datetime import date, datetime, timezone
+from datetime import datetime, timezone
 import hashlib
 import json
 
 from .budgets import project_files
-from .model import (GATES, IMPLEMENTATION, connected_specs, direct_specs, epic_needs, need_scope,
-                    ready_tasks, select_needs, spec_needs)
-from .storage import (WishError, contained, document, initial_state, read_json,
-                      write_json, write_text)
-
-RUNTIME_FIELDS = {"implementation", "confirmed_at", "verified_at"}
+from .model import MODES, change_tasks, review_needs
+from .storage import WishError, check_text, contained, document, read_json, write_json, write_text
 
 
 def digest(value):
     return hashlib.sha256(json.dumps(value, sort_keys=True, ensure_ascii=False).encode()).hexdigest()
 
 
-def semantic(record):
-    return {"meta": {k: v for k, v in record["meta"].items() if k not in RUNTIME_FIELDS},
-            "body": record["body"]}
-
-
-def state_path(project, key):
-    return contained(project["root"], f"openwish/needs/{key}.state.json")
+def require_change(project, key, *, active=True):
+    if key not in project["changes"]:
+        raise WishError(f"Unknown change: {key}")
+    change = project["changes"][key]
+    if active and change["meta"]["status"] == "closed":
+        raise WishError(f"{key} is closed. Create a new change for further work, or clean this one.")
+    return change
 
 
 def review_path(project, key):
-    return contained(project["root"], f"openwish/needs/{key}.review.json")
+    return contained(project["root"], f"openwish/changes/{key}/review.json")
 
 
 def source_fingerprint(project):
@@ -41,230 +37,131 @@ def source_fingerprint(project):
     return digest(records)
 
 
-def scoped_tasks(project, keys):
-    epics = need_scope(project, keys)["epics"]
-    return [task for task in project["tasks"] if task["epic"] in epics]
-
-
-def fingerprint(project, key, gate):
-    state = project["needs"][key]["state"]
-    scope = need_scope(project, [key])
-    payload = {
-        "need": key, "revision": state["revision"], "mode": state["mode"],
+def review_fingerprint(project, key):
+    """Protect a pending result from stale checks, without stage authorization gates."""
+    change = project["changes"][key]
+    policy = contained(project["root"], "openwish/policy.md")
+    return digest({
+        "change": {"meta": {k: v for k, v in change["meta"].items()
+                             if k not in ("status", "closed_at", "closed_by")}, "body": change["body"]},
+        "needs": {nid: {"meta": project["needs"][nid]["meta"], "body": project["needs"][nid]["body"]}
+                  for nid in review_needs(project, key)},
+        "tasks": change_tasks(project, key),
         "config": project["config"],
-        "policy": contained(project["root"], "openwish/policy.md").read_text(encoding="utf-8"),
-        "intent": {nid: semantic(need) for nid, need in project["needs"].items()
-                   if need["meta"]["currency"] == "current" or nid == key},
-    }
-    if gate == "needs":
-        return digest(payload)
-    payload["no_work_reason"] = state["no_work_reason"]
-    payload["specs"] = {sid: {"contract": semantic(project["specs"][sid]),
-                              "design": semantic(project["specs"][sid]["design"])}
-                        for sid in connected_specs(project, [key])}
-    payload["knowledge"] = {path.relative_to(project["root"]).as_posix():
-                            contained(project["root"], path.relative_to(project["root"])).read_text(encoding="utf-8")
-                            for path in sorted((project["root"] / "openwish/knowledge").rglob("*")) if path.is_file()}
-    if gate == "align":
-        return digest(payload)
-    payload["epics"] = {eid: semantic(project["epics"][eid]) for eid in scope["epics"]}
-    payload["tasks"] = [{k: v for k, v in task.items() if k not in ("status", "evidence")}
-                        for task in scoped_tasks(project, [key])]
-    if gate == "implement":
-        return digest(payload)
-    payload["task_results"] = scoped_tasks(project, [key])
-    payload["source"] = source_fingerprint(project)
-    payload["review"] = read_json(review_path(project, key))
-    return digest(payload)
+        "policy": policy.read_text(encoding="utf-8") if policy.exists() else "",
+        "source": source_fingerprint(project),
+    })
 
 
-def gate_valid(project, key, gate):
-    state = project["needs"][key]["state"]
-    for stage in GATES[:GATES.index(gate) + 1]:
-        record = state["gates"].get(stage)
-        if not record or (record["by"] == "fast-forward" and state["mode"] != "fast-forward"):
-            return False
-        if record["fingerprint"] != fingerprint(project, key, stage):
-            return False
-    return True
+def change_update(change, **fields):
+    meta = {**change["meta"], **fields}
+    text = document(meta, change["body"])
+    check_text(change["path"], text)
+    return meta, text
 
 
-def require_gate(project, key, gate):
-    if not gate_valid(project, key, gate):
-        raise WishError(f"{key}: {gate} approval is missing or stale. Reconcile and record it again.")
+def save_change(change, **fields):
+    meta, text = change_update(change, **fields)
+    write_text(change["path"], text)
+    change["meta"] = meta
 
 
-def require_open(project, key):
-    if project["needs"][key]["meta"]["implementation"] == "approved":
-        raise WishError(f"{key} is approved. Reopen this need if more work is required.")
+def set_mode(project, key, mode):
+    change = require_change(project, key)
+    if mode not in MODES:
+        raise WishError(f"Unknown mode: {mode}")
+    if mode != change["meta"]["mode"]:
+        # The old review remains visible, but its fingerprint is now stale.
+        save_change(change, mode=mode, status="in-progress")
 
 
-def update_implementation(project, keys, state, *, confirmed=False, verified=None):
-    for key in keys:
-        record = project["needs"][key]
-        meta = record["meta"]
-        if state:
-            meta["implementation"] = state
-        if confirmed:
-            meta["confirmed_at"] = date.today().isoformat()
-        if verified:
-            meta["verified_at"] = verified[key]
-        write_text(record["path"], document(meta, record["body"]))
-    if state:
-        for sid in direct_specs(project, keys):
-            spec = project["specs"][sid]
-            linked = [project["needs"][nid]["meta"] for nid in spec_needs(project, sid)]
-            current = [need for need in linked if need["currency"] == "current"] or linked
-            spec["meta"]["implementation"] = min((need["implementation"] for need in current), key=IMPLEMENTATION.index)
-            write_text(spec["path"], document(spec["meta"], spec["body"]))
+def review_fields(summary, checks, needs, verdict):
+    if not isinstance(summary, str) or not summary.strip():
+        raise WishError("Provide a concise outcome summary.")
+    if not isinstance(checks, list) or not checks or not all(isinstance(c, str) and c.strip() for c in checks):
+        raise WishError("Provide direct verification results.")
+    if not isinstance(needs, list) or not all(isinstance(n, str) and n for n in needs):
+        raise WishError("Provide an array of reviewed need IDs.")
+    if verdict not in ("pass", "blocked"):
+        raise WishError("Review verdict must be pass or blocked.")
 
 
-def reopen_needs(project, keys, *, fast_forward=False):
-    keys = select_needs(project, keys)
-    for key in keys:
-        need = project["needs"][key]
-        need["state"] = initial_state(fast_forward=fast_forward, revision=need["state"]["revision"] + 1)
-        need["meta"]["currency"] = "current"
-        write_json(state_path(project, key), need["state"])
-    update_implementation(project, keys, "open")
-
-
-def set_mode(project, keys, mode):
-    keys = select_needs(project, keys)
-    for key in keys:
-        require_open(project, key)
-    for key in keys:
-        state = project["needs"][key]["state"]
-        if state["mode"] != mode:
-            state.update(mode=mode, gates={})
-            write_json(state_path(project, key), state)
-
-
-def review_needs(project, keys):
-    result = set(select_needs(project, keys))
-    for sid in connected_specs(project, keys):
-        result.update(nid for nid in spec_needs(project, sid)
-                      if project["needs"][nid]["meta"]["currency"] == "current")
-    return sorted(result)
-
-
-def authorized_tasks(project, keys):
-    ready, waiting = ready_tasks(project, keys)
-    authorized = []
-    for task in ready:
-        affected = set(epic_needs(project, task["epic"]))
-        required = set(keys) & affected
-        required |= {nid for nid in affected if project["needs"][nid]["meta"]["currency"] == "current"
-                     and project["needs"][nid]["meta"]["implementation"] != "approved"}
-        missing = [nid for nid in sorted(required) if not gate_valid(project, nid, "implement")]
+def record_review(project, key, summary, checks, needs, verdict="pass"):
+    change = require_change(project, key)
+    review_fields(summary, checks, needs, verdict)
+    if set(needs).difference(project["needs"]):
+        raise WishError("Review contains unknown need IDs.")
+    if verdict == "pass":
+        if any(task["status"] != "done" for task in change_tasks(project, key)):
+            raise WishError("Unfinished work or manual verification remains; continue ready work before review.")
+        missing = set(review_needs(project, key)).difference(needs)
         if missing:
-            waiting.append({**task, "blocker": "Missing or stale implementation authority: " + ", ".join(missing)})
-        else:
-            authorized.append(task)
-    return authorized, waiting
+            raise WishError("Assess these current/linked needs too: " + ", ".join(sorted(missing)))
+    record = {"verdict": verdict, "summary": summary, "checks": checks, "needs": sorted(set(needs)),
+              "fingerprint": review_fingerprint(project, key), "at": datetime.now(timezone.utc).isoformat()}
+    status = "review" if verdict == "pass" else "in-progress"
+    change_update(change, status=status)
+    write_json(review_path(project, key), record)
+    save_change(change, status=status)
 
 
-def validate_review(project, key):
+def validate_review(project, key, *, fresh=True):
     review = read_json(review_path(project, key))
-    tasks = scoped_tasks(project, [key])
-    if review.get("verdict") != "pass" or any(task["status"] != "done" for task in tasks):
+    review_fields(review.get("summary"), review.get("checks"), review.get("needs"), review.get("verdict"))
+    if review["verdict"] != "pass" or any(task["status"] != "done" for task in change_tasks(project, key)):
         raise WishError("Review is not passing, or unfinished work/manual verification remains.")
-    if review.get("implementation_fingerprint") != fingerprint(project, key, "implement"):
-        raise WishError("Review is stale: the approved plan changed.")
-    if review.get("source_fingerprint") != source_fingerprint(project):
-        raise WishError("Review is stale: repository files changed after the recorded checks.")
-    if review.get("task_results_fingerprint") != digest(tasks):
-        raise WishError("Review is stale: task results changed after the recorded checks.")
     try:
         datetime.fromisoformat(review.get("at", ""))
-    except (ValueError, TypeError) as error:
+    except (TypeError, ValueError) as error:
         raise WishError("Review needs a valid verification timestamp.") from error
-    checks, needs = review.get("checks"), review.get("needs")
-    if not isinstance(checks, list) or not checks or not all(isinstance(x, str) and x.strip() for x in checks):
-        raise WishError("Review needs direct verification results.")
-    if not isinstance(needs, list) or not all(isinstance(x, str) for x in needs):
-        raise WishError("Review needs an array of reviewed need IDs.")
-    missing = set(review_needs(project, [key])).difference(needs)
-    if missing:
-        raise WishError("Review is missing affected needs: " + ", ".join(sorted(missing)))
-    if not isinstance(review.get("summary"), str) or not review["summary"].strip():
-        raise WishError("Review needs a concise outcome summary.")
+    if fresh:
+        if set(review_needs(project, key)).difference(review["needs"]):
+            raise WishError("Review is missing current/linked needs.")
+        if review.get("fingerprint") != review_fingerprint(project, key):
+            raise WishError("Review is stale: needs, approach, tasks, policy, or repository files changed. "
+                            "Refresh verification and AI review before closing.")
     return review
 
 
-def record_gate(project, keys, gate, by, *, through=False):
-    """Record one decision, or one authorization covering all preparation stages.
-
-    Preflight the entire selection before writing any receipt. Gate fingerprints
-    describe the prepared artifacts, not how many questions a human answered.
-    """
-    keys = select_needs(project, keys)
-    if through and gate != "implement":
-        raise WishError("Combined authorization is only for needs, alignment, and implementation.")
-    stages = GATES[:3] if through else (gate,)
-    pending = {}
-    for key in keys:
-        require_open(project, key)
-        state = project["needs"][key]["state"]
-        if by == "fast-forward" and state["mode"] != "fast-forward":
-            raise WishError(f"{key}: fast-forward approval requires explicitly enabling that need's mode.")
-        gates = dict(state["gates"])
-        for stage in stages:
-            index = GATES.index(stage)
-            if index and GATES[index - 1] not in stages:
-                require_gate(project, key, GATES[index - 1])
-            scope = need_scope(project, [key])
-            if stage == "align" and not scope["specs"] and not state["no_work_reason"].strip():
-                raise WishError(f"{key}: alignment needs a linked spec design or a no_work_reason.")
-            if stage == "implement" and not state["no_work_reason"].strip():
-                if not scope["epics"] or any(not any(t["epic"] == eid for t in project["tasks"]) for eid in scope["epics"]):
-                    raise WishError(f"{key}: implementation needs epics with tasks, or a no_work_reason.")
-            if stage == "review":
-                validate_review(project, key)
-            gates = {name: record for name, record in gates.items() if GATES.index(name) < index}
-            gates[stage] = {"by": by, "at": datetime.now(timezone.utc).isoformat(),
-                           "fingerprint": fingerprint(project, key, stage)}
-        pending[key] = {**state, "gates": gates}
-    for key, state in pending.items():
-        write_json(state_path(project, key), state)
-        project["needs"][key]["state"] = state
-    if "needs" in stages and by == "human":
-        update_implementation(project, keys, None, confirmed=True)
-    if gate == "implement":
-        update_implementation(project, keys, "in-progress")
+def close_changes(project, keys, by):
+    if by not in ("human", "fast-forward"):
+        raise WishError("Closure must be attributed to human or explicit fast-forward.")
+    pending = []
+    for key in dict.fromkeys(keys):
+        change = require_change(project, key)
+        if by == "fast-forward" and change["meta"]["mode"] != "fast-forward":
+            raise WishError(f"{key}: fast-forward closure requires explicitly enabling this change's mode.")
+        validate_review(project, key)
+        meta, text = change_update(change, status="closed", closed_by=by,
+                                   closed_at=datetime.now(timezone.utc).isoformat())
+        pending.append((change, meta, text))
+    for change, meta, text in pending:
+        write_text(change["path"], text)
+        change["meta"] = meta
+    # Closing an increment does not establish that every linked need is fully
+    # satisfied. Needs and confirmation dates are deliberately untouched.
 
 
-def record_review(project, keys, summary, checks, needs, verdict):
-    keys = select_needs(project, keys)
-    if not summary.strip() or not checks or not all(check.strip() for check in checks):
-        raise WishError("Provide a summary and direct check results.")
-    if set(needs).difference(project["needs"]):
-        raise WishError("Review contains unknown need IDs.")
-    for key in keys:
-        require_open(project, key)
-        require_gate(project, key, "implement")
-    if verdict == "pass":
-        if any(task["status"] != "done" for task in scoped_tasks(project, keys)):
-            raise WishError("Unfinished work remains; continue ready work before final review.")
-        missing = set(review_needs(project, keys)).difference(needs)
-        if missing:
-            raise WishError("Review these affected needs too: " + ", ".join(sorted(missing)))
-    source = source_fingerprint(project)
-    for key in keys:
-        record = {"verdict": verdict, "summary": summary, "checks": checks, "needs": sorted(set(needs)),
-                  "implementation_fingerprint": fingerprint(project, key, "implement"),
-                  "source_fingerprint": source, "task_results_fingerprint": digest(scoped_tasks(project, [key])),
-                  "at": datetime.now(timezone.utc).isoformat()}
-        write_json(review_path(project, key), record)
-    if verdict == "pass":
-        update_implementation(project, keys, "review")
-
-
-def approve_needs(project, keys):
-    keys = select_needs(project, keys)
-    dates = {}
-    for key in keys:
-        require_open(project, key)
-        require_gate(project, key, "review")
-        dates[key] = validate_review(project, key)["at"][:10]
-    update_implementation(project, keys, "approved", verified=dates)
+def clean_changes(project, keys):
+    """Preflight the full selection and remove only known files of closed changes."""
+    pending = []
+    for key in dict.fromkeys(keys):
+        change = require_change(project, key, active=False)
+        if change["meta"]["status"] != "closed":
+            raise WishError(f"{key}: only closed changes can be disposed; review and close it first.")
+        validate_review(project, key, fresh=False)
+        directory = contained(project["root"], f"openwish/changes/{key}")
+        paths = []
+        for path in sorted(directory.iterdir()):
+            path = contained(project["root"], path.relative_to(project["root"]))
+            if path.name not in ("change.md", "tasks.json", "review.json") or not path.is_file():
+                raise WishError(f"Unknown file preserved: {path}. Move useful knowledge before cleanup.")
+            paths.append(path)
+        pending.append((key, directory, paths))
+    for key, directory, paths in pending:
+        for path in paths:
+            path.unlink()
+        directory.rmdir()
+        del project["changes"][key]
+        project["tasks"] = [t for t in project["tasks"] if t["change"] != key]
+    return [key for key, _, _ in pending]

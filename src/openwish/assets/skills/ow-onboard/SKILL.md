@@ -1,34 +1,32 @@
 ---
 name: ow-onboard
-description: Adopt OpenWish only when the user requests onboarding a product or monorepo into NDD. Map a small set of durable outcomes, distinguishing inference from confirmed intent. Never onboard merely to handle a code change.
+description: Adopt OpenWish when explicitly requested for a product or monorepo. Infer a compact set of durable needs from code and product context, distinguishing inference from confirmed intent. Never onboard merely to handle a code change.
 ---
 
 # Onboard
 
-Initialize with `ow init --harness HARNESS` if needed. Read `openwish/policy.md`
-and `openwish/artifacts.md`. Default to one product/domain in this repository.
+Initialize with `ow init --harness HARNESS` if adoption was requested. Read
+`openwish/policy.md` and `openwish/artifacts.md` for the current format. Default to
+one product/domain per repository.
 
-1. Inspect product descriptions, interfaces, important user journeys, code, tests,
-   and deployment configuration deliberately; avoid loading the whole repository.
-2. Propose a short set of candidate needs with actors, outcomes, gains/pains,
-   acceptance, and uncertainties. Label inference. Do not persist asks or turn
-   onboarding into a change record. Existing behavior does not establish intent.
-   Group by independently valuable user outcomes, not commands, modules, phases,
-   or platforms. Compare actor/outcome/acceptance before adding each candidate.
-3. Reuse established need IDs and confirmed definitions on repeated onboarding.
-   Reopen needs requiring work; preserve approved needs whose outcomes remain met.
-4. In default mode, confirm the candidate needs with numbered questions and two
-   or three A/B/C choices. Prefix the preferred text with `(Recommended)` and
-   explain effects briefly. One batch confirmation is enough for inferred intent;
-   do not require a separate confirmation for each candidate or implementation detail.
-   Explicit fast-forward skips confirmation and leaves inferred intent unconfirmed.
-5. Map contracts and technical designs to needs; put authoritative need references
-   in spec designs. Use open for unverified implementation, in-progress for active
-   work, review for verified candidates, and approved only after accepted results.
-6. Capture verified environment profiles and secret references in durable knowledge.
-   Identify gaps/manual observations without inventing tasks to rewrite working code.
-7. Continue through the structured workflow only if implementation or verification
-   was requested; onboarding alone does not authorize product changes. Reuse the
-   confirmed intent without another prompt. Set `no_work_reason` when only
-   verification remains. Explain results by need and spec, with the next current
-   action or required decision. Keep every artifact and global intent bounded.
+1. Inspect product descriptions, interfaces, user journeys, code, tests, and
+   deployment configuration deliberately. Use repository structure as the design
+   map rather than generating a parallel collection of specs and designs.
+2. Propose a small set of needs with actors, independently valuable outcomes,
+   observable acceptance, genuine constraints, and uncertainties. Existing code
+   reveals behavior, not confirmed intent or verified delivery. Label inference.
+3. Reuse established IDs and confirmed definitions on repeated onboarding. Compare
+   actor/outcome/acceptance, not modules, commands, platforms, or shared code.
+   Keep needs free of execution state and internal implementation plans.
+4. In default mode, confirm inferred intent in one useful batch decision, using
+   numbered A/B/C choices with `(Recommended)` before preferred text. Actual human
+   confirmation may set `confirmed_at`. Explicit fast-forward leaves inference
+   unconfirmed and skips that confirmation; it does not invent verification.
+5. Preserve useful operational knowledge in ordinary repo docs and secrets as
+   references, never values. Identify gaps and manual observations without
+   inventing work to rewrite an already satisfactory implementation.
+6. Create disposable changes/tasks only when substantive implementation or
+   verification was requested. Onboarding alone does not authorize product edits.
+   Verification-only changes may have no implementation tasks but still require
+   actual checks and review. New changes default to human review unless explicitly
+   delegated. Explain the needs and observed outcomes, plus the next useful action.

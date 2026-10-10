@@ -57,7 +57,33 @@ def smoke(artifact, version):
         run(ow, "init", str(project), "--harness", *HARNESSES)
         if snapshot(project) != before:
             raise RuntimeError("Reinitializing at the same version modified project files.")
-    print(f"PASS {artifact.name}: uv install, both CLI aliases, all harnesses/assets, validation, and no-op reinitialization")
+
+        # Exercise the installed implementation rather than importing from source.
+        def command(*args):
+            return run(ow, "--root", str(project), *args)
+
+        command("new", "need", "N-001", "--title", "Local reconciliation")
+        need = project / "openwish/needs/N-001.md"
+        text = need.read_text(encoding="utf-8")
+        text = text.replace('actor = ""', 'actor = "Operations staff"')
+        text = text.replace('outcome = ""', 'outcome = "Reconcile records locally"')
+        text = text.replace('acceptance = []', 'acceptance = ["Records stay on device"]')
+        need.write_text(text, encoding="utf-8")
+        command("new", "change", "C-001", "--title", "Verify local behavior", "--need", "N-001", "--fast-forward")
+        command("check")
+        ready = json.loads(command("ready", "N-001", "--json"))
+        if ready != {"ready": [], "waiting": []}:
+            raise RuntimeError(f"Verification-only change invented work: {ready}")
+        command("record-review", "C-001", "--summary", "Distribution workflow smoke scenario",
+                "--check", "Synthetic fixture: artifact validation passed; no product behavior claimed",
+                "--covered-need", "N-001")
+        command("close", "C-001", "--by", "fast-forward")
+        command("clean", "C-001")
+        status = json.loads(command("status", "--json"))
+        if status["changes"] or need.read_text(encoding="utf-8") != text:
+            raise RuntimeError("Change disposal failed to retain durable intent unchanged.")
+        command("check")
+    print(f"PASS {artifact.name}: uv install, aliases, harness assets, no-op init, and change lifecycle/disposal")
 
 
 def main():

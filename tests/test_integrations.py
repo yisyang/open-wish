@@ -1,4 +1,3 @@
-from pathlib import Path
 from unittest.mock import Mock, patch
 
 from openwish import __version__
@@ -49,16 +48,6 @@ class IntegrationTests(ProjectCase):
         self.assertEqual(report["upgraded"], 28)
         for relative, text in integration_files(["opencode", "claude"], __version__).items():
             self.assertEqual((self.root / relative).read_text(), text)
-
-    def test_known_unversioned_v02_skills_are_upgraded(self):
-        path = self.root / ".opencode/skills/ow-propose/SKILL.md"
-        path.parent.mkdir(parents=True)
-        # Keep real legacy bytes: current assets can evolve independently.
-        legacy = (Path(__file__).parent / "fixtures/ow-propose-v0.2.md").read_text(encoding="utf-8")
-        path.write_text(legacy, encoding="utf-8")
-        report = install_skills(self.root, "opencode")
-        self.assertEqual(report["upgraded"], 1)
-        self.assertEqual(declared_version(path.read_text()), __version__)
 
     def test_downgrade_requires_explicit_confirmation_before_any_writes(self):
         self.seed_version("opencode", "1.0.0")
@@ -125,7 +114,7 @@ class IntegrationTests(ProjectCase):
 
     def test_reinitializing_preserves_all_knowledge_and_custom_config(self):
         self.fixture()
-        path = self.root / "openwish/knowledge/environment.md"
+        path = self.root / "openwish/policy.md"
         path.write_text("# Custom environment\n", encoding="utf-8")
         before = {key: value for key, value in self.snapshot().items()
                   if key.startswith("openwish/") and key != "openwish/installation.json"}

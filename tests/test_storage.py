@@ -73,11 +73,32 @@ class StorageTests(ProjectCase):
         meta, _ = read_document(self.root / "openwish/needs/N-001.md")
         self.assertEqual(meta["title"], "Original")
 
-    def test_scaffolding_never_creates_an_ask_or_change_record(self):
+    def test_needs_have_no_execution_sidecars_and_changes_require_known_needs(self):
         new_artifact(self.root, "need", "N-001", "An outcome")
         meta, _ = read_document(self.root / "openwish/needs/N-001.md")
         self.assertNotIn("ask", meta)
-        self.assertTrue((self.root / "openwish/needs/N-001.state.json").is_file())
+        self.assertFalse((self.root / "openwish/needs/N-001.state.json").exists())
         self.assertFalse((self.root / "openwish/changes").exists())
-        with self.assertRaisesRegex(WishError, "Unknown artifact kind"):
-            new_artifact(self.root, "change", "some-request", "A request")
+        with self.assertRaisesRegex(WishError, "nonempty"):
+            new_artifact(self.root, "change", "C-001", "An improvement")
+        with self.assertRaisesRegex(WishError, "Unknown need"):
+            new_artifact(self.root, "change", "C-001", "An improvement", needs=["N-999"])
+        self.assertFalse((self.root / "openwish/changes").exists())
+        new_artifact(self.root, "change", "C-001", "An improvement", needs=["N-001"])
+        self.assertTrue((self.root / "openwish/changes/C-001/tasks.json").is_file())
+
+    def test_change_scaffolding_preserves_preexisting_unknown_files(self):
+        self.fixture()
+        directory = self.root / "openwish/changes/C-002"
+        directory.mkdir()
+        (directory / "notes.md").write_text("Keep me", encoding="utf-8")
+        with self.assertRaisesRegex(WishError, "preserved"):
+            self.add_change()
+        self.assertFalse((directory / "change.md").exists())
+
+    def test_missing_config_does_not_reinitialize_existing_knowledge(self):
+        self.fixture()
+        (self.root / "openwish/config.json").unlink()
+        with self.assertRaisesRegex(WishError, "preserved"):
+            initialize(self.root)
+        self.assertFalse((self.root / "openwish/config.json").exists())

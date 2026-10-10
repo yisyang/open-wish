@@ -25,30 +25,29 @@ For an installed executable, use a virtual environment and `python -m pip instal
 - Keep source below 500 nonblank lines when practical; 1000 is the hard maximum
   without a justified low-complexity exception. All Markdown/OW artifacts stay
   below 500 lines. Data-file exceptions never bypass OW knowledge limits.
-- Test behaviors that protect intent, user data, ordering, approval freshness,
-  or review correctness. Avoid tests that merely reproduce implementation text.
+- Test behaviors that protect intent, user data, local dependencies, safe disposal,
+  or review freshness. Avoid tests that merely reproduce implementation text.
 - Run the full suite after substantive changes; it should remain well under
   five minutes. Choose further checks based on actual unresolved risk.
 - Keep canonical skills in `src/openwish/assets/skills/`. Test generated adapters
   without copying divergent workflow logic into them.
 - Keep workflow overhead proportional to the work. Test routine changes without
   creating OW records to manage the contribution. See `evals/` for skill scenarios.
-- In the product, distinguish execution authority from regression coverage and
-  human decisions from fast-forward delegation or an agent's own assessment.
+- In the product, distinguish conversation authority from task readiness and
+  human result acceptance from change-scoped fast-forward delegation.
 
 ## Compatibility
 
-Artifact schema version is stored in `openwish/config.json`. Reject unsupported
-versions clearly. Preserve unknown project files. Integration updates overwrite
+Before v1.0.0, prioritize a simple current design over migrations or legacy
+compatibility. Support only the current artifact schema, stored in
+`openwish/config.json`, and reject unsupported versions clearly.
+Preserve unknown project files. Integration updates overwrite
 older versions, preserve same-version edits, and require confirmation to downgrade.
 Keep package and `__version__` values in sync; bump the version when bundled skills
-or adapters change so existing installations can receive the update. Preserve
-known legacy template hashes when adding compatibility for unversioned releases.
-Make schema migrations explicit before introducing incompatible formats.
+or adapters change so installations can receive the update.
 
 Publish from the source checkout only after tests and a wheel-install smoke test
-pass. Check package data contains policy, artifact reference, legacy template
-hashes, and all eight skills.
+pass. Check package data contains policy, artifact reference, and all eight skills.
 
 ## Releases
 

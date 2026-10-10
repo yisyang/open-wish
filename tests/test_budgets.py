@@ -10,7 +10,7 @@ class BudgetTests(ProjectCase):
         write_json(path, {**read_json(path), **kwargs})
 
     def test_artifact_499_lines_passes_but_500_fails(self):
-        path = self.root / "openwish/knowledge/large.md"
+        path = self.root / "openwish/large.md"
         path.write_text("fact\n" * 499, encoding="utf-8")
         errors, warnings = check_budgets(self.project())
         self.assertEqual(errors, [])
@@ -42,7 +42,7 @@ class BudgetTests(ProjectCase):
         errors, warnings = check_budgets(self.project())
         self.assertFalse(errors)
         self.assertIn("exception", "\n".join(warnings))
-        (self.root / "openwish/knowledge/routes.json").write_text("{}\n" * 500, encoding="utf-8")
+        (self.root / "openwish/routes.json").write_text("{}\n" * 500, encoding="utf-8")
         self.assertIn("under 500", "\n".join(check_budgets(self.project())[0]))
 
     def test_data_files_are_exempt_but_source_cannot_claim_to_be_data(self):

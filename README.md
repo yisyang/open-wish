@@ -2,22 +2,29 @@
 
 **Need-Driven Development for humans and coding agents.**
 
-Humans ask. AI identifies needs, aligns solutions, plans, implements, and reviews.
-Humans review the results. Current needs remain binding after implementation,
-so the next feature does not quietly undo what the previous one accomplished.
-**OW operates on needs.** Asks stay in conversation; existing needs are revised
-or reopened, and distinct outcomes become new needs. There are no change records.
-Small, clear changes within existing intent go straight to implementation and
-verification. OW's structured workflow is for work that benefits from it.
+Humans ask. AI identifies needs, aligns design and engineering, implements, and
+reviews. Humans review the results.
 
-OpenWish takes inspiration from [Spec Kit](https://github.com/github/spec-kit)
-and [OpenSpec](https://github.com/Fission-AI/OpenSpec), with durable needs and
-bounded agent context at the center of the workflow.
+**Durable intent. Disposable plans. Code and tests carry the solution.**
+
+```text
+Needs ← referenced by → Changes → contain Tasks
+durable                 disposable on completion and review
+```
+
+Needs preserve actors, desired outcomes, observable acceptance, and genuine
+constraints. Changes hold temporary design and coordination; tasks organize their
+execution. After review, useful knowledge lives in needs and the repository, and
+the change can disappear. Current needs remain binding after delivery so the next
+feature does not quietly undo what the previous one accomplished.
+
+OW takes inspiration from [Spec Kit](https://github.com/github/spec-kit) and
+[OpenSpec](https://github.com/Fission-AI/OpenSpec), centering durable needs and
+bounded agent context. OpenWish **0.5.0** uses **artifact schema 3**.
 
 ## Get started
 
 Requires Python 3.11+. The runtime has **no third-party dependencies**.
-Install the CLI from PyPI with [uv](https://docs.astral.sh/uv/):
 
 ```sh
 uv tool install openwish
@@ -25,241 +32,217 @@ cd /path/to/your/product
 ow init
 ```
 
-To install from a source checkout, use `uv tool install .`.
-The package name is **openwish**. The installed commands are **ow** (the canonical
-short form used here) and its exact alias **openwish**. If your shell cannot find
-them, run `uv tool update-shell` and open a new terminal.
+For a source checkout, use `uv tool install .`. Both `ow` and `openwish` invoke
+the same CLI; `ow` is canonical in examples. Run `uv tool update-shell` if needed.
 
-`ow init` opens a terminal multi-select for **OpenCode, Claude Code, Codex, and
-generic Agent Skills**. Move with the arrow keys, toggle with Space, and press
-Enter to initialize all selected harnesses. Press A to toggle all or Q/Esc to
-cancel. Installed harnesses are preselected on subsequent runs. Basic or narrow
-terminals use a numbered multi-select instead.
-
-To select harnesses directly, including in scripts:
+`ow init` offers a terminal multi-select for **OpenCode, Claude Code, Codex, and
+generic Agent Skills**. Arrow keys move, Space toggles, Enter applies, A toggles
+all, and Q/Esc cancels. Existing harnesses are preselected. Basic terminals use
+numbered selection. Automation uses explicit selections:
 
 ```sh
 ow init --harness opencode claude codex
 # Equivalent: ow init --harness opencode --harness claude --harness codex
 ```
 
-Without an interactive terminal, specify `--harness`. Codex and generic Agent
-Skills share `.agents/skills`, so selecting both installs one copy. One
-product/domain in one repository, including a monorepo, is the default.
+Codex and generic Agent Skills share `.agents/skills`; selecting both installs
+one copy. One product/domain per repository, including a monorepo, is the default.
 
-### Updating installed skills
-
-Upgrade the CLI, then run `ow init` again in your project:
-
-```sh
-uv tool upgrade openwish
-ow init
-```
-
-Initialization installs missing integrations and compares each selected file's
-installed version with the CLI's bundled version:
-
-| Installed version | Behavior |
-| --- | --- |
-| Older | Overwrite with the bundled version, including any local edits |
-| Same | Leave the file untouched, including local edits and timestamps |
-| Newer | Ask before downgrading; keeping the newer files is the default |
-
-Downgrades require explicit terminal confirmation; scripts fail before writing
-if confirmation is needed. Declining keeps newer files while other selected
-installs/upgrades proceed. Deselection does not uninstall existing integrations.
-
-Version stamps and `openwish/installation.json` track installed skills and command
-adapters. Exact unversioned v0.2 templates are recognized and upgraded; unknown
-unversioned files are preserved with an actionable error. Existing needs, specs,
-project configuration, policy, and knowledge are preserved when reinitializing.
-For the proportional workflow introduced in 0.4, see [upgrade guidance](docs/migration.md#upgrading-from-02-or-03).
-
-In **OpenCode**, start with:
+In OpenCode or Claude Code:
 
 ```text
 /onboard
 /ow-propose Let operations reconcile this month's transactions without copying rows.
 ```
 
-Or explicitly choose the uninterrupted workflow:
+Or explicitly delegate final acceptance for this work:
 
 ```text
 /fast-forward Let operations reconcile this month's transactions without copying rows.
 ```
 
-`/fast-forward` skips **all OW confirmations and approvals**, including final
-acceptance, for the selected needs' current implementation revisions. It still performs alignment, planning, implementation,
-verification, and AI review. It asks only for genuinely blocking clarification,
-access, or manual observations, after continuing any independent ready work.
+Fast-forward performs the same design, implementation, verification, and AI review
+without approval prompts. It still requires genuine blocking clarification, access,
+or manual observations, and does not apply to unrelated future changes.
 
 ## The workflow
 
-OW is opt-in. Installing its skills does not require using them for every edit,
-and instructions to work without OW are respected.
+OW is opt-in. Installing skills does not require using them for every edit.
 
-**Routine changes:** inspect → implement → verify → report. A localized,
-reversible fix, exact command alias, documentation update, or small refactor within
-clear existing intent needs no new need, epic, gate receipt, or acceptance prompt.
-Update an existing spec when its contract would otherwise become inaccurate.
+**Routine work:** inspect → implement → verify → report. Clear, localized,
+reversible work within existing intent needs no change file, new need, or final
+acceptance ceremony.
 
-**Structured work:** use when outcomes or constraints change, work requires
-substantial coordination, or consequential product/compatibility/data decisions
-remain. Preparation is continuous:
+**Substantive work:** prepare needs, design, and tasks together in a bounded change:
 
 ```text
-Ask → Propose → Align → Plan → Implement ↔ Review → Accepted results
-       └── prepare together ──┘                    │
-         one authorization                final acceptance
-         if still needed                  in default mode
+Ask → Identify needs → Align design and engineering → Plan
+                                                       ↓
+                        Human reviews ← Implement ↔ AI review
+                              ↓
+                     Close and dispose change/tasks
 ```
 
-A clear instruction to implement already supplies authority for that scope.
-Otherwise, ask once about the combined outcome, approach, and implementation.
-Clarify genuine ambiguity early. Plan-only requests stop at the plan. Technical
-repairs or artifact relinking within authorized scope do not require renewed
-permission. Implementation continues through ready work and review/remediation;
-structured default work requests final acceptance once available work is finished.
+A clear instruction to implement already authorizes its scope. Clarify material
+uncertainty and consequential choices; respect plan-only requests. Technical plan
+repairs within that scope require no repeated permission. Execution continues
+through verification and remediation, including independent tasks around manual
+blockers. Readiness reports prerequisites, not permission.
+
+Default structured work retains final human review. Explicit fast-forward
+delegates acceptance for the selected change. There are no stage gates or
+authorization receipts.
 
 | Skill | Responsibility |
 | --- | --- |
-| `ow-propose` | Distill an ask into new or revised needs; clarify material intent |
-| `ow-align` | Reconcile all current needs and affected implementations; update specs/designs |
-| `ow-plan` | Inspect code and plan minimal epics and correctly ordered task groups |
-| `ow-implement` | Execute ready work until completion or an actual human blocker |
-| `ow-review` | Check needs and regressions, remediate, and present compact results |
-| `ow-consolidate` | Promote durable knowledge and remove completed execution detail |
-| `ow-fast-forward` | Run the full workflow without confirmation/approval prompts |
-| `ow-onboard` | Infer candidate needs and map an existing codebase for confirmation |
+| `ow-propose` | Reuse or revise durable needs; scope useful changes |
+| `ow-align` | Inspect code/tests and align working design with all current needs |
+| `ow-plan` | Prepare lightweight tasks within a disposable change |
+| `ow-implement` | Execute, verify, and continue independent work around blockers |
+| `ow-review` | Review outcomes and regressions; present results and close accepted work |
+| `ow-consolidate` | Preserve useful knowledge and dispose closed changes/tasks |
+| `ow-fast-forward` | Run through review and disposal under explicit delegation |
+| `ow-onboard` | Infer candidate needs from product context and the repository |
 
 ### Harness invocation
 
 | Harness | Initialization | Invocation |
 | --- | --- | --- |
-| OpenCode V2 | `ow init --harness opencode` | `/ow-propose`, `/fast-forward`, `/onboard` |
+| OpenCode | `ow init --harness opencode` | `/ow-propose`, `/fast-forward`, `/onboard` |
 | Claude Code | `ow init --harness claude` | `/ow-propose`, `/fast-forward`, `/onboard` |
 | Codex | `ow init --harness codex` | `$ow-propose`, `$ow-fast-forward`, `$ow-onboard` |
-| Other Agent Skills hosts | `ow init --harness generic` | Host-specific skill selection |
+| Other Agent Skills hosts | `ow init --harness generic` | Host-specific selection |
 
-Add or update integrations later with `ow init`, or `ow skills --harness NAME ...`.
-Both commands use the same version-aware installer. The same workflow is used
-everywhere; command adapters do not contain divergent process logic.
+Canonical skills are shared across hosts; adapters contain no separate process logic.
 
-## Needs are first-class
+## What persists
 
-Each need records its actor, desired outcome, observable
-acceptance, human confirmation date, and latest verified implementation date.
+| Information | Home and lifetime |
+| --- | --- |
+| Actors, outcomes, acceptance, constraints | Durable `openwish/needs/N-001.md` |
+| Implemented behavior | Source code |
+| Executable contracts and regression checks | Tests, types, schemas |
+| Responsibilities and dependencies | Repository layout and interfaces |
+| Useful rationale and operational knowledge | Nearby comments or ordinary repository docs |
+| Working purpose, approach, verification plan | Disposable `openwish/changes/C-001/change.md` |
+| Task progress and latest review | Disposable files inside the same change |
 
-Two independent state dimensions avoid confusing delivery with relevance:
+Needs are the only mandatory durable OW product knowledge. Tool configuration,
+policy, and integration bookkeeping support the workflow. No persistent spec/epic
+hierarchy, need execution sidecars, or OW archive is required.
 
-- **Currency:** `current`, `retired`.
-- **Implementation:** `open`, `in-progress`, `review`, `approved`.
+Need currency is `current` or `retired`. Needs have no execution status: several
+changes can improve the same outcome, and one change can serve several needs.
+Closing a change neither retires a need nor proves its complete satisfaction.
+`confirmed_at` records actual human confirmation; inferred intent stays unconfirmed.
 
-A `current/approved` need still constrains every future design. Fast-forward
-acceptance records its origin; it is not mislabeled as human confirmation.
-An inferred need starts unconfirmed, and existing code is not assumed verified.
+Keep implementation detail out of needs. For example, another export format
+usually improves an existing reconciliation outcome; auditor accountability may
+justify a separate need. Compare actor, outcome, and acceptance before adding one.
 
-Spec designs contain authoritative many-to-many references to needs. Specs describe
-entities, UI modules, or cross-cutting capabilities; epics/tasks organize bounded
-implementation. Containment and prerequisite relationships are distinct.
-An epic can select a subset of its specs' needs as execution scope. Other linked
-needs remain regression constraints without requiring unrelated authorization.
-Compare actor, outcome, and acceptance before adding needs: a new command,
-mechanism, platform, or task is usually a spec detail for an existing outcome.
-
-`ow reopen N-001` resumes work under the same ID and resets authority to default.
-Only an explicit new fast-forward request enables it for the reopened revision.
-
-### Human-facing communication
-
-Ask only questions whose answers can materially change the work; do not restate
-clear instructions as confirmation questions. Clarifications use numbered questions and two or three
-lettered choices, with `(Recommended)` before the preferred choice text:
-
-```text
-1. N-001 already provides local monthly trends. Uploading raw records would
-conflict with its local-only constraint. What should I do?
-  A. (Recommended) Keep N-001 as-is. No new need or product modification.
-  B. Add third-party upload and keep trends local. Revise N-001's allowed-domain exception.
-  C. Add third-party upload and computation with local viewing. Revise N-001's constraint.
-```
-
-Final updates lead with need → spec → outcome, followed by verification and any
-blocker. `ow summary N-001` provides that context; reporting only task IDs is insufficient.
-
-## Small artifacts, complete intent
-
-- OW-managed knowledge and planning: **under 500 lines per artifact**.
-- All current needs together: **under 500 lines**, default **6,000 estimated tokens**.
-- Source: **under 500 LOC soft target**, **under 1000 LOC hard maximum**.
-- Data formats are exempt from source limits. Low-complexity source exceptions
-  are exact paths with a rationale; they do not exempt OW knowledge artifacts.
-- Routine verification should finish within **five minutes**. Necessary slower
-  checks are explicit, and missing verification never counts as success.
-- Latest summaries replace earlier ones. Git holds history; there is no required
-  append-only journal, growing evidence archive, or duplicate needs ledger.
-
-`ow context` derives the needs register and related spec statuses from authoritative
-records. `ow context N-001` also lists affected contracts and work to retrieve.
-Agents read detailed designs only for the work at hand.
+Prefer functional cores, explicit effects, cohesive modules, and clear dependency
+direction. Code explains what is implemented; needs supply the independent intent
+against which code and tests are reviewed.
 
 ## CLI
 
-The CLI handles deterministic operations. The coding harness supplies reasoning,
-code execution, and semantic review; OW does not make model-provider API calls.
-
-```sh
-ow status                           # needs, linked specs, implementation progress
-ow context                          # all current needs, including approved ones
-ow context N-001 N-002              # plus affected spec/epic IDs
-ow check                            # schema, links, cycles, ordering, size budgets
-ow ready N-001 N-002                # ready work with spec/need context and blockers
-ow summary N-001                    # outcomes, specs, work, and verification
-```
-
-Artifact scaffolding and decision recording are available to agents and humans:
+The CLI handles deterministic storage, validation, scheduling, and cleanup. The
+coding harness supplies reasoning and code execution; OW makes no model API calls.
 
 ```sh
 ow new need N-001 --title "Monthly reconciliation"
-ow new spec S-001 --title "Transaction export"
-ow new epic E-001 --title "Export implementation"
-# Fill templates and references before authorization.
-ow authorize N-001 --by human        # one decision covers needs, design, and plan
-ow reopen N-001                     # reuse a need when further work is necessary
+# Fill actor, outcome, acceptance, and genuine constraints in the need.
+ow new change C-001 --title "Local export" --need N-001
+# Fill the working approach and tasks; no separate spec or epic.
+ow context C-001
+ow ready C-001 --json
+ow check
 ```
 
-Structured gates are revision-bound: changed need intent invalidates downstream authority,
-while updating task progress does not. Reviews are bound to the plan and repository
-content. The CLI records human decisions supplied by the harness; it does not
-authenticate a conversation or establish semantic correctness on its own.
+Tasks have concrete acceptance, local status, and optional prerequisites within
+their change. List order guides execution; dependencies determine readiness.
+Completed task evidence stays until the parent change closes.
 
-`--root PATH` works before the subcommand; otherwise the project root is discovered
-from the current directory and its parents. `check`, `status`, and `ready` support
-`--json`. See `ow --help` and the installed `openwish/artifacts.md` for all commands.
+After implementation and actual verification:
+
+```sh
+ow record-review C-001 --summary "Monthly reconciliation no longer requires copying rows" \
+  --check "Representative export/import: passed" --covered-need N-001
+ow summary C-001
+# After human review and acceptance:
+ow close C-001 --by human
+# Once useful knowledge is preserved in needs, code, tests, or ordinary docs:
+ow clean C-001
+```
+
+Include all `review_needs` from `ow context C-001` with repeated `--covered-need`
+flags. Assess every current need; run relevant checks and explain unaffected
+constraints. A passing review requires completed tasks. Changes to its inputs
+make it stale and require refreshed verification before closure. The CLI cannot
+establish semantic correctness or authenticate a human conversation.
+
+Explicit delegation uses `--fast-forward` when creating the change, or
+`ow mode fast-forward C-001`; close with `--by fast-forward`. It preserves evidence
+requirements and does not manufacture human confirmation.
+
+`ow clean` removes only known files of closed changes after preflighting the full
+selection. Unknown files are preserved. Git can hold history; future maintenance
+should work from needs and the repository without resurrecting old plans.
+
+```sh
+ow status --json                   # needs, changes, task progress, review freshness
+ow context                        # all current intent, without truncation
+ow context N-001                   # plus related changes
+ow ready                          # ready tasks and blockers across active changes
+ow summary N-001                   # desired outcome and retained work/results
+ow check --json                    # schema, references, dependencies, size budgets
+```
+
+`--root PATH` works before the subcommand; otherwise roots are discovered from the
+current directory and parents. See `ow --help` and the installed `openwish/artifacts.md`.
+
+## Small artifacts, complete intent
+
+- OW artifacts: **under 500 lines each**.
+- All current needs together: **under 500 lines**, default **6,000 estimated tokens**.
+- Source: **under 500 nonblank LOC soft target**, **under 1000 LOC hard maximum**.
+- Exact-path data/low-complexity exceptions never relax OW artifact limits.
+- Routine verification should finish within **five minutes**; identify necessary
+  slower checks and report missing observations honestly.
+- Replace latest summaries and dispose completed work rather than growing journals.
+
+## Updating integrations
+
+For schema-3 projects:
+
+```sh
+uv tool upgrade openwish
+ow init
+```
+
+Before v1.0.0, OW supports only its current schema and keeps breaking changes
+simple, without migration tooling or legacy compatibility.
+
+Installation upgrades older integration files, preserves equal versions and local
+edits, and asks before downgrades. Noninteractive downgrades fail before writes.
+Version stamps and `openwish/installation.json` track ownership. Unversioned files
+without an installation record are preserved with an error.
+Reinitialization preserves project-owned configuration, policy, needs, and work.
+Deselected harnesses are not uninstalled.
 
 ## Design and contribution
 
-- [Framework design](docs/design.md)
 - [Product requirements](docs/product.md)
-- [Artifact format](src/openwish/assets/artifacts.md)
-- [Workflow policy](src/openwish/assets/policy.md)
-- [Contributing and verification](CONTRIBUTING.md)
-- [Publishing releases to PyPI](docs/releases.md)
-- [Changelog and release notes](CHANGELOG.md)
-
-Run directly from a source checkout without installing:
+- [Framework design](docs/design.md)
+- [Artifact reference](src/openwish/assets/artifacts.md) and [workflow policy](src/openwish/assets/policy.md)
+- [Changelog](CHANGELOG.md) and [release procedure](docs/releases.md)
+- [Contributing](CONTRIBUTING.md)
 
 ```sh
 PYTHONPATH=src python3 -m openwish --help
 PYTHONPATH=src python3 -m unittest discover -s tests -v
 ```
 
-This repository is developed directly; shipped skills live only in
-`src/openwish/assets/skills/`. Tests exercise OW in temporary projects rather
-than installing an active OW workflow into this checkout.
-
-OpenWish `0.4.0` uses artifact schema 2. The v0.1
-prototype's change records are superseded; see [migration guidance](docs/migration.md).
-Integration files follow current
-host documentation; deterministic checks do not substitute for hands-on harness
-workflow validation. Licensed under [MIT](LICENSE).
+This repository is developed directly. Shipped skills live in
+`src/openwish/assets/skills/`; tests exercise OW in temporary projects. Structural
+checks complement semantic skill evaluation and hands-on harness use. MIT licensed.
