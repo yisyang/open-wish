@@ -1,7 +1,8 @@
+from pathlib import Path
 from unittest.mock import Mock, patch
 
 from openwish import __version__
-from openwish.integrations import (HARNESSES, asset, installed_harnesses, install_skills,
+from openwish.integrations import (HARNESSES, installed_harnesses, install_skills,
                                    integration_files, load_manifest)
 from openwish.scaffold import initialize
 from openwish.storage import WishError
@@ -52,8 +53,8 @@ class IntegrationTests(ProjectCase):
     def test_known_unversioned_v02_skills_are_upgraded(self):
         path = self.root / ".opencode/skills/ow-propose/SKILL.md"
         path.parent.mkdir(parents=True)
-        # The unversioned v0.2 template used the lowercase recommendation label.
-        legacy = asset("skills/ow-propose/SKILL.md").replace("(Recommended)", "(recommended)")
+        # Keep real legacy bytes: current assets can evolve independently.
+        legacy = (Path(__file__).parent / "fixtures/ow-propose-v0.2.md").read_text(encoding="utf-8")
         path.write_text(legacy, encoding="utf-8")
         report = install_skills(self.root, "opencode")
         self.assertEqual(report["upgraded"], 1)

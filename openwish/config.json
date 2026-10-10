@@ -1,7 +1,0 @@
-{
-  "version": 2,
-  "product": "open-wish",
-  "needs_token_budget": 6000,
-  "epic_limit": 8,
-  "code_exceptions": []
-}

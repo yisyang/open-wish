@@ -1,6 +1,6 @@
 ---
 name: ow-consolidate
-description: Compact OpenWish epics and knowledge while preserving durable needs, current spec designs, and acceptance conditions. Use after implementation or when context budgets approach their limits.
+description: Compact artifacts in an explicitly active OW workflow or on request, preserving durable outcomes and acceptance. Honor OW opt-outs; ordinary repository cleanup does not require this skill.
 ---
 
 # Consolidate
@@ -19,6 +19,9 @@ inspect reported files directly before requesting full context.
    or retiring a need changes intent: use Propose under the selected workflow.
    Clarifications use numbered questions, two or three A/B/C choices, and
    `(Recommended)` before the preferred choice text, with concise useful effects.
+   Diagnose duplicates by actor/outcome/acceptance, not by shared spec links.
+   An implementation-specific need may belong as a scenario in an existing spec;
+   preserve its observable requirement and resolve references when consolidating.
 5. Preserve the only historical copy in Git before removing completed epics.
    Resolve live references first. Keep one current state and latest review per
    need; do not accumulate asks, execution containers, histories, or archive indexes.

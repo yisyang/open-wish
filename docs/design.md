@@ -40,13 +40,29 @@ pretend a structural validation pass establishes satisfaction of user needs.
 
 ## Authority and modes
 
-Four revision-bound gates represent different human decisions: needs, alignment,
-implementation, and final review. Default mode requires explicit decisions.
-`fast-forward` records bypass authority for selected need revisions and skips all four
-prompts while retaining all four phases and their quality checks.
+OW is opt-in. Routine, clear, localized changes within existing intent use direct
+implementation and verification without lifecycle/gate records. Skills choose this
+path by scope and consequences, not merely line count. Existing contracts are
+updated where needed, but a command alias does not become a new durable need.
+
+Structured work retains four revision-bound receipts: needs, alignment,
+implementation, and final review. Receipts are freshness checks, not a mandate
+for four separate questions. Propose, Align, and Plan prepare one coherent scope
+without requiring earlier receipts. `ow authorize` preflights all three preparation
+stages and the full selected need set before recording them together. An actual
+instruction to implement can authorize its scope; otherwise request one combined
+decision. Plan-only requests stop before authorization. Lower-level `ow gate`
+commands support deliberate staged collaboration.
+
+Structured default work still requests final human acceptance. `fast-forward`
+records bypass authority for selected need revisions and skips authorization and
+acceptance prompts while retaining quality checks. Technical repairs/relinking
+within the same authorized scope can refresh stale receipts using the existing
+conversation authority. Changed outcomes, constraints, or consequential decisions
+require renewed authority. Fingerprints detect edits, not semantic materiality.
 
 The CLI records `by=human` or `by=fast-forward`, timestamp, and input fingerprint.
-Skills record human authority only after the corresponding explicit decision.
+Skills record human authority only from the corresponding instruction or decision.
 Only human need confirmation advances `confirmed_at`; accepted implementation
 verification advances `verified_at`. No process infers confirmation from file reads.
 
@@ -61,8 +77,8 @@ Spec/epic/task associations are derived rather than copied into state.
 
 ## Communication
 
-Propose asks only about the current need interpretation, without previewing
-later approval gates. Clarifications and confirmations use numbered questions,
+Ask only material questions; do not restate clear instructions for confirmation.
+Clarifications and necessary combined decisions use numbered questions,
 two or three A/B/C choices, and `(Recommended)` before the preferred choice text.
 Concise effect clauses explain consequences for needs and the product.
 
@@ -101,7 +117,16 @@ Task dependencies form a DAG with explicit global task IDs and unique increasing
 reuse ordinal pairs. The lowest authorized ready task executes first.
 A blocked manual task does not prevent an independent later task from executing.
 
-Shared work requires implementation authority for all linked current open needs.
+An epic's optional `needs` selects execution outcomes from its linked spec designs.
+Validation requires a nonempty, duplicate-free subset of known covered need IDs.
+Omission retains legacy all-linked-needs execution semantics. Work selection,
+task ordinal checks, plan fingerprints, and completion use this execution scope.
+Changing it invalidates implementation authority. Shared execution requires
+authority for all selected current open needs; shared spec coverage alone does not.
+Review still covers all connected current needs, including unselected constraints.
+Every spec linked by a selected epic, plus its prerequisites and consumers, is
+included in review coverage and semantic fingerprints even when that spec does
+not directly reference a selected execution need.
 Missing authority is a task-level blocker, so other authorized work still proceeds.
 A spec becomes approved only when all linked current needs are approved.
 
@@ -173,9 +198,9 @@ Pseudo-terminal tests exercise real key input, multiple selections, cancellation
 terminal restoration, and both downgrade decisions. Installer tests check equal
 version no-write behavior, upgrades, legacy detection, and multi-harness preflight.
 
-Semantic skill scenarios cover current-stage-only clarification, preserving an
-existing need, numbered choices, need/spec final updates, fast-forward approval,
-and continuing around human blockers. These
+Semantic skill scenarios cover lightweight changes, need reuse, combined authority,
+plan-only requests, OW opt-outs, preserving current constraints, fast-forward
+acceptance, and continuing around human blockers. These
 complement deterministic tests; they cannot prove every model will follow a skill.
 
 ## Reference influences

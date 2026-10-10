@@ -5,7 +5,7 @@ import hashlib
 import json
 
 from .budgets import project_files
-from .model import (GATES, IMPLEMENTATION, connected_specs, direct_specs, need_scope,
+from .model import (GATES, IMPLEMENTATION, connected_specs, direct_specs, epic_needs, need_scope,
                     ready_tasks, select_needs, spec_needs)
 from .storage import (WishError, contained, document, initial_state, read_json,
                       write_json, write_text)
@@ -152,7 +152,7 @@ def authorized_tasks(project, keys):
     ready, waiting = ready_tasks(project, keys)
     authorized = []
     for task in ready:
-        affected = {need["id"] for spec in task["lineage"] for need in spec["needs"]}
+        affected = set(epic_needs(project, task["epic"]))
         required = set(keys) & affected
         required |= {nid for nid in affected if project["needs"][nid]["meta"]["currency"] == "current"
                      and project["needs"][nid]["meta"]["implementation"] != "approved"}
@@ -192,32 +192,43 @@ def validate_review(project, key):
     return review
 
 
-def record_gate(project, keys, gate, by):
+def record_gate(project, keys, gate, by, *, through=False):
+    """Record one decision, or one authorization covering all preparation stages.
+
+    Preflight the entire selection before writing any receipt. Gate fingerprints
+    describe the prepared artifacts, not how many questions a human answered.
+    """
     keys = select_needs(project, keys)
-    index = GATES.index(gate)
+    if through and gate != "implement":
+        raise WishError("Combined authorization is only for needs, alignment, and implementation.")
+    stages = GATES[:3] if through else (gate,)
     pending = {}
     for key in keys:
         require_open(project, key)
         state = project["needs"][key]["state"]
         if by == "fast-forward" and state["mode"] != "fast-forward":
             raise WishError(f"{key}: fast-forward approval requires explicitly enabling that need's mode.")
-        if index:
-            require_gate(project, key, GATES[index - 1])
-        scope = need_scope(project, [key])
-        if gate == "align" and not scope["specs"] and not state["no_work_reason"].strip():
-            raise WishError(f"{key}: alignment needs a linked spec design or a no_work_reason.")
-        if gate == "implement" and not state["no_work_reason"].strip():
-            if not scope["epics"] or any(not any(t["epic"] == eid for t in project["tasks"]) for eid in scope["epics"]):
-                raise WishError(f"{key}: implementation needs epics with tasks, or a no_work_reason.")
-        if gate == "review":
-            validate_review(project, key)
-        gates = {name: record for name, record in state["gates"].items() if GATES.index(name) < index}
-        gates[gate] = {"by": by, "at": datetime.now(timezone.utc).isoformat(), "fingerprint": fingerprint(project, key, gate)}
+        gates = dict(state["gates"])
+        for stage in stages:
+            index = GATES.index(stage)
+            if index and GATES[index - 1] not in stages:
+                require_gate(project, key, GATES[index - 1])
+            scope = need_scope(project, [key])
+            if stage == "align" and not scope["specs"] and not state["no_work_reason"].strip():
+                raise WishError(f"{key}: alignment needs a linked spec design or a no_work_reason.")
+            if stage == "implement" and not state["no_work_reason"].strip():
+                if not scope["epics"] or any(not any(t["epic"] == eid for t in project["tasks"]) for eid in scope["epics"]):
+                    raise WishError(f"{key}: implementation needs epics with tasks, or a no_work_reason.")
+            if stage == "review":
+                validate_review(project, key)
+            gates = {name: record for name, record in gates.items() if GATES.index(name) < index}
+            gates[stage] = {"by": by, "at": datetime.now(timezone.utc).isoformat(),
+                           "fingerprint": fingerprint(project, key, stage)}
         pending[key] = {**state, "gates": gates}
     for key, state in pending.items():
         write_json(state_path(project, key), state)
         project["needs"][key]["state"] = state
-    if gate == "needs" and by == "human":
+    if "needs" in stages and by == "human":
         update_implementation(project, keys, None, confirmed=True)
     if gate == "implement":
         update_implementation(project, keys, "in-progress")

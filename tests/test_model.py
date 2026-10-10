@@ -1,4 +1,4 @@
-from openwish.model import connected_specs, needs_context, ready_tasks
+from openwish.model import connected_specs, need_scope, needs_context, ready_tasks
 from openwish.scaffold import new_artifact
 from openwish.validation import validate
 
@@ -25,6 +25,21 @@ class ModelTests(ProjectCase):
         self.edit_document("specs/S-002/design.md", needs=["N-001"])
         project = self.project()
         self.assertEqual(connected_specs(project, ["N-001"]), ["S-001", "S-002"])
+
+    def test_scoped_epic_includes_other_specs_and_their_neighbors_in_impact(self):
+        self.fixture()
+        new_artifact(self.root, "need", "N-002", "Privacy")
+        self.edit_document("needs/N-002.md", actor="Staff", outcome="Keep data local",
+                           acceptance=["No uploads"])
+        for sid in ("S-002", "S-003"):
+            new_artifact(self.root, "spec", sid, "Privacy contract")
+            self.edit_document(f"specs/{sid}/design.md", needs=["N-002"])
+        self.edit_document("specs/S-003/spec.md", depends_on=["S-002"])
+        self.edit_document("epics/E-001/design.md", specs=["S-001", "S-002"], needs=["N-001"])
+        project = self.project()
+        self.assertEqual(validate(project), [])
+        self.assertEqual(connected_specs(project, ["N-001"]), ["S-001", "S-002", "S-003"])
+        self.assertEqual(need_scope(project, ["N-002"])["epics"], [])
 
     def test_later_independent_work_runs_while_manual_task_waits(self):
         self.fixture()
@@ -87,3 +102,31 @@ class ModelTests(ProjectCase):
         self.fixture()
         self.edit_document("needs/N-001.md", ask="Do not persist this conversation input")
         self.assertIn("not an ask field", "\n".join(validate(self.project())))
+
+    def test_execution_scope_is_a_nonempty_subset_of_spec_needs(self):
+        self.fixture()
+        new_artifact(self.root, "need", "N-002", "Privacy")
+        self.edit_document("needs/N-002.md", actor="Staff", outcome="Keep data local",
+                           acceptance=["No uploads"])
+        for value in ([], None, "N-001", ["N-001", "N-001"], ["N-999"], ["N-002"]):
+            with self.subTest(needs=value):
+                project = self.project()
+                project["epics"]["E-001"]["meta"]["needs"] = value
+                self.assertTrue(validate(project))
+        self.edit_document("epics/E-001/design.md", needs=["N-001"])
+        self.assertEqual(validate(self.project()), [])
+
+    def test_independent_increments_can_share_a_spec_without_sharing_work(self):
+        self.fixture()
+        new_artifact(self.root, "need", "N-002", "Privacy")
+        self.edit_document("needs/N-002.md", actor="Staff", outcome="Keep data local",
+                           acceptance=["No uploads"])
+        self.edit_document("specs/S-001/design.md", needs=["N-001", "N-002"])
+        self.edit_document("epics/E-001/design.md", needs=["N-001"])
+        new_artifact(self.root, "epic", "E-002", "Privacy work")
+        self.edit_document("epics/E-002/design.md", specs=["S-001"], needs=["N-002"])
+        from openwish.storage import write_json
+        write_json(self.root / "openwish/epics/E-002/tasks.json", {"tasks": [self.task("E-002/T-001")]})
+        self.assertEqual(validate(self.project()), [])
+        self.assertEqual(need_scope(self.project(), ["N-001"])["epics"], ["E-001"])
+        self.assertEqual(need_scope(self.project(), ["N-002"])["epics"], ["E-002"])

@@ -33,8 +33,10 @@ def smoke(artifact, version):
 
         run("uv", "tool", "install", "--python", sys.executable, str(artifact))
         ow = str(root / "bin" / ("ow.exe" if os.name == "nt" else "ow"))
-        if run(ow, "--version").strip() != f"OpenWish {version}":
-            raise RuntimeError("The installed CLI version does not match the release.")
+        openwish = str(root / "bin" / ("openwish.exe" if os.name == "nt" else "openwish"))
+        for executable in (ow, openwish):
+            if run(executable, "--version").strip() != f"OpenWish {version}":
+                raise RuntimeError(f"The installed {Path(executable).name} version does not match the release.")
         project = root / "product"
         run(ow, "init", str(project), "--harness", *HARNESSES)
         result = json.loads(run(ow, "--root", str(project), "check", "--json"))
@@ -55,7 +57,7 @@ def smoke(artifact, version):
         run(ow, "init", str(project), "--harness", *HARNESSES)
         if snapshot(project) != before:
             raise RuntimeError("Reinitializing at the same version modified project files.")
-    print(f"PASS {artifact.name}: uv install, CLI version, all harnesses/assets, validation, and no-op reinitialization")
+    print(f"PASS {artifact.name}: uv install, both CLI aliases, all harnesses/assets, validation, and no-op reinitialization")
 
 
 def main():

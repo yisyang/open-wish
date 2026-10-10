@@ -1,6 +1,6 @@
 ---
 name: ow-implement
-description: Implement authorized OpenWish needs in dependency order, continuing independent ready work until completion or genuine human blockers. Use to implement or resume NDD work.
+description: Execute or resume an authorized structured OW plan in dependency order. Continue independent work until completion or genuine blockers. Honor OW opt-outs; routine coding needs no structured plan.
 ---
 
 # Implement
@@ -8,6 +8,8 @@ description: Implement authorized OpenWish needs in dependency order, continuing
 Read `openwish/policy.md`, `ow context N-001 ...`, and `ow ready N-001 ...`.
 Authority and progress belong to needs. Follow each need's explicit mode and
 revision; missing authority blocks only affected work, not other authorized tasks.
+Routine changes identified by Propose implement and verify directly without gate
+receipts. Do not expand them into a structured workflow merely to use this skill.
 
 1. Select the lowest ready `(group, order)` task. Load its epic and spec designs,
    including the spec's need references, relevant code, and acceptance conditions.
@@ -20,6 +22,10 @@ revision; missing authority blocks only affected work, not other authorized task
    Task prerequisites, not merely earlier ordinals, determine blocking.
 5. Repair defects within approved intent. Material need/design revisions return
    to the relevant earlier phase; refresh stale authority under the selected mode.
+   A technical repair or relinking within the same authorized scope can refresh
+   receipts using existing conversation authority; it needs no new permission.
+   Shared spec references are regression coverage. Use the epic's execution scope
+   rather than splitting specs or reopening unrelated needs to satisfy `ready`.
 6. When only genuine human blockers remain, explain the affected need and spec,
    then ask numbered questions with two or three A/B/C choices. Prefix the
    preferred choice text with `(Recommended)` and describe useful effects briefly.

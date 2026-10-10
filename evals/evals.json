@@ -42,6 +42,88 @@
         "Uses a numbered human question with two or three lettered choices and '(Recommended)' before preferred text.",
         "Does not invent manual completion or approve the need prematurely."
       ]
+    },
+    {
+      "id": 4,
+      "name": "routine-alias-with-shared-spec",
+      "skills": ["ow-propose", "ow-plan", "ow-review"],
+      "prompt": "Dry-run only; do not edit files or execute commands. A Python CLI ships an ow executable. N-006 is adoption with low friction, and shared S-003 covers CLI/harness integration with N-001, N-002, N-004, N-005, and N-006. The first four needs are unconfirmed baseline review candidates. No active epic exists. The user says: Can we make it available through both ow and openwish? An exact alias can use the same entry point and tests; there is no compatibility conflict. Give the next action sequence and any question you would ask. Do not claim implementation or verification occurred.",
+      "expected_output": "Use the routine path: add the shared entry point, update existing docs/spec if needed, verify both commands, report. No need confirmation, design approval, authorization, or final acceptance prompt; no need/epic creation, reopen cycle, or artificial child spec.",
+      "files": [],
+      "assertions": [
+        "Chooses direct implementation and meaningful verification without OW gate receipts or approval questions.",
+        "Reuses existing intent and avoids new/reopened needs, epics, or a spec split to isolate authority.",
+        "Does not seek authority for every need linked to the shared spec.",
+        "Does not claim checks were run or update lifecycle dates in the dry run."
+      ]
+    },
+    {
+      "id": 5,
+      "name": "shared-spec-technical-plan-repair",
+      "skills": ["ow-align", "ow-plan", "ow-implement"],
+      "prompt": "Dry-run only; no commands or edits. An active structured plan implements N-001, monthly reconciliation. The human already approved its scope, design, and implementation. S-001's design references N-001 and N-002, keeping data local. N-002 is current/open but this increment does not implement or alter it. E-001 accidentally omitted execution scope; the scheduler therefore reports missing N-002 authority. No product behavior, acceptance, or technical approach needs changing. Explain how to repair the plan and resume, including any human question or review coverage.",
+      "expected_output": "Set E-001 needs to N-001, retaining S-001 and its N-001/N-002 references. Refresh implementation receipts under existing human authority and continue. Keep N-002 in regression review without authorizing or approving its implementation. Do not split specs, create needs, or request renewed permission.",
+      "files": [],
+      "assertions": [
+        "Uses the epic's execution needs subset instead of splitting a spec or broadening authorization.",
+        "Refreshes changed plan receipts using existing authority without reauthorization questions.",
+        "Retains N-002 as regression coverage and does not mark its implementation approved.",
+        "Keeps active structured work in its plan rather than bypassing authority via the routine path."
+      ]
+    },
+    {
+      "id": 6,
+      "name": "mechanism-versus-independent-outcome",
+      "skills": ["ow-propose", "ow-onboard"],
+      "prompt": "Dry-run classification only; no commands or files. Current N-001 lets finance staff reconcile monthly records without manual copying; CSV export already satisfies its acceptance. Current N-002 keeps raw financial records local. First request: add an XLSX export to serve the same reconciliation workflow, preserving local processing. Second request: give auditors tamper-evident proof of who approved each reconciliation; neither current need covers accountability. Compare each against existing needs and identify which artifacts or intent changes are justified. Do not ask for authorization to perform this classification.",
+      "expected_output": "Treat XLSX as a mechanism/spec scenario supporting N-001, not a new need just for the format. A separately valuable accountability outcome for auditors justifies a new need with observable acceptance, preserving N-002. Do not merge distinct outcomes simply because they share a spec.",
+      "files": [],
+      "assertions": [
+        "Reuses N-001 for the XLSX mechanism rather than creating a format-specific need.",
+        "Recognizes independently valuable auditor accountability as a candidate new durable outcome.",
+        "Preserves N-002 and compares actor/outcome/acceptance rather than merely titles or shared spec links.",
+        "Performs only classification and does not claim implementation authorization."
+      ]
+    },
+    {
+      "id": 7,
+      "name": "plan-only-is-not-authority",
+      "skills": ["ow-propose", "ow-align", "ow-plan"],
+      "prompt": "Dry-run only. The user explicitly asks: Use OW to plan local XLSX reconciliation support under existing N-001. Only prepare the plan; do not implement yet. The work spans several modules and needs a structured plan. Existing constraints and requirements are clear. What actions and questions come next? Do not execute anything.",
+      "expected_output": "Prepare aligned specs and a scoped plan, reuse N-001, and stop with that plan. No mandatory need/design prompts during preparation, and no authorize call or implementation inferred from a planning request.",
+      "files": [],
+      "assertions": [
+        "Prepares the plan without mandatory separate need/design approval questions.",
+        "Does not record implementation authorization or execute implementation.",
+        "Reuses the existing need rather than inventing a plan-tracking need."
+      ]
+    },
+    {
+      "id": 8,
+      "name": "explicit-ow-opt-out",
+      "skills": ["ow-propose", "ow-onboard"],
+      "prompt": "Dry-run only. This checkout contains OpenWish's source and shipped skill templates. The user says: Do not use OpenWish for this change. Fix the typo in the README directly and verify it. What is your next action sequence? No edits or commands in this dry run.",
+      "expected_output": "Respect the opt-out, inspect and correct the text directly and verify the diff. Do not initialize OW, load an OW lifecycle, create needs/epics, invoke gates, or ask permission.",
+      "files": [],
+      "assertions": [
+        "Treats source/templates as product assets rather than instructions to self-adopt OW.",
+        "Proposes a direct fix and diff verification without OW records or commands.",
+        "Does not ask for permission or final acceptance."
+      ]
+    },
+    {
+      "id": 9,
+      "name": "fast-forward-routine-change",
+      "skills": ["ow-fast-forward", "ow-propose"],
+      "prompt": "Dry-run only; do not edit files or execute commands. The user explicitly requests: /fast-forward Add openwish as an exact alias of the existing ow CLI. Both commands can use the same entry point; no behavior or compatibility changes are needed. Existing N-001 covers easy CLI adoption, is current/approved, and has no active epic. Describe the action sequence and where it ends. Do not claim any work or checks already happened.",
+      "expected_output": "Use the routine path even under explicit fast-forward: inspect, implement the exact alias, update existing contract/docs as needed, verify both entry points, report, and stop. Do not reopen the need, set fast-forward mode on it, create epics, record authorization/review/approval, or ask for acceptance.",
+      "files": [],
+      "assertions": [
+        "Chooses routine implementation and meaningful alias verification, then stops after reporting.",
+        "Does not create or reopen needs, create epics, set need mode, or record gates/reviews/approval.",
+        "Does not ask for permission or final acceptance.",
+        "Does not claim implementation, verification, or lifecycle updates occurred in the dry run."
+      ]
     }
   ]
 }

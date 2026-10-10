@@ -5,6 +5,10 @@ need. Humans express asks in conversation; OW creates, revises, or reopens needs
 Do not persist asks, ask summaries, request logs, or separate change records.
 Default scope is one product/domain in one repository, including a monorepo.
 
+OW is opt-in. An installed skill, source tree, or mention of OpenWish is not a
+request to run its workflow. Respect instructions to work directly without OW.
+Do not initialize a repository merely because a software change was requested.
+
 ## Needs and current truth
 
 - Capture actor, desired outcome, pain reduced/gain delivered, and observable
@@ -16,8 +20,14 @@ Default scope is one product/domain in one repository, including a monorepo.
   when interpreting history. Never silently retire or weaken a need.
 - Match existing intent before creating a need. If the outcome is already met,
   explain that; do not invent work or create a duplicate need to represent an ask.
-- Reopen an existing need when its outcome requires further implementation.
+- For structured work, reopen an existing need when it requires further implementation.
   Preserve its ID. Create a new need only for a distinct durable outcome.
+- Compare actor, outcome, and acceptance, not titles or implementation surfaces.
+  An alias, another platform, a bug fix, or a different mechanism usually belongs
+  to an existing outcome. Put solution details in specs, not new needs. Before
+  creating a need, explain what independently valuable outcome existing needs
+  cannot cover without conflating different goals. Shared spec links alone are
+  not evidence of duplicate needs.
 - `confirmed_at` records human confirmation of intent; `verified_at` records the
   latest accepted implementation check. Reading a file does not advance either.
 - Existing behavior is evidence of what exists, not proof of what humans want.
@@ -25,9 +35,10 @@ Default scope is one product/domain in one repository, including a monorepo.
 
 ## Human communication
 
-Show only the decision relevant to the current stage. In Propose, confirm the
-need interpretation without announcing later approval gates or asking about Plan.
-Keep process instructions internal unless the human asks how the workflow works.
+Ask only questions whose answers can change the work. An unambiguous instruction
+is already authority for its stated scope; do not ask the human to repeat it as
+a confirmation. Keep process instructions internal unless asked. Respect requests
+to discuss, propose, or plan only; those do not authorize implementation.
 
 For every clarification or confirmation:
 
@@ -50,7 +61,7 @@ Example when N-001 already provides local monthly trends:
 >   C. Add third-party upload and trend computation with local viewing. Revise
 >   N-001's local-only constraint for approved third-party domains.
 
-Final updates lead with **need → spec → outcome**, followed by direct verification
+Structured final updates lead with **need → spec → outcome**, followed by direct verification
 and any remaining blocker. Read the spec design's need references; do not report
 only epic/task IDs or assume that humans remember why a task matters. For example:
 
@@ -59,19 +70,42 @@ only epic/task IDs or assume that humans remember why a task matters. For exampl
 
 ## Workflow and authority
 
-1. Propose: confirm the need interpretation; automatically enter Align afterward.
-2. Align: reconcile current needs, code, contracts, and designs; get design approval.
-3. Plan: inspect code, update epics/tasks, and obtain implementation authority.
-4. Implement: execute ready work, verify, repair, and continue independent work.
-5. Review: AI reviews outcomes; humans explicitly accept final results by default.
+Scale the process to the decision, not the number of phases:
 
-Record decisions against need IDs, e.g. `ow gate needs N-001 N-002 --by human`,
-only after the human actually made that decision for the current definitions.
-The CLI records conversation authority; it does not authenticate the speaker.
+- **Routine path (default for small, clear changes):** inspect relevant current
+  needs and code, implement, verify, and report. Examples include an exact CLI
+  alias, a focused bug fix, documentation, and small refactors that preserve intent.
+  Use this path when the change is localized, reversible, and within clear intent,
+  with no unresolved product trade-off or consequential compatibility, data,
+  security, or migration decision. No new needs, revision/reopen, epics, gate
+  receipts, or final acceptance prompt are required. Update an existing spec only
+  when its contract/design would otherwise become inaccurate. Do not advance need
+  lifecycle or confirmation/verification dates as a side effect.
+  Work already tracked in an active structured plan stays in that plan; do not
+  relabel it routine to bypass missing authority or unfinished manual checks.
+- **Structured path:** use for a new durable outcome, changed constraints,
+  consequential trade-offs, or substantial/coordinated work. Propose, Align, and
+  Plan prepare one coherent scope. Clarify material ambiguity early; otherwise
+  proceed through preparation without stage-by-stage confirmation. Obtain at most
+  one combined scope/design/implementation decision if the conversation has not
+  already authorized that scope. A clear instruction to implement can supply this
+  authority when the prepared solution stays within it; a speculative suggestion
+  or plan-only request cannot. Record it with `ow authorize N-001 ... --by human`.
+  Implement, verify, and remediate continuously. Ask once for final acceptance
+  after available work is complete, unless explicitly fast-forwarded.
+
+Preparation phases are quality checks, not separate permission boundaries.
+The lower-level `ow gate` commands remain for deliberate staged collaboration.
+Record only actual human authority, not an agent's own assessment. Technical
+plan repairs and artifact relinking within the authorized scope need refreshed
+receipts, not renewed human permission. Material changes to outcomes, constraints,
+or consequential trade-offs need a new decision. The CLI detects changed inputs;
+the agent judges whether the existing conversation authority still covers them.
 
 An explicit `/fast-forward` enables that mode on the selected needs' current
-implementation revisions. Follow all phases and checks, recording gates with
-`--by fast-forward` without approval or confirmation prompts, including final
+implementation revisions. For structured work, follow all phases and checks,
+using `ow authorize ... --by fast-forward` and final `ow gate review ... --by
+fast-forward` without approval or confirmation prompts, including final
 acceptance. Never invent human confirmation dates, test results, or manual actions.
 Reopening a need resets authority to default unless fast-forward is explicitly
 requested again. Mode applies to need revisions, not subsequent unrelated asks.
@@ -89,8 +123,11 @@ a reason to stop other authorized work. Do not ask to run AI review.
 - Spec **designs** own the authoritative need references. Specs may address API
   entities, UI modules, or cross-cutting capabilities. Need/spec links are many-to-many.
   Keep `parent` containment separate from prerequisite `depends_on` links.
-- Epics reference specs; tasks belong to epics. Work is derived through these
-  links from selected needs, without a separate persistent work container.
+- Epics reference specs; tasks belong to epics. An epic's optional `needs` array
+  selects the outcomes this increment implements from its spec designs' need
+  references. Other linked needs remain regression constraints, not additional
+  authorization requirements. Legacy epics without this field select all linked
+  needs. Do not split specs or invent needs just to bypass an authority blocker.
 - Tasks have explicit prerequisites and increasing `(group, order)` pairs across
   the work for a need. No lower ordinal depends on a higher one. Execute the
   earliest authorized ready task; independent later work can pass a manual blocker.

@@ -1,8 +1,6 @@
 ---
 name: ow-propose
 description: Interpret a software ask against existing OpenWish needs, creating or reopening needs only when necessary. Use to clarify desired outcomes or revise NDD intent.
-metadata:
-  openwish-version: "0.3.1"
 ---
 
 # Propose
@@ -20,7 +18,7 @@ spec designs/code to distinguish a new need from an already-satisfied outcome.
    its stable ID. Create a new need only for a distinct durable outcome. Present
    material conflicts and affected adjacent needs before modifying constraints.
 4. Ask numbered questions with two or three choices, `A.`, `B.`, `C.`. Put
-   `(Recommended)` before the preferred choice text. Add concise effects on needs
+   `(recommended)` before the preferred choice text. Add concise effects on needs
    and implementation when useful. Recommendations depend on existing intent and
    evidence; do not automatically ignore a request for an unmet outcome.
 5. In default mode, confirm only the proposed need interpretation and acceptance.

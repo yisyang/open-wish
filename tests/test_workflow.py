@@ -7,7 +7,41 @@ from tests.support import ProjectCase
 
 
 class WorkflowTests(ProjectCase):
-    def test_default_requires_sequential_explicit_decisions_for_a_need(self):
+    def test_combined_authorization_keeps_final_acceptance_separate(self):
+        self.fixture()
+        record_gate(self.project(), ["N-001"], "implement", "human", through=True)
+        need = self.project()["needs"]["N-001"]
+        self.assertEqual(set(need["state"]["gates"]), {"needs", "align", "implement"})
+        self.assertTrue(need["meta"]["confirmed_at"])
+        self.assertTrue(gate_valid(self.project(), "N-001", "implement"))
+        self.finish_tasks()
+        self.review()
+        with self.assertRaisesRegex(WishError, "missing or stale"):
+            approve_needs(self.project(), ["N-001"])
+
+    def test_combined_authorization_preflights_plan_and_entire_selection(self):
+        self.fixture()
+        self.add_second_need()
+        before = self.project()["needs"]["N-001"]["state"]
+        with self.assertRaisesRegex(WishError, "linked spec"):
+            record_gate(self.project(), ["N-001", "N-002"], "implement", "human", through=True)
+        self.assertEqual(self.project()["needs"]["N-001"]["state"], before)
+        self.assertEqual(self.project()["needs"]["N-001"]["meta"]["confirmed_at"], "")
+        self.write_tasks([])
+        with self.assertRaisesRegex(WishError, "epics with tasks"):
+            record_gate(self.project(), ["N-001"], "implement", "human", through=True)
+        self.assertEqual(self.project()["needs"]["N-001"]["state"], before)
+
+    def test_combined_fast_forward_requires_mode_and_preserves_provenance(self):
+        self.fixture()
+        with self.assertRaisesRegex(WishError, "explicitly enabling"):
+            record_gate(self.project(), ["N-001"], "implement", "fast-forward", through=True)
+        set_mode(self.project(), ["N-001"], "fast-forward")
+        record_gate(self.project(), ["N-001"], "implement", "fast-forward", through=True)
+        self.assertEqual(self.project()["needs"]["N-001"]["meta"]["confirmed_at"], "")
+        self.assertTrue(gate_valid(self.project(), "N-001", "implement"))
+
+    def test_individual_gates_require_sequential_decisions_for_a_need(self):
         self.fixture()
         with self.assertRaisesRegex(WishError, "missing or stale"):
             record_gate(self.project(), ["N-001"], "implement", "human")
@@ -152,6 +186,61 @@ class WorkflowTests(ProjectCase):
         for stage in ("needs", "align", "implement"):
             record_gate(self.project(), ["N-002"], stage, "human")
         self.assertEqual(len(authorized_tasks(self.project(), ["N-001", "N-002"])[0]), 1)
+
+    def test_scoped_epic_does_not_authorize_or_block_on_regression_needs(self):
+        self.fixture()
+        self.add_second_need()
+        self.edit_document("specs/S-001/design.md", needs=["N-001", "N-002"])
+        self.edit_document("epics/E-001/design.md", needs=["N-001"])
+        record_gate(self.project(), ["N-001"], "implement", "human", through=True)
+        ready, waiting = authorized_tasks(self.project(), ["N-001", "N-002"])
+        self.assertEqual([task["id"] for task in ready], ["E-001/T-001"])
+        self.assertFalse(waiting)
+        self.assertEqual(authorized_tasks(self.project(), ["N-002"]), ([], []))
+        self.assertEqual(self.project()["needs"]["N-002"]["state"]["gates"], {})
+        self.assertEqual([need["id"] for need in ready[0]["lineage"][0]["needs"]], ["N-001", "N-002"])
+        self.finish_tasks()
+        with self.assertRaisesRegex(WishError, "affected needs.*N-002"):
+            self.review()
+        record_review(self.project(), ["N-001"], "Export remains private", ["Local export passed"],
+                      ["N-001", "N-002"], "pass")
+        record_gate(self.project(), ["N-001"], "review", "human")
+        approve_needs(self.project(), ["N-001"])
+        self.assertEqual(self.project()["needs"]["N-002"]["meta"]["implementation"], "open")
+        self.assertEqual(self.project()["specs"]["S-001"]["meta"]["implementation"], "open")
+
+    def test_changing_execution_scope_invalidates_authority(self):
+        self.fixture()
+        self.add_second_need()
+        self.edit_document("specs/S-001/design.md", needs=["N-001", "N-002"])
+        self.edit_document("epics/E-001/design.md", needs=["N-001"])
+        self.approve()
+        self.edit_document("epics/E-001/design.md", needs=["N-001", "N-002"])
+        self.assertFalse(gate_valid(self.project(), "N-001", "implement"))
+        ready, waiting = authorized_tasks(self.project(), ["N-001"])
+        self.assertFalse(ready)
+        self.assertIn("N-002", waiting[0]["blocker"])
+
+    def test_scoped_epic_retains_all_linked_specs_for_review_and_freshness(self):
+        self.fixture()
+        self.add_second_need()
+        new_artifact(self.root, "spec", "S-002", "Privacy")
+        self.edit_document("specs/S-002/design.md", needs=["N-002"])
+        self.edit_document("epics/E-001/design.md", specs=["S-001", "S-002"], needs=["N-001"])
+        record_gate(self.project(), ["N-001"], "implement", "human", through=True)
+        ready, waiting = authorized_tasks(self.project(), ["N-001"])
+        self.assertEqual([task["id"] for task in ready], ["E-001/T-001"])
+        self.assertFalse(waiting)
+        self.finish_tasks()
+        with self.assertRaisesRegex(WishError, "affected needs.*N-002"):
+            self.review()
+        record_review(self.project(), ["N-001"], "Export remains private", ["Local export passed"],
+                      ["N-001", "N-002"], "pass")
+        self.edit_document("specs/S-002/spec.md", title="Revised privacy contract")
+        self.assertFalse(gate_valid(self.project(), "N-001", "implement"))
+        with self.assertRaisesRegex(WishError, "approved plan changed"):
+            validate_review(self.project(), "N-001")
+        self.assertEqual(self.project()["needs"]["N-002"]["state"]["gates"], {})
 
     def test_shared_spec_is_not_approved_until_both_needs_are_approved(self):
         self.fixture()

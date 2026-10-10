@@ -56,6 +56,9 @@ def parser():
     gate.add_argument("stage", choices=GATES)
     gate.add_argument("needs", nargs="+")
     gate.add_argument("--by", choices=("human", "fast-forward"), required=True)
+    authorize = commands.add_parser("authorize", help="Record one authorization for needs, design, and implementation")
+    authorize.add_argument("needs", nargs="+")
+    authorize.add_argument("--by", choices=("human", "fast-forward"), required=True)
     review = commands.add_parser("record-review", help="Record AI review results against needs")
     review.add_argument("needs", nargs="+")
     review.add_argument("--summary", required=True)
@@ -115,7 +118,7 @@ def run(args):
                     print(f"{level} {message}")
             print(f"{'FAIL' if errors else 'PASS'}: {len(errors)} errors, {len(warnings)} warnings")
         return 1 if errors else 0
-    project = checked_project(root, code=args.command in ("gate", "record-review", "approve"))
+    project = checked_project(root, code=args.command in ("authorize", "gate", "record-review", "approve"))
     keys = select_needs(project, args.needs) if getattr(args, "needs", None) else []
     if args.command == "status":
         data = status_data(project)
@@ -145,6 +148,7 @@ def run(args):
                     context = "; ".join(f"{spec['id']} ({spec['title']}) → " + ", ".join(
                         f"{need['id']} ({need['title']})" for need in spec["needs"]) for spec in task["lineage"])
                     print(f"{label} {task['id']} [{task['group']}.{task['order']}] {task['title']} — {context}")
+                    print("  Execution needs: " + ", ".join(task["execution_needs"]))
                     if task.get("blocker"):
                         print(f"  {task['blocker']}")
             if not ready:
@@ -160,6 +164,9 @@ def run(args):
     elif args.command == "gate":
         record_gate(project, keys, args.stage, args.by)
         print(f"Recorded {args.stage}: {args.by} for " + ", ".join(keys))
+    elif args.command == "authorize":
+        record_gate(project, keys, "implement", args.by, through=True)
+        print(f"Recorded combined authorization: {args.by} for " + ", ".join(keys))
     elif args.command == "record-review":
         record_review(project, keys, args.summary, args.checks, args.covered, args.verdict)
         print(f"Recorded {args.verdict} review for " + ", ".join(keys))

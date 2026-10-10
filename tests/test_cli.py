@@ -37,6 +37,28 @@ class CliTests(ProjectCase):
         self.assertIn("approved", self.cli("context").stdout)
         self.assertFalse((self.root / "openwish/changes").exists())
 
+    def test_combined_authorization_and_scoped_shared_spec_through_cli(self):
+        self.fixture()
+        self.cli("new", "need", "N-002", "--title", "Privacy")
+        self.edit_document("needs/N-002.md", actor="Staff", outcome="Keep data local",
+                           acceptance=["No uploads"])
+        self.edit_document("specs/S-001/design.md", needs=["N-001", "N-002"])
+        self.edit_document("epics/E-001/design.md", needs=["N-001"])
+        self.cli("authorize", "N-001", "--by", "human")
+        ready = json.loads(self.cli("ready", "N-001", "--json").stdout)
+        self.assertEqual(len(ready["ready"]), 1)
+        self.assertFalse(ready["waiting"])
+        self.assertEqual(ready["ready"][0]["execution_needs"], ["N-001"])
+        self.assertIn("Execution needs: N-001", self.cli("ready", "N-001").stdout)
+        self.finish_tasks()
+        self.cli("record-review", "N-001", "--summary", "Local reconciliation verified",
+                 "--check", "Local export passed", "--covered-need", "N-001", "--covered-need", "N-002")
+        self.cli("approve", "N-001", success=False)
+        self.cli("gate", "review", "N-001", "--by", "human")
+        self.cli("approve", "N-001")
+        self.assertEqual(self.project()["needs"]["N-001"]["meta"]["implementation"], "approved")
+        self.assertEqual(self.project()["needs"]["N-002"]["meta"]["implementation"], "open")
+
     def test_final_summary_contains_need_spec_outcome_and_evidence(self):
         self.fixture()
         self.approve()

@@ -27,7 +27,7 @@ def check_version(root, tag=""):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--tag", default="", help="Optional GitHub release tag, e.g. v0.3.1")
+    parser.add_argument("--tag", default="", help="Optional GitHub release tag, e.g. v0.4.0")
     args = parser.parse_args()
     try:
         print(check_version(Path(__file__).resolve().parents[1], args.tag))

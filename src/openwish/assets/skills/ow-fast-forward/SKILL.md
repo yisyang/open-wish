@@ -6,18 +6,24 @@ disable-model-invocation: true
 
 # Fast-forward
 
-Read `openwish/policy.md`. This grants explicit authority for the selected needs'
-current implementation revisions. Follow the same quality phases without asking
+Use this workflow only after an explicit fast-forward request; loading the skill
+alone grants no authority. Respect OW opt-outs and plan-only requests. Read
+`openwish/policy.md`. Explicit fast-forward delegates acceptance for the selected
+needs' current implementation revisions. Follow the same quality phases without asking
 for confirmation, design approval, implementation permission, or final acceptance.
 
 1. Interpret the ask against existing needs. Keep the ask in conversation; do not
    create a request/change record, ask summary, or independent execution container.
-2. Reuse existing needs. If implementation must resume, use `ow reopen N-001 ...
+2. Routine changes still use Propose's lightweight path: implement, verify, report,
+   then finish without creating needs/epics, recording gates, or running the
+   structured steps below. For structured work, reuse existing needs. If
+   implementation must resume, use `ow reopen N-001 ...
    --fast-forward`. For open needs use `ow mode fast-forward N-001 ...`. Create a
    distinct new need only when necessary with `ow new need ... --fast-forward`.
    If current outcomes already satisfy the request, explain that and do no extra work.
 3. Follow Propose, Align, Plan, Implement, and Review, reading each skill on entry.
-   Record gates with `ow gate STAGE N-001 ... --by fast-forward`. Skip all approval
+   Record preparation with `ow authorize N-001 ... --by fast-forward` and final
+   acceptance with `ow gate review N-001 ... --by fast-forward`. Skip all approval
    questions; do not fabricate human confirmation or verification dates.
 4. Resolve routine decisions from all current needs and minimal coherent work.
    For genuine blocking ambiguity or contradictory intent, first exhaust

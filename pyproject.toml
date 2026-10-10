@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "openwish"
-version = "0.3.1"
+version = "0.4.0"
 description = "Need-Driven Development for humans and coding agents"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -30,6 +30,7 @@ Releases = "https://github.com/yisyang/open-wish/releases"
 
 [project.scripts]
 ow = "openwish.cli:main"
+openwish = "openwish.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

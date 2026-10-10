@@ -7,6 +7,8 @@ Humans review the results. Current needs remain binding after implementation,
 so the next feature does not quietly undo what the previous one accomplished.
 **OW operates on needs.** Asks stay in conversation; existing needs are revised
 or reopened, and distinct outcomes become new needs. There are no change records.
+Small, clear changes within existing intent go straight to implementation and
+verification. OW's structured workflow is for work that benefits from it.
 
 OpenWish takes inspiration from [Spec Kit](https://github.com/github/spec-kit)
 and [OpenSpec](https://github.com/Fission-AI/OpenSpec), with durable needs and
@@ -15,7 +17,7 @@ bounded agent context at the center of the workflow.
 ## Get started
 
 Requires Python 3.11+. The runtime has **no third-party dependencies**.
-After the first PyPI release, install the CLI with [uv](https://docs.astral.sh/uv/):
+Install the CLI from PyPI with [uv](https://docs.astral.sh/uv/):
 
 ```sh
 uv tool install openwish
@@ -23,9 +25,10 @@ cd /path/to/your/product
 ow init
 ```
 
-Until that first publication, install from a checkout using `uv tool install .`.
-The package name is **openwish** and the installed command is **ow**. If your
-shell cannot find `ow`, run `uv tool update-shell` and open a new terminal.
+To install from a source checkout, use `uv tool install .`.
+The package name is **openwish**. The installed commands are **ow** (the canonical
+short form used here) and its exact alias **openwish**. If your shell cannot find
+them, run `uv tool update-shell` and open a new terminal.
 
 `ow init` opens a terminal multi-select for **OpenCode, Claude Code, Codex, and
 generic Agent Skills**. Move with the arrow keys, toggle with Space, and press
@@ -70,6 +73,7 @@ Version stamps and `openwish/installation.json` track installed skills and comma
 adapters. Exact unversioned v0.2 templates are recognized and upgraded; unknown
 unversioned files are preserved with an actionable error. Existing needs, specs,
 project configuration, policy, and knowledge are preserved when reinitializing.
+For the proportional workflow introduced in 0.4, see [upgrade guidance](docs/migration.md#upgrading-from-02-or-03).
 
 In **OpenCode**, start with:
 
@@ -91,17 +95,31 @@ access, or manual observations, after continuing any independent ready work.
 
 ## The workflow
 
+OW is opt-in. Installing its skills does not require using them for every edit,
+and instructions to work without OW are respected.
+
+**Routine changes:** inspect → implement → verify → report. A localized,
+reversible fix, exact command alias, documentation update, or small refactor within
+clear existing intent needs no new need, epic, gate receipt, or acceptance prompt.
+Update an existing spec when its contract would otherwise become inaccurate.
+
+**Structured work:** use when outcomes or constraints change, work requires
+substantial coordination, or consequential product/compatibility/data decisions
+remain. Preparation is continuous:
+
 ```text
 Ask → Propose → Align → Plan → Implement ↔ Review → Accepted results
-         │        │       │                    │
-       confirm  approve authorize         explicit acceptance
-        needs    design implementation       in default mode
+       └── prepare together ──┘                    │
+         one authorization                final acceptance
+         if still needed                  in default mode
 ```
 
-Propose automatically enters Align after need confirmation. Align enters Plan
-after design approval. Plan asks whether to implement. Implementation continues
-through ready work and AI review/remediation; it does not stop for approval of
-each task or epic. Human acceptance is requested once available work is finished.
+A clear instruction to implement already supplies authority for that scope.
+Otherwise, ask once about the combined outcome, approach, and implementation.
+Clarify genuine ambiguity early. Plan-only requests stop at the plan. Technical
+repairs or artifact relinking within authorized scope do not require renewed
+permission. Implementation continues through ready work and review/remediation;
+structured default work requests final acceptance once available work is finished.
 
 | Skill | Responsibility |
 | --- | --- |
@@ -144,14 +162,18 @@ An inferred need starts unconfirmed, and existing code is not assumed verified.
 Spec designs contain authoritative many-to-many references to needs. Specs describe
 entities, UI modules, or cross-cutting capabilities; epics/tasks organize bounded
 implementation. Containment and prerequisite relationships are distinct.
+An epic can select a subset of its specs' needs as execution scope. Other linked
+needs remain regression constraints without requiring unrelated authorization.
+Compare actor, outcome, and acceptance before adding needs: a new command,
+mechanism, platform, or task is usually a spec detail for an existing outcome.
 
 `ow reopen N-001` resumes work under the same ID and resets authority to default.
 Only an explicit new fast-forward request enables it for the reopened revision.
 
 ### Human-facing communication
 
-Propose confirms only the need interpretation. Later approvals are discussed when
-their stage is reached. Clarifications use numbered questions and two or three
+Ask only questions whose answers can materially change the work; do not restate
+clear instructions as confirmation questions. Clarifications use numbered questions and two or three
 lettered choices, with `(Recommended)` before the preferred choice text:
 
 ```text
@@ -201,12 +223,12 @@ Artifact scaffolding and decision recording are available to agents and humans:
 ow new need N-001 --title "Monthly reconciliation"
 ow new spec S-001 --title "Transaction export"
 ow new epic E-001 --title "Export implementation"
-# Fill templates and references before checks or gates.
-ow gate needs N-001 --by human
+# Fill templates and references before authorization.
+ow authorize N-001 --by human        # one decision covers needs, design, and plan
 ow reopen N-001                     # reuse a need when further work is necessary
 ```
 
-Gates are revision-bound: changed need intent invalidates downstream authority,
+Structured gates are revision-bound: changed need intent invalidates downstream authority,
 while updating task progress does not. Reviews are bound to the plan and repository
 content. The CLI records human decisions supplied by the harness; it does not
 authenticate a conversation or establish semantic correctness on its own.
@@ -218,11 +240,12 @@ from the current directory and its parents. `check`, `status`, and `ready` suppo
 ## Design and contribution
 
 - [Framework design](docs/design.md)
-- [OpenWish's own current needs](openwish/needs/)
+- [Product requirements](docs/product.md)
 - [Artifact format](src/openwish/assets/artifacts.md)
 - [Workflow policy](src/openwish/assets/policy.md)
 - [Contributing and verification](CONTRIBUTING.md)
 - [Publishing releases to PyPI](docs/releases.md)
+- [Changelog and release notes](CHANGELOG.md)
 
 Run directly from a source checkout without installing:
 
@@ -231,7 +254,11 @@ PYTHONPATH=src python3 -m openwish --help
 PYTHONPATH=src python3 -m unittest discover -s tests -v
 ```
 
-OpenWish is an initial `0.3.1` implementation using artifact schema 2. The v0.1
+This repository is developed directly; shipped skills live only in
+`src/openwish/assets/skills/`. Tests exercise OW in temporary projects rather
+than installing an active OW workflow into this checkout.
+
+OpenWish `0.4.0` uses artifact schema 2. The v0.1
 prototype's change records are superseded; see [migration guidance](docs/migration.md).
 Integration files follow current
 host documentation; deterministic checks do not substitute for hands-on harness

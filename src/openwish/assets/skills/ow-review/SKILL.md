@@ -1,12 +1,16 @@
 ---
 name: ow-review
-description: Review implemented OpenWish needs and affected regressions, remediate defects, and present concise need/spec outcomes for acceptance. Use after implementation or to refresh verification.
+description: Review structured OW implementation and regressions, then present outcomes for acceptance. Routine changes get a concise verified result without acceptance gates. Honor OW opt-outs.
 ---
 
 # Review
 
 Read `openwish/policy.md`, `ow context N-001 ...`, affected spec designs and their
 need references, task evidence, and the actual code diff. Review from intent.
+For the routine path, inspect the diff, run meaningful checks, remediate, and
+report the result without OW records, lifecycle updates, or an acceptance prompt.
+The remaining steps apply to structured work only, replacing legacy generated
+blanket approval requirements while honoring deliberate project-specific controls.
 
 1. Check selected needs and affected adjacent current needs, including previously
    approved ones. Verify contracts, error paths, security, reliability, and

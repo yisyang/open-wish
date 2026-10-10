@@ -88,6 +88,9 @@ def validate(project):
             else:
                 links(meta, "specs", project["specs"], key)
                 require(bool(meta.get("specs")), f"{key}: link at least one spec")
+                if "needs" in meta:
+                    links(meta, "needs", project["needs"], key)
+                    require(bool(meta["needs"]), f"{key}: execution scope must contain at least one need")
                 require(nonempty(record["body"]), f"{key}: implementation design is required")
 
     task_ids = set()
@@ -133,6 +136,12 @@ def validate(project):
     if errors:
         return errors
     # Only operate on graphs after all input types and references are sound.
+    for key, epic in project["epics"].items():
+        meta = epic["meta"]
+        if "needs" in meta:
+            covered = {nid for sid in meta["specs"] for nid in project["specs"][sid]["design"]["meta"]["needs"]}
+            require(set(meta["needs"]).issubset(covered),
+                    f"{key}: execution needs must be covered by its spec designs")
     for relation in ("depends_on", "parent"):
         graph = {}
         for key, spec in project["specs"].items():

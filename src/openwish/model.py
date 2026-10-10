@@ -29,18 +29,30 @@ def direct_specs(project, keys):
     return sorted(key for key in project["specs"] if set(keys).intersection(spec_needs(project, key)))
 
 
+def epic_needs(project, key):
+    """Execution scope can be narrower than the specs' regression coverage."""
+    meta = project["epics"][key]["meta"]
+    if "needs" in meta:
+        return meta["needs"]
+    # Older epics retain their original scope until deliberately narrowed.
+    return sorted({nid for sid in meta["specs"] for nid in spec_needs(project, sid)})
+
+
 def need_scope(project, keys):
     """Derive execution work from needs; no separate work container is persisted."""
     keys = select_needs(project, keys)
     specs = direct_specs(project, keys)
-    epics = sorted(key for key, epic in project["epics"].items()
-                   if set(specs).intersection(epic["meta"]["specs"]))
+    epics = sorted(key for key in project["epics"]
+                   if set(keys).intersection(epic_needs(project, key)))
     return {"needs": keys, "specs": specs, "epics": epics}
 
 
 def connected_specs(project, keys):
-    """Include contract prerequisites and consumers, not just direct mappings."""
-    affected = set(direct_specs(project, select_needs(project, keys)))
+    """Include execution contracts and their prerequisites/consumers for review."""
+    scope = need_scope(project, keys)
+    affected = set(scope["specs"])
+    for eid in scope["epics"]:
+        affected.update(project["epics"][eid]["meta"]["specs"])
     edges = {}
     for key, spec in project["specs"].items():
         meta = spec["meta"]
@@ -120,8 +132,10 @@ def ready_tasks(project, keys):
         if task["epic"] not in scope or task["status"] == "done":
             continue
         dependencies_done = all(tasks[dep]["status"] == "done" for dep in task["depends_on"])
+        item = {**task, "lineage": task_lineage(project, task),
+                "execution_needs": epic_needs(project, task["epic"])}
         if task["kind"] == "agent" and dependencies_done and task["status"] != "blocked":
-            ready.append({**task, "lineage": task_lineage(project, task)})
+            ready.append(item)
         else:
-            waiting.append({**task, "lineage": task_lineage(project, task)})
+            waiting.append(item)
     return ready, waiting

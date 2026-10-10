@@ -1,5 +1,6 @@
 from pathlib import Path
 import tempfile
+import tomllib
 import unittest
 
 from scripts.check_release import check_version
@@ -19,6 +20,13 @@ class ReleaseTests(unittest.TestCase):
     def test_matching_package_cli_and_tag_pass(self):
         self.assertEqual(check_version(self.root, "v0.3.1"), "0.3.1")
         self.assertEqual(check_version(self.root), "0.3.1")
+
+    def test_distribution_exposes_exact_cli_aliases(self):
+        root = Path(__file__).resolve().parents[1]
+        metadata = tomllib.loads((root / "pyproject.toml").read_text(encoding="utf-8"))
+        for command in ("ow", "openwish"):
+            with self.subTest(command=command):
+                self.assertEqual(metadata["project"]["scripts"][command], "openwish.cli:main")
 
     def test_wrong_or_unprefixed_release_tag_is_rejected(self):
         for tag in ("v0.3.0", "0.3.1", "v0.3.1-extra"):

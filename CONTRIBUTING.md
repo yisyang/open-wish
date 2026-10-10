@@ -1,7 +1,10 @@
 # Contributing to OpenWish
 
-Start from the need behind an ask. Check all current needs, keep the smallest
-coherent scope, and preserve the documented workflow and artifact budgets.
+Develop this repository directly with ordinary code changes and verification.
+Keep the smallest coherent scope and preserve [product requirements](docs/product.md).
+Shipped OW skills are product assets, not the development process for this repo.
+Test adoption and workflows in disposable projects; do not initialize OW in this
+checkout unless explicitly asked to use it for a contribution.
 
 ## Local development
 
@@ -28,12 +31,10 @@ For an installed executable, use a virtual environment and `python -m pip instal
   five minutes. Choose further checks based on actual unresolved risk.
 - Keep canonical skills in `src/openwish/assets/skills/`. Test generated adapters
   without copying divergent workflow logic into them.
-- Store durable needs rather than asks or change containers. Put authoritative
-  need references in spec designs and retain them in human-facing summaries.
-- Use numbered clarification questions, two or three A/B/C choices, and
-  `(Recommended)` before the preferred text. Present only the current decision.
-- Review all observable outcomes before marking a need approved. Distinguish
-  a human decision, a fast-forward bypass, and a model's own assessment.
+- Keep workflow overhead proportional to the work. Test routine changes without
+  creating OW records to manage the contribution. See `evals/` for skill scenarios.
+- In the product, distinguish execution authority from regression coverage and
+  human decisions from fast-forward delegation or an agent's own assessment.
 
 ## Compatibility
 

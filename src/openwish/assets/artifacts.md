@@ -2,6 +2,8 @@
 
 OW operates on need IDs. Asks stay in conversation. Stable IDs are `N-001`,
 `S-001`, and `E-001`; Markdown records use TOML headers between `+++` lines.
+These records support structured work. Routine, clear changes within existing
+intent need no new records, reopen cycle, or gate receipts; see `policy.md`.
 
 ```text
 openwish/
@@ -77,6 +79,12 @@ Prerequisite and containment graphs are separate and acyclic.
 `id`, `title`, and `specs = ["S-001"]`. Describe only this bounded increment.
 Split larger work into multiple task groups or epics; retain durable design in specs.
 
+Add `needs = ["N-001"]` to the epic header to select its execution scope. This
+must be a nonempty subset of the needs referenced by its spec designs. It selects
+which outcomes this increment implements; it does not replace the designs' full
+regression coverage. If omitted, all linked needs are selected for compatibility.
+Use this field instead of splitting a shared spec just to avoid unrelated gates.
+
 ```json
 {
   "tasks": [
@@ -106,24 +114,30 @@ Prerequisites must have lower pairs; independent needs may reuse ordinal pairs.
 
 A need's state contains only `revision`, `mode`, `no_work_reason`, and `gates`.
 It has no title, ask, independent identity, stored need group, or copied work list.
-Specs/epics/tasks are derived from need → spec design → epic links at read time.
+Specs are derived from design references; epic execution scope selects tasks.
 Missing state for an imported need defaults to revision 1 with no approvals.
 
 ```sh
 ow context N-001 N-002
-ow gate needs N-001 N-002 --by human
-ow gate align N-001 N-002 --by human
-ow gate implement N-001 N-002 --by human
+ow authorize N-001 N-002 --by human
 ow ready N-001 N-002
 ```
 
+`authorize` preflights needs, alignment, and implementation together before
+writing receipts. Use it after preparing the scope, design, and plan, when an
+actual human instruction or combined decision authorizes them. It does not record
+final acceptance. Preparation itself requires no gate receipts. If authority is
+missing, ask one combined question rather than three restatements of the request.
+Plan-only requests do not authorize implementation. Lower-level `ow gate needs`,
+`ow gate align`, and `ow gate implement` remain available for intentional staged
+collaboration. Refreshing receipts for technical repairs within the authorized
+scope does not require asking the same question again.
+
 The IDs select needs for that command; they do not create a persistent grouping.
-Human-facing confirmations discuss only the current decision, using policy's
-numbered questions and lettered choices. Do not preview later gates in Propose.
 
 For explicit fast-forward, use `ow new need ... --fast-forward`, `ow reopen
 N-001 --fast-forward`, or `ow mode fast-forward N-001 N-002` for already-open
-needs. Then record gates with `--by fast-forward`. Changing mode invalidates
+needs. Then use `ow authorize ... --by fast-forward`. Changing mode invalidates
 authority; reopening never inherits fast-forward implicitly.
 
 If existing implementation already satisfies a need, set its state's concise
@@ -147,7 +161,8 @@ relevant tasks done and is bound to plan, source content, and task evidence.
 `approve` preserves currency. A shared spec becomes approved only when every
 linked current need is approved. `ready` exposes missing authority per task and
 continues to list other authorized work. It includes spec titles and the needs
-they address. `summary` provides need → spec → outcome context for final updates.
+they address. Authority is required for the epic's execution needs, while review
+still covers adjacent needs. `summary` provides need → spec → outcome context.
 
 ## Bounds and consolidation
 
