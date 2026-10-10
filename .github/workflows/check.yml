@@ -1,0 +1,67 @@
+name: Check
+on:
+  push:
+  pull_request:
+  workflow_call:
+    inputs:
+      release_tag:
+        description: Release tag to match against package and CLI versions
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      matrix:
+        python: ['3.11', '3.12', '3.13', '3.14']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m pip install .
+      - run: python -m unittest discover -s tests -v
+      - run: ow --version
+
+  distributions:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        id: python
+        with:
+          python-version-file: '.python-version'
+      - name: Install the latest version of uv
+        uses: astral-sh/setup-uv@1c37ad07a6a961277cf70c0d37d6f313000f5884 # v10.3.0
+        with:
+          python-version: ${{ steps.python.outputs.python-version }}
+      - name: Check package and release versions
+        id: version
+        env:
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          version=$(python scripts/check_release.py --tag "$RELEASE_TAG")
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Build wheel and source distribution
+        run: uv build --no-sources
+      - name: Validate distribution metadata
+        run: uvx twine check --strict dist/*
+      - name: Install and exercise both distributions with uv
+        env:
+          EXPECTED_VERSION: ${{ steps.version.outputs.version }}
+        run: python scripts/smoke_dist.py dist --expected-version "$EXPECTED_VERSION"
+      - name: Upload tested distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: python-dists
+          path: dist/
+          if-no-files-found: error
+          retention-days: 7

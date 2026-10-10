@@ -1,0 +1,26 @@
+{
+  "format": 1,
+  "harnesses": [
+    "opencode"
+  ],
+  "files": {
+    ".opencode/skills/ow-propose/SKILL.md": "0.3.1",
+    ".opencode/commands/ow-propose.md": "0.3.1",
+    ".opencode/skills/ow-align/SKILL.md": "0.3.1",
+    ".opencode/commands/ow-align.md": "0.3.1",
+    ".opencode/skills/ow-plan/SKILL.md": "0.3.1",
+    ".opencode/commands/ow-plan.md": "0.3.1",
+    ".opencode/skills/ow-implement/SKILL.md": "0.3.1",
+    ".opencode/commands/ow-implement.md": "0.3.1",
+    ".opencode/skills/ow-review/SKILL.md": "0.3.1",
+    ".opencode/commands/ow-review.md": "0.3.1",
+    ".opencode/skills/ow-consolidate/SKILL.md": "0.3.1",
+    ".opencode/commands/ow-consolidate.md": "0.3.1",
+    ".opencode/skills/ow-fast-forward/SKILL.md": "0.3.1",
+    ".opencode/commands/ow-fast-forward.md": "0.3.1",
+    ".opencode/commands/fast-forward.md": "0.3.1",
+    ".opencode/skills/ow-onboard/SKILL.md": "0.3.1",
+    ".opencode/commands/ow-onboard.md": "0.3.1",
+    ".opencode/commands/onboard.md": "0.3.1"
+  }
+}

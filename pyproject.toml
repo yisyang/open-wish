@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=77.0.3"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "openwish"
+version = "0.3.1"
+description = "Need-Driven Development for humans and coding agents"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+license-files = ["LICENSE"]
+keywords = ["need-driven-development", "coding-agents", "agent-skills", "cli"]
+dependencies = []
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Environment :: Console",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3 :: Only",
+  "Operating System :: OS Independent",
+  "Topic :: Software Development",
+]
+
+[project.urls]
+Homepage = "https://github.com/yisyang/open-wish"
+Documentation = "https://github.com/yisyang/open-wish/blob/main/README.md"
+Repository = "https://github.com/yisyang/open-wish"
+Issues = "https://github.com/yisyang/open-wish/issues"
+Releases = "https://github.com/yisyang/open-wish/releases"
+
+[project.scripts]
+ow = "openwish.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["openwish*"]
+
+[tool.setuptools.package-data]
+openwish = ["assets/*.md", "assets/*.json", "assets/skills/*/SKILL.md"]

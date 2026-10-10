@@ -1,0 +1,40 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.event_name }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    if: github.event_name == 'workflow_dispatch' || !github.event.release.prerelease
+    uses: ./.github/workflows/check.yml
+    with:
+      release_tag: ${{ github.event_name == 'release' && github.event.release.tag_name || '' }}
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment:
+      name: ${{ github.event_name == 'release' && 'pypi' || 'testpypi' }}
+      url: ${{ github.event_name == 'release' && 'https://pypi.org/project/openwish/' || 'https://test.pypi.org/project/openwish/' }}
+    permissions:
+      id-token: write
+    steps:
+      - name: Download tested distributions
+        uses: actions/download-artifact@v4
+        with:
+          name: python-dists
+          path: dist/
+      - name: Publish with PyPI Trusted Publishing
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: ${{ github.event_name == 'release' && 'https://upload.pypi.org/legacy/' || 'https://test.pypi.org/legacy/' }}

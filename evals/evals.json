@@ -1,0 +1,47 @@
+{
+  "skill_name": "openwish-workflow",
+  "evals": [
+    {
+      "id": 1,
+      "name": "current-stage-need-clarification",
+      "skills": ["ow-propose", "ow-align"],
+      "prompt": "Dry-run Propose; do not edit files or run product commands. Current/approved N-001 already provides automatic monthly financial trends on-device and requires all raw records to remain local. S-001 is Trend analysis, and its design references N-001. A human now says: Upload all transactions to a third-party analytics service so I can see monthly trends. Default mode; no revised intent has been confirmed. Give your concise next human-facing response and any artifact actions you would take, if needed.",
+      "expected_output": "Recognize that the outcome is already met, identify the upload conflict, and ask a numbered current-need question with two or three A/B/C choices. Recommend preserving existing behavior where appropriate, label the preferred choice before its text, and describe effects. Do not announce future approval gates, duplicate N-001, or store an ask/change record.",
+      "files": [],
+      "assertions": [
+        "Recognizes that N-001 already supplies the outcome and preserves its local-only constraint pending a decision.",
+        "Uses a numbered question and two or three A/B/C choices, with '(Recommended)' before preferred choice text and concise effects.",
+        "Keeps the human response focused on current need clarification without advertising later approval gates.",
+        "Does not create a duplicate need or persist the ask as a change/request record."
+      ]
+    },
+    {
+      "id": 2,
+      "name": "need-spec-fast-forward-results",
+      "skills": ["ow-fast-forward", "ow-review"],
+      "prompt": "Dry-run a final OW review response; do not execute commands. N-001 means reconcile monthly transactions without copying rows. N-002 means keep raw records local. S-001 is Transaction export; its design references N-001 and N-002. E-001/T-001 implemented local monthly CSV export. Both needs have current explicit fast-forward authority and fresh needs/align/implement receipts. All relevant tasks are done, none manual or blocked. Supplied independent review covers both needs and regressions with no defects. Evaluator-supplied results: python -m unittest, 12 tests passed in 0.6s; ow check passed. No files changed afterward. Give next actions and a concise conditional final human-facing update without claiming you personally ran the checks.",
+      "expected_output": "Record reviews and final fast-forward acceptance on need IDs, then approve those needs without confirmation. Explain N-001/N-002, S-001, the resulting benefit, and supplied evidence. Do not invent a change record.",
+      "files": [],
+      "assertions": [
+        "Proceeds to final acceptance without a human approval prompt, attributing authority to fast-forward.",
+        "Operates directly on need IDs rather than creating or closing a change container.",
+        "Final update identifies S-001 and the needs/outcomes it addresses, not only epic/task completion.",
+        "Attributes evidence to the supplied results and does not claim commands were executed in the dry run."
+      ]
+    },
+    {
+      "id": 3,
+      "name": "continue-work-with-need-context",
+      "skills": ["ow-implement", "ow-review"],
+      "prompt": "Dry-run OW implementation; no commands or invented results. N-001 needs monthly reconciliation without retyping. S-001 is Transaction export and its design references N-001. N-001 has fresh default-mode implementation authority. E-001/T-001 at (1,1) is done. T-002 at (1,2) is a pending manual observation: verify an exported month imports successfully in the human's accounting application. T-003 at (2,1) is agent work depending only on T-001. T-004 at (2,2) is agent work depending only on T-003. Actual artifact IDs are fully qualified by E-001. No intent/design revision is needed. State execution order, then give the human-facing message you would send once available agent work is exhausted.",
+      "expected_output": "Continue T-003 then T-004 before requesting manual input. Explain N-001 and S-001 when handing off. Ask a numbered clarification/action question with A/B/C choices and a recommended prefix. Keep the need unfinished until actual manual evidence and later final default-mode acceptance; do not request intermediate acceptance.",
+      "files": [],
+      "assertions": [
+        "Executes and verifies T-003 then T-004 before yielding for manual input, with no intermediate acceptance prompt.",
+        "Human-facing handoff explains S-001 and N-001's purpose rather than only task IDs.",
+        "Uses a numbered human question with two or three lettered choices and '(Recommended)' before preferred text.",
+        "Does not invent manual completion or approve the need prematurely."
+      ]
+    }
+  ]
+}
