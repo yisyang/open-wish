@@ -19,7 +19,12 @@ Routine work follows the lightweight path without creating design records.
    dependency paths. Compare retaining the current structure with the smallest
    useful improvement. Cite actual code, tests, or operational constraints for
    consequential trade-offs; do not infer quality from file size or pattern names.
-4. Put the working design in the change's approach: responsibility/data ownership,
+4. Check the delivery boundary using Right-size delivery in `../ow-propose/SKILL.md`.
+   Architecture spanning several capabilities does not put their full implementation
+   in this change. Describe what is delivered now, preserved, and deferred, with exit
+   evidence. Split independently acceptable work and integrate a representative path
+   early; shared modules or sequential dependencies alone do not require one change.
+   Put the working design in the change's approach: responsibility/data ownership,
    dependency direction, effects, meaningful alternatives, and verification of
    preserved constraints. For greenfield work, start with a representative end-to-end
    slice and conventional layout; introduce boundaries for demonstrated needs.

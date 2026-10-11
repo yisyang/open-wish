@@ -60,8 +60,15 @@ def new_artifact(root, kind, key, title, *, needs=(), fast_forward=False):
         if directory.exists():
             raise WishError(f"Already exists; preserved: {directory}")
         content = document(meta, "## Purpose\n\nDescribe this bounded improvement.\n\n"
-                           "## Approach\n\nKeep working design and engineering decisions here.\n\n"
-                           "## Verification\n\nDescribe meaningful checks against the needs.")
+                           "## Scope\n\n"
+                           "- Delivers now: observable results and motivating need IDs.\n"
+                           "- Preserves: applicable constraints and existing behavior.\n"
+                           "- Defers: remaining outcomes, with follow-up changes when planned.\n\n"
+                           "## Approach\n\nKeep working design and engineering decisions here. "
+                           "Identify prerequisite capabilities to verify in code/tests.\n\n"
+                           "## Verification\n\nDescribe exit evidence for this increment and "
+                           "meaningful regression checks. The result should remain useful "
+                           "if later changes are postponed.")
         extras[f"openwish/changes/{key}/tasks.json"] = '{"tasks": []}\n'
     for name in (relative, *extras):
         if contained(root, name).exists():

@@ -94,7 +94,9 @@ aid continuity, not permanent immutability.
 ## Temporary changes and tasks
 
 `changes/C-001/change.md` references its motivating needs and holds purpose,
-approach, and verification. Status is `open | in-progress | review | closed`;
+scope, approach, and verification. Scope names delivers now, preserves, and defers;
+verification gives exit evidence for this increment. These are prose conventions,
+not required headings or another typed schema. Status is `open | in-progress | review | closed`;
 mode is `default | fast-forward`. Implementation choices evolve here while work
 is active, then survive in code, types, schemas, tests, and useful nearby rationale.
 
@@ -103,13 +105,31 @@ Optional prerequisites, kind, files, and evidence keep simple tasks small. Task
 status is `open | in-progress | blocked | done`. Done tasks require direct evidence.
 IDs are qualified by their change; dependencies are within-change and acyclic.
 List order is a preference, not an implicit dependency. There are no group/order
-constraints or global task ordinals. An empty list supports verification-only work.
+constraints or global task ordinals. An empty list supports verification-only work
+or a future candidate awaiting planning; neither establishes delivery by itself.
+
+`ow-propose` owns Right-size delivery: changes have independently acceptable results
+that remain useful if successors are postponed. Broad requested plans use several
+ordinary open changes. Later candidates retain concise scope, prerequisite capabilities,
+uncertainties, and exit evidence; detailed tasks are prepared when selected. There is
+no parent program change or mandatory roadmap tier. Before execution, the agent checks
+prerequisites against delivered code/tests, not retained completion receipts.
+
+`ow-plan` owns Task sizing and Reconcile the plan. Agents check scope-to-work coverage,
+resolve contradictory decision/task state using real evidence, and reassess scope on
+new asks/resumption. Splits assign unfinished obligations to retained changes, preserve
+useful evidence, repair local IDs/dependencies, and invalidate pending review as usual.
+Before disposal, successors refer to delivered capabilities rather than deleted plans.
+Neither reference counts nor artifact length can certify executable scope; deterministic
+validation checks structure while semantic evaluations exercise these judgments.
 
 `ready` accepts need/change selections or defaults to all active changes. It lists
 agent-ready tasks and explains waiting prerequisites, manual observations, and
 explicit blockers. Continue independent work while human input is unavailable.
-Readiness never supplies authority. Interdependent work belongs in one bounded
-change; independent changes coordinate through delivered code/interfaces.
+Readiness neither authorizes work nor establishes prerequisite product capabilities.
+Combine work needing joint acceptance; shared modules or sequential dependencies
+alone do not require one change. Other changes coordinate through delivered
+code/interfaces. Representative end-to-end integration provides early evidence.
 
 ## Authority and result review
 
@@ -240,8 +260,9 @@ Installer/terminal tests protect preservation, multi-harness preflight, upgrades
 downgrades, and terminal restoration. Distribution checks exercise installed wheel
 and source packages, both CLI aliases, assets, and the change lifecycle.
 
-Semantic skill scenarios cover intent reuse, conflicts, plan-only scope, opt-outs,
-routine work, manual blockers, change-scoped delegation, and disposal. They
+Semantic skill scenarios cover delivery sizing, scope growth, stale blockers,
+partial need contributions, disposal-safe successor plans, intent reuse, conflicts,
+plan-only scope, opt-outs, routine work, manual blockers, change-scoped delegation, and disposal. They
 complement deterministic tests and do not prove behavior across every model/harness.
 The greenfield evaluation reruns retained tests and checks their useful protection
 and cost against current needs. Final artifacts do not establish historical run

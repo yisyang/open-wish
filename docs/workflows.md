@@ -14,6 +14,7 @@ This guide covers:
   first useful slice for a new product.
 - [Brownfield onboarding](#brownfield-onboarding): recover intent and assess the
   architecture of an existing product.
+- [Planning large work](#planning-large-work): turn broad asks into reviewable increments.
 - [The change workflow](#the-change-workflow): take an ask through proportionate
   planning, implementation, verification, review, and disposal.
 
@@ -167,6 +168,60 @@ otherwise unrecoverable rationale in ordinary repository docs or nearby comments
 A requested verification-only change may have no implementation tasks, but still
 needs actual checks and review.
 
+## Planning large work
+
+A need describes durable value; a change describes an independently reviewable
+improvement. A modernization may justify dozens of needs and many changes. Calling
+the whole first release a "pilot" does not make it one manageable change.
+
+Use [Right-size delivery](../src/openwish/assets/skills/ow-propose/SKILL.md#right-size-delivery)
+before making tasks. Ask what concrete result can be accepted and retained if later
+work is postponed. Split separately acceptable improvements; combine work that needs
+joint acceptance. A shared database or sequential dependency does not imply a single
+change. Many need references can still be appropriate for one narrow improvement.
+
+For each candidate, identify:
+
+| Boundary | Question |
+| --- | --- |
+| Delivers now | Which observable results does this increment contribute to its needs? |
+| Preserves | Which existing behavior and applicable constraints must hold? |
+| Defers | Which remaining outcomes belong to later work? |
+| Prerequisites | Which delivered capabilities must be checked before execution? |
+| Exit evidence | What would let someone accept this result independently? |
+
+For a requested resumable plan, retain later candidates as concise ordinary open
+changes. Detail tasks for the next executable increments; later task lists can
+remain empty with an explicit explanation that planning is incomplete. On selection,
+inspect delivered code/tests, resolve relevant uncertainty, and prepare concrete tasks.
+Assessment-only sequences can stay in conversation. No parent implementation change,
+permanent roadmap tier, or cross-change task graph is necessary.
+
+For example, an online economy could progress through reproducible player access,
+an isolated starter, one durable production recipe, and a first sale. Each increment
+includes the interface, persistence and checks needed to demonstrate it. Regional
+freight and native clients follow as separately scoped work. A task called "implement
+all production, commerce, logistics and UI" would conceal most of that delivery plan.
+
+Use enough tasks to expose meaningful completion and blocking boundaries. Keep
+coherent implementation and focused checks together; do not optimize for a short
+list or create a task per file. Map every promised result to work or existing evidence.
+Integrate representative behavior early instead of postponing all integration.
+
+When requirements grow or work resumes, reconcile decisions, scope, task state and
+dependencies before trusting `ow ready`. A resolved policy task needs actual evidence
+and any remaining application work must stay visible. If the change has grown beyond
+one acceptance boundary, move unfinished obligations into specific retained changes,
+repair local IDs/dependencies, preserve useful evidence, and refresh pending review.
+Decomposition within authorized scope needs no new permission; material changes do.
+New changes retain normal review unless explicitly delegated.
+
+Before disposing an increment, ensure successors describe prerequisites in terms of
+delivered code/interfaces/checks. Deferred obligations must not disappear with the
+earlier change. An empty future task list is not completion; final review checks the
+delivered scope and exit evidence, not only task status. Considering all current needs
+does not mean every future capability must ship in every increment.
+
 ## The change workflow
 
 This workflow applies to the first greenfield slice, approved brownfield
@@ -179,11 +234,11 @@ mechanism for the same outcome; revise or add needs when intent genuinely change
 **Routine work** is clear, localized, reversible, and within existing intent:
 inspect → implement → verify → report. It needs no change file, new need, or final
 acceptance ceremony. Honor plan-only requests here too. Work already tracked in an
-active change stays there, including unresolved manual checks.
+active change must be reconciled before moving it, including unresolved manual checks.
 
 **Structured work** is substantive, involves consequential choices, or needs
-resumable coordination. Create or reuse one bounded change referencing one or more
-needs, then follow this flow:
+resumable coordination. Scope one or more reviewable changes referencing motivating
+needs, then follow this flow for each selected increment:
 
 ```mermaid
 flowchart TD
@@ -215,9 +270,10 @@ human decision before implementing it.
 ### 1. Propose, align, and plan
 
 Use `ow-propose`, `ow-align`, and `ow-plan` to prepare needs, design, and tasks
-together. A change holds its purpose, approach, and verification plan. Tasks have
-concrete acceptance; optional prerequisites form an acyclic graph within that
-change. A small change may have one task. Verification-only work may have none.
+together. A change holds its purpose, delivery scope, approach, and exit evidence.
+Tasks have concrete acceptance; optional prerequisites form an acyclic graph within
+that change. A small change may have one task. Verification-only work or future candidates
+awaiting detailed planning may have none; actual completion still needs direct evidence.
 
 Load all current needs with `ow context`; inspect affected interfaces, consumers,
 and tests. Resolve genuine intent conflicts without silently weakening constraints.

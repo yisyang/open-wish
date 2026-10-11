@@ -2,6 +2,30 @@
 
 Release notes for OpenWish, newest first. Update this file for every release.
 
+## v0.6.1
+
+### Changed
+
+- Changes are sized by independently reviewable results, with explicit delivers-now,
+  preserved constraints, deferrals, and exit evidence in the creation template.
+- Broad planning requests produce multiple candidate increments; future work uses
+  concise ordinary open changes and is detailed against delivered capabilities when
+  selected. Shared modules or sequential dependencies alone do not require one change.
+- Task guidance exposes concrete completion/blocking boundaries instead of favoring
+  short lists that can conceal whole subsystems. Representative integration happens early.
+- Planning and resumption reconcile scope growth, resolved decisions, stale blockers,
+  and outcome-to-work coverage. Splits preserve unfinished obligations and evidence;
+  successor plans remain usable after earlier changes are disposed.
+- Review checks the promised increment and exit evidence as well as task completion,
+  distinguishing partial need contributions from complete delivery. Empty future task
+  lists do not establish completion, and split changes do not inherit delegation.
+- CLI check summaries identify structural/budget validation; an empty ready list
+  directs attention to scope and evidence rather than implying the work is complete.
+- Added semantic regressions for large modernization, growing plans with stale state,
+  and a narrow cross-cutting change serving many needs.
+- Package and bundled integrations advance together to 0.6.1; artifact schema remains 3.
+  Existing project-owned policy/reference files are preserved during integration updates.
+
 ## v0.6.0
 
 ### Added

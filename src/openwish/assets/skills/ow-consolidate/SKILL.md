@@ -17,7 +17,10 @@ the reported files directly before requesting full context.
 2. Check that durable intent is in needs, behavior in source, executable checks
    in tests, and useful rationale/environment references in ordinary repository
    docs or nearby comments. Do not copy the entire temporary approach into docs.
-   Future maintenance should not require resurrecting a deleted change.
+   Future maintenance should not require resurrecting a deleted change. Keep future
+   obligations in their own open changes when a resumable plan exists; reconcile
+   successor prerequisites to delivered code/interfaces/checks before disposing an
+   earlier increment. Do not discard the only copy of deferred work with its plan.
 3. Prefer preserving that knowledge before final review. If an active change needs
    new edits, refresh checks and review before closure. Already-closed results are
    historical; substantive follow-up work belongs to a new change.

@@ -20,7 +20,7 @@ feature does not quietly undo what the previous one accomplished.
 
 OW takes inspiration from [Spec Kit](https://github.com/github/spec-kit) and
 [OpenSpec](https://github.com/Fission-AI/OpenSpec), centering durable needs and
-bounded agent context. OpenWish **0.6.0** uses **artifact schema 3**.
+bounded agent context. OpenWish **0.6.1** uses **artifact schema 3**.
 
 ## Get started
 
@@ -30,6 +30,12 @@ Requires Python 3.11+. The runtime has **no third-party dependencies**.
 uv tool install openwish
 cd /path/to/your/product
 ow init
+```
+
+If previously installed and attempting to upgrade, use `uv tool upgrade`.
+
+```sh
+uv tool upgrade openwish
 ```
 
 For a source checkout, use `uv tool install .`. Both `ow` and `openwish` invoke
@@ -75,7 +81,8 @@ and the change lifecycle, with step-by-step guidance and vertical diagrams.
 reversible work within existing intent needs no change file, new need, or final
 acceptance ceremony.
 
-**Substantive work:** prepare needs, design, and tasks together in a bounded change:
+**Substantive work:** scope reviewable increments, then prepare design and tasks for
+each selected change:
 
 ```text
 Ask → Identify needs → Align design and engineering → Plan
@@ -94,6 +101,14 @@ blockers. Readiness reports prerequisites, not permission.
 Default structured work retains final human review. Explicit fast-forward
 delegates acceptance for the selected change. There are no stage gates or
 authorization receipts.
+
+**Large work:** one ask may need many changes. Define what each increment delivers
+now, preserves, defers, and how its result can be accepted while later work waits.
+Detail the next executable increments; retain future candidates as concise open
+changes when a resumable plan is requested. Shared code and sequential dependencies
+do not by themselves require one change. Tasks expose real completion boundaries;
+a short list must not hide whole subsystems. Reconcile growing scope and stale
+blockers before resuming. See [Planning large work](docs/workflows.md#planning-large-work).
 
 | Skill | Responsibility |
 | --- | --- |

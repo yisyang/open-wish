@@ -92,9 +92,25 @@ mode = "default"
 +++
 ```
 
-The body explains **purpose**, **approach**, and **verification** for this bounded
-improvement. Keep it concise and revise it when the working design changes. Source
-and tests carry the resulting implementation; the change need not survive delivery.
+The body explains **purpose**, **scope**, **approach**, and **verification** for this
+reviewable increment. Scope identifies **delivers now**, **preserves**, and **defers**;
+verification identifies direct **exit evidence**. Reference need IDs where useful
+without implying that this increment fully delivers every linked need. Deferral
+preserves intent, not permission to violate a constraint or drop an agreed result.
+The template's headings are guidance, not a required prose schema.
+
+Apply Right-size delivery in the installed `ow-propose` skill. A result should be
+acceptable and useful while later work is postponed. Shared code and sequential
+dependencies alone do not require one change; combine work needing joint acceptance.
+Neither need/task count nor a short document proves that the scope is manageable.
+Keep the design concise and evolving; source/tests carry the implemented solution.
+
+For requested resumable plans, use several ordinary open changes. Later candidates
+hold a concise scope, prerequisite capabilities, uncertainties, and exit evidence;
+their tasks may be empty until selected. Explain that planning is incomplete, then
+verify prerequisites in delivered code/tests and prepare tasks before execution.
+An empty list is not evidence that a candidate is delivered. Keep future obligations
+in their own records so disposal of an earlier change does not lose the remaining plan.
 
 Status is `open | in-progress | review | closed`. Edit `in-progress` when work
 starts. `record-review` sets `review` for a pass and `in-progress` for blocked
@@ -137,11 +153,23 @@ Task IDs are qualified by their owning change. Dependencies must reference tasks
 within that same change and form an acyclic graph. List order is the scheduling
 preference; prerequisites control readiness. There are no global group/order
 pairs. Independent work continues while a manual observation or blocked task waits.
-For tightly coupled cross-change work, combine the tasks into one bounded change.
-Otherwise coordinate changes against already delivered code and interfaces.
+Combine work requiring a joint acceptance boundary; otherwise sequence changes
+against delivered capabilities, verified from code/interfaces/checks before execution.
+There is no cross-change task graph. Reconcile prerequisite descriptions before
+disposing earlier changes so successors do not depend on deleted working records.
+
+Use enough tasks to expose real completion and blocking boundaries. Split hidden
+subsystems or separately verifiable work, while keeping coherent implementation and
+its focused checks together. No fixed task count or task-per-file rule applies.
+Every delivers-now result needs planned work or existing direct evidence. Reconcile
+changed decisions, scope, task states and dependencies before trusting readiness;
+see the installed `ow-plan` skill for Task sizing and Reconcile the plan.
 
 Keep completed task results until the change closes. An empty tasks array is valid
-for verification-only work; it does not excuse missing review or actual checks.
+for verification-only work or a future candidate awaiting detailed planning; neither
+excuses missing review, delivered scope, or actual checks. When splitting active work,
+preserve unfinished obligations and useful evidence, repair qualified IDs/local links,
+and refresh pending reviews. Moved work is not completed work.
 
 ## Review, closure, and disposal
 
@@ -163,6 +191,8 @@ Include all `review_needs` from the context manifest, including current needs
 outside the change's purpose. Coverage means assessing intent and regressions;
 record actual relevant checks and explain why unaffected constraints remain safe.
 The CLI checks structure, not whether an agent's reasoning or evidence is truthful.
+Review the promised increment and its exit evidence as well as task completion;
+assessing all needs does not claim all future outcomes are implemented.
 
 Use `--verdict blocked` for unresolved findings. A passing review requires all
 tasks done and direct results. Its fingerprint covers current/linked needs, the

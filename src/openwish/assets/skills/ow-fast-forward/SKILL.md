@@ -15,7 +15,9 @@ Delegation belongs to this change, never to a durable need or unrelated future w
    inferred needs unconfirmed. Keep conversation asks out of permanent records.
 2. Routine work still uses the lightweight path: inspect, implement, verify, report,
    and stop. Create no records, set no mode, and ask no acceptance question.
-3. For substantive work, create/reuse a bounded change. Use `ow new change C-001
+3. For substantive work, use Propose's Right-size delivery to scope reviewable
+   increments; delegation does not justify one oversized change. New/split changes
+   do not inherit mode from a parent or shared needs. Use `ow new change C-001
    --title "Improvement" --need N-001 --fast-forward`, or `ow mode fast-forward
    C-001` for an active change explicitly covered by this request.
 4. Follow Propose, Align, Plan, Implement, and Review, reading each on entry.

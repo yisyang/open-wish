@@ -33,9 +33,22 @@ OW workflow imposed on contributors. Architecture is in [design.md](design.md).
 - Changes reference one or more needs directly, many-to-many. Each holds a bounded
   improvement's purpose, working design/engineering approach, verification plan,
   and tasks. Plans may evolve without synchronizing another persistent spec tier.
+- Bound changes by independently reviewable results that remain useful if later
+  work is postponed. State delivery scope, preserved constraints, explicit deferrals,
+  and exit evidence. A need reference does not promise complete satisfaction.
+- Broad asks produce a sequence of increments. Detail the next executable work;
+  retain future candidates as concise open changes when resumability is requested.
+  Their empty task lists mean planning is incomplete, not delivery is complete.
+- Shared code or sequential dependencies do not imply joint acceptance. Coordinate
+  through prerequisite capabilities verified in delivered code/tests. Integrate
+  representative outcomes early rather than deferring all integration to the end.
 - Tasks have verifiable acceptance and concise direct completion evidence. Simple
   lists suffice; optional acyclic dependencies stay within the parent change.
   Continue independent work around manual blockers. Missing observations never pass.
+- Size tasks by concrete completion and blocking boundaries, without quotas or
+  hidden subsystem-sized work. Reconcile changed scope/decisions, tasks and blockers
+  before execution. Splits preserve unfinished obligations and useful evidence;
+  successor plans must remain understandable after earlier changes are disposed.
 - Retain task results through integration and final review. After accepted closure,
   dispose the change, tasks, and review together. Preserve useful knowledge in
   needs, code, tests, or ordinary repository docs before removal.

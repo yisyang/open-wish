@@ -16,9 +16,9 @@ Respect requests to work directly without OW. Initialize only when asked to adop
 Clear, localized, reversible work within existing intent follows inspect →
 implement → verify → report. It needs no change file, new need, or acceptance
 ceremony. Substantial work, consequential choices, and work that needs resumable
-coordination use a change. Keep work already tracked in a change there, including
-unresolved manual checks. A small change may have one task; a verification-only
-change may have none.
+coordination use reviewable changes. Reconcile tracked work before moving it between
+changes, preserving unresolved manual checks and useful completed evidence. A small
+change may have one task; verification-only work may have none.
 
 ## Durable needs
 
@@ -99,6 +99,32 @@ constraints, including those outside a change's motivating scope. Distinguish
 incompatible intent from an implementation that does not yet satisfy compatible
 needs; adapt the implementation when possible.
 
+### Reviewable delivery
+
+Use Right-size delivery in the installed `ow-propose` skill. A change delivers a
+concrete improvement that can be accepted and retained while later work is postponed.
+Describe delivers now, preserves, defers, and exit evidence. Need links express
+contribution, not complete satisfaction. Deferral cannot weaken applicable constraints
+or silently remove agreed results. Broad asks usually need a sequence of changes.
+
+Split separately acceptable capabilities; combine work needing joint acceptance.
+Shared modules/databases or later work using earlier work do not alone require one
+change. Integrate representative end-to-end behavior early. Enabling work should prove
+a useful capability rather than merely construct speculative layers.
+
+For requested resumable plans, retain later candidates as concise ordinary open
+changes with scope, prerequisite capabilities, uncertainties, and exit evidence.
+Detail tasks for the next executable increments; an empty future task list is
+unplanned work, not completion. Verify prerequisites against delivered code/tests.
+Reconcile successor references before disposal; no permanent roadmap tier is required.
+
+Use Task sizing and Reconcile the plan in the installed `ow-plan` skill. Task count
+follows meaningful completion and blocking boundaries, not a fixed quota. Do not
+compress subsystems into tasks to keep a list short. Connect promised outcomes to
+work or existing evidence. On new requirements or resumption, reconcile scope,
+resolved decisions, blockers and dependencies; preserve unfinished work and evidence
+when splitting changes. Decomposition within authorized scope needs no reauthorization.
+
 ### Strategic verification
 
 Use the smallest set of fast, independent checks that protects affected needs and
@@ -155,16 +181,19 @@ observations, access, or passing checks, and does not override a plan-only reque
 
 ## Execution and review
 
-1. Prepare needs, approach, and tasks together. Continue to implementation when
-   authorized; a plan-only request stops at the prepared change.
+1. Prepare needs, increment boundaries, approach, and tasks together. Continue to
+   implementation when authorized; a plan-only request stops at the prepared plan.
 2. Run `ow ready C-001` and work in listed order subject to local prerequisites.
    Tasks use `open | in-progress | blocked | done`. Optional dependencies stay
    within the change so completed changes can be removed independently. Coordinate
-   separate changes through delivered code/interfaces; combine tightly coupled work.
+   separate changes through delivered code/interfaces; combine work needing joint
+   acceptance. Reconcile stale task states and prerequisite capabilities first.
 3. Verify each task before marking it done. Record concise direct evidence.
    Retain completed tasks until change closure. Continue independent work around
    manual blockers, then present indispensable human input with its purpose.
-4. Review the actual diff and outcomes against all current needs. Assess which
+4. Review delivered scope and exit evidence as well as task completion. Assess the
+   actual diff and outcomes against all current needs without claiming all future
+   outcomes are implemented. Assess which
    need checks are affected and explain unaffected constraints briefly. Run
    meaningful regression checks and `ow check`; routine verification should take
    under five minutes, with necessary slower checks identified explicitly.

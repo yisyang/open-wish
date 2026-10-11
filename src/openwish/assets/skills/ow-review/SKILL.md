@@ -13,6 +13,11 @@ report, and stop without creating records or asking final acceptance.
    relevant error paths, compatibility, reliability, security, and maintainability.
    Determine affected checks and explain unaffected constraints briefly. Passing
    tests alone do not prove user benefit or excuse tests that repeat a code mistake.
+   Compare actual results with the change's delivers-now scope and exit evidence,
+   not just checked-off tasks. Explain partial contributions and explicit deferrals;
+   reviewing all needs does not mean implementing every future outcome. Deferral
+   cannot excuse a violated constraint or an omitted agreed deliverable. An empty
+   task list in a candidate change is not completion evidence.
    Apply Strategic verification in `../ow-plan/SKILL.md`: do the retained checks
    detect important need violations and survive harmless refactors? Look for genuine
    gaps before adding tests. Question brittle presentation snapshots, private-call

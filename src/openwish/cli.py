@@ -115,7 +115,8 @@ def run(args):
             for level, messages in (("ERROR", errors), ("WARN", warnings)):
                 for message in messages:
                     print(f"{level} {message}")
-            print(f"{'FAIL' if errors else 'PASS'}: {len(errors)} errors, {len(warnings)} warnings")
+            print(f"{'FAIL' if errors else 'PASS'} (structure and budgets): "
+                  f"{len(errors)} errors, {len(warnings)} warnings")
         return 1 if errors else 0
     project = checked_project(root, code=args.command in ("record-review", "close"))
     if args.command == "status":
@@ -166,7 +167,7 @@ def run(args):
                     if task.get("blocker"):
                         print(f"  {task['blocker']}")
             if not ready:
-                print("No agent-ready work. Resolve waiting items, or review completed changes.")
+                print("No agent-ready tasks. Inspect change scope and evidence before planning work or reviewing results.")
     elif args.command == "summary":
         print(summary(project, args.selection))
     elif args.command == "mode":

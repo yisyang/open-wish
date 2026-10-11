@@ -29,8 +29,10 @@ one product/domain per repository.
 5. Report architecture findings as observation (with code/test references), practical
    consequence, and whether improvement is worthwhile. Compare retaining satisfactory
    structure with targeted refactoring; broader restructuring needs stronger evidence.
-   If helpful, propose a bounded sequence with preserved behavior, baseline checks,
-   dependency/effect boundaries, cost/risk, and incremental verification or rollback.
+   If helpful, propose a sequence of independently reviewable changes with preserved
+   behavior, baseline checks, dependency/effect boundaries, cost/risk, and incremental
+   verification or rollback. Apply Right-size delivery in `../ow-propose/SKILL.md`;
+   a whole modernization or pilot is not bounded merely because it has a short list.
    Seek one human decision on that refactor scope before product edits; onboarding
    or delegated intent inference alone does not authorize a rewrite. Present this
    alongside intent confirmation when useful. If no refactor earns its cost, say why.
@@ -42,6 +44,8 @@ one product/domain per repository.
    inventing work to rewrite an already satisfactory implementation.
 7. Present the assessment/proposal in conversation. Create disposable changes/tasks
    only when planning, substantive implementation, or verification was requested.
+   For broad requested plans, record concise candidate changes and detail the next
+   executable increments; do not put the whole delivery program into one change.
    Onboarding alone does not authorize product edits.
    Verification-only changes may have no implementation tasks but still require
    actual checks and review. New changes default to human review unless explicitly

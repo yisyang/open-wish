@@ -9,7 +9,11 @@ Read `openwish/policy.md`, `ow context C-001`, the change approach, and
 `ow ready C-001`. Verify conversation authority before implementation; readiness
 does not grant it. For routine work, implement and verify directly, then report.
 
-1. Select ready work in listed order, subject to local prerequisites. Read its
+1. On resumption or changed decisions/scope, apply Reconcile the plan in
+   `../ow-plan/SKILL.md` before trusting `ow ready`. Verify prerequisite capabilities
+   from earlier increments in the repository; reconcile stale blockers with actual
+   evidence. Expand an unplanned candidate's tasks before executing it.
+   Select ready work in listed order, subject to local prerequisites. Read its
    acceptance and the motivating needs, then inspect relevant code and tests.
    Set the change and task in-progress as work begins.
 2. Implement the smallest coherent solution. Preserve current needs and existing
@@ -30,7 +34,9 @@ does not grant it. For routine work, implement and verify directly, then report.
 4. Continue independent ready work around blocked/manual tasks. A task's list
    position alone does not block later work. Repair the approach and remaining
    tasks as the implementation teaches you more; keep technical decisions within
-   existing authority. Material intent/scope changes return to the relevant decision.
+   existing authority. Reassess growing scope with Right-size delivery in
+   `../ow-propose/SKILL.md`; preserve unfinished work/evidence when splitting changes.
+   Material intent/scope changes return to the relevant decision.
 5. Put enduring behavior in code, regression checks in tests, and otherwise
    unrecoverable rationale near code or in ordinary repository documentation.
    Retain tests protecting lasting obligations; temporary probes need not become

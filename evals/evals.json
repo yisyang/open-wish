@@ -231,6 +231,53 @@
       ]
     },
     {
+      "id": 19,
+      "name": "large-modernization-delivery-boundaries",
+      "skills": ["ow-onboard", "ow-propose", "ow-align", "ow-plan"],
+      "prompt": "The human asks: Use OW to prepare a resumable modernization plan from the supplied assessment and draft. I want the complete direction visible and a useful next step. Planning only; do not build the game yet. Inspect evals/fixtures/modernization/README.md, then save response.md with your assessment of the draft, proposed working-record actions, delivery sequence, and a concrete task plan for the next executable increment. Do not modify the source fixture or initialize OW in this checkout. You may write only your response in the assigned output directory. Distinguish supplied observations from any checks you perform.",
+      "expected_output": "Identify hidden subsystem-sized tasks despite a short pilot checklist. Preserve the current needs and constraints; propose independently reviewable increments with scoped contributions and exit evidence, integrated representative behavior early, and prerequisite capabilities. Detail the next executable increment and keep future work in lightweight ordinary open changes for resumability. Stop at planning without invented verification or a permanent epic tier.",
+      "files": ["evals/fixtures/modernization/README.md"],
+      "assertions": [
+        "Explains why the pilot and at least two existing tasks conceal substantial separately reviewable work, rather than judging only the number of needs or tasks.",
+        "Proposes multiple increments with observable outcomes and exit evidence that can be accepted while later work is postponed; does not simply rename the original program as a parent implementation change.",
+        "Integrates a representative user path early instead of leaving all usable UI and integration until all backend subsystems exist; enabling work proves a concrete capability.",
+        "Details concrete verifiable tasks for the next increment, preserves exact/retry-safe state and isolation when applicable, and explicitly defers later portions of needs without retiring or weakening them.",
+        "Keeps future obligations discoverable in concise ordinary open changes, verifies prerequisite capabilities from delivered code/tests before execution, and avoids cross-change task links or a mandatory permanent roadmap/epic tier.",
+        "Honors plan-only scope and attributes fixture observations honestly without claiming implementation, checks, or acceptance occurred."
+      ]
+    },
+    {
+      "id": 20,
+      "name": "scope-growth-and-stale-plan-reconciliation",
+      "skills": ["ow-propose", "ow-plan", "ow-implement", "ow-consolidate"],
+      "prompt": "Read-only plan repair; no commands or edits except response.md in the assigned output directory. C-001 is an in-progress, fast-forward change originally authorized to let one player complete one production recipe in the browser. Its T-001 tooling task is done with supplied install/build evidence. T-002 is blocked/manual and its entire acceptance is 'Owner selects immediate or timed completion.' T-003 depends on T-002 and implements the recipe. T-004 implements its browser controls. T-005 is a manual phone observation, still unperformed, depending on T-004. The current change body records the owner's actual choice: timed completion. No other tasks are done. In subsequent messages the owner requested a plan for intercity freight, regional retail, employment/payroll, and native app distribution, all under already-current needs; the agent appended these to T-003/T-004 and kept the original five-task list. The owner now says: Repair this plan so we can resume the originally authorized work, keep the requested future direction visible, and avoid losing anything when completed work is cleaned. Give exact proposed changes to scope, task state/evidence, dependencies, future records and execution order, with any necessary questions. Later implementation has not been authorized. Do not invent phone results, product code or acceptance.",
+      "expected_output": "Restore the narrow delivery boundary, split separately acceptable additions into lightweight future changes, reconcile T-002 using the supplied actual decision without inventing implementation evidence, retain T-005 and T-001 evidence, and repair local dependencies. Prepare/resume only original authorized work; future additions remain planning-only and default review. Successor prerequisites survive cleanup through delivered capabilities, without losing obligations or copying an execution archive.",
+      "files": [],
+      "assertions": [
+        "Separates freight, regional retail, employment/payroll and native distribution from the original single-recipe delivery instead of expanding broad task acceptance to contain them.",
+        "Proposes completing T-002 with evidence attributed to the actual supplied timed-completion decision, removes its stale blocking effect, and preserves implementation work as unfinished.",
+        "Retains the unperformed T-005 manual observation and T-001 completion evidence; does not mark moved or unverified work done or drop it to achieve closure.",
+        "Reconciles scoped tasks and local dependencies, then resumes T-003/T-004 subject to actual verification under existing authority without redundant decision questions.",
+        "Keeps requested future direction in specific lightweight open changes with prerequisite capabilities and normal review, without inheriting C-001 fast-forward or authorizing later implementation.",
+        "Explains how successor obligations and prerequisite descriptions survive C-001 cleanup using retained future changes and delivered code/interfaces/checks, without permanent completion receipts or cross-change task dependencies."
+      ]
+    },
+    {
+      "id": 21,
+      "name": "narrow-many-need-partial-delivery",
+      "skills": ["ow-propose", "ow-plan", "ow-review"],
+      "prompt": "Read-only assessment; save response.md only in the assigned output directory. C-007 is an existing default-mode change scoped to fix one shared exact-money parser and update its inseparable serializer contract. It references 18 current needs because production, commerce, payroll, reporting and other features share that boundary. Some of those capabilities, including native clients, are future work. Two coherent tasks cover the parser and contract integration; both have supplied direct passing evidence, including regression checks of existing consumers. Assume an independent review supplied to you found the promised fix correct and every applicable current constraint preserved. One reviewer says 18 needs require at least 18 changes and every future capability must be implemented before this change can close. Another says its two done tasks prove all 18 needs are now fully delivered. The human has not accepted C-007's result. C-008 is an open future native-client candidate with an empty task list and no implementation evidence. Assess the reviewers' claims, explain the right scope and review/closure actions for both changes, and identify any necessary new work without inventing commands or observations.",
+      "expected_output": "Keep the narrow jointly acceptable parser/contract fix together despite many need references, assess all current intent without demanding future capability delivery, and distinguish supplied evidence of this increment from complete need satisfaction. Present C-007 for actual human acceptance, preserve current needs, and keep C-008 unplanned/open without manufacturing verification-only completion or speculative tasks.",
+      "files": [],
+      "assertions": [
+        "Keeps C-007 as one coherent change because its parser/serializer result needs joint acceptance, rejecting a fixed need-count rule or one-change-per-need mapping.",
+        "Distinguishes the verified scoped contribution from complete satisfaction of all 18 needs and explains that future features remain deferred while applicable constraints and existing behavior are assessed.",
+        "Checks promised scope and exit evidence rather than treating done tasks alone as proof of delivery; accurately attributes the supplied checks and independent review.",
+        "Presents C-007 for genuine human acceptance before closure/disposal and leaves needs current without inventing acceptance or requiring implementation of unrelated future capabilities.",
+        "Keeps C-008 open as a future candidate awaiting detailed planning and actual work; its empty task list is not verification or completion evidence."
+      ]
+    },
+    {
       "id": 12,
       "name": "default-results-await-human-review",
       "skills": ["ow-review"],

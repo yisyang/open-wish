@@ -23,6 +23,9 @@ a snapshot of previous skills when assessing a revision.
 | Need sizing, relationships, and retention | Reuse/split/merge intent carefully; preserve sparse semantic facts and useful knowledge |
 | Strategic test selection | Reuse stable checks, protect against consequential data loss, avoid brittle incidental assertions and unrequested targets |
 | Explicit coverage contract | Honor scoped human coverage requirements without equating them with correctness |
+| Large modernization | Detect subsystem-sized tasks; scope independently reviewable increments and detail the next executable work |
+| Growing scope and stale blockers | Preserve obligations/evidence, reconcile resolved decisions, repair dependencies, and keep future plans usable after disposal |
+| Narrow change with many needs | Retain a coherent cross-cutting increment; distinguish partial contribution, future work, and actual result acceptance |
 
 Grade actual responses rather than claims of compliance. A real decision uses
 numbered A/B/C choices with `(Recommended)` before preferred text; routine work
@@ -50,6 +53,14 @@ Historical sequencing would require separately captured harness checkpoints; it 
 not established by retrospective prose or required in the product's retained files.
 Case 16 assesses semantic consolidation and relationship reuse. Assertions support
 human judgment; none of these small samples prove reliability across harnesses.
+Cases 19–21 exercise delivery planning at different scales. Case 19 uses a supplied
+modernization assessment, not a runnable game; grade attribution accordingly. Inspect
+the proposed acceptance boundaries, early integration and concrete next tasks rather
+than rewarding change/file counts. Case 20 checks scope growth and contradictory
+decision/task state, including preservation of genuine manual blockers and delegation
+boundaries. Case 21 is a control against unnecessary splitting or claims that an empty
+future task list establishes completion. Compare old and revised guidance on identical
+prompts in fresh sessions; report improvements and non-discriminating cases honestly.
 Fixtures are evaluation inputs, not OW's product implementation. Always run/copy
 them in temporary projects; never install an OW workflow into this source checkout.
 
