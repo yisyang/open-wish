@@ -1,4 +1,4 @@
-# OpenWish framework design — 0.5
+# OpenWish framework design — 0.6
 
 ## Core invariant
 
@@ -23,7 +23,7 @@ reviews, configuration, and installer bookkeeping. `tomllib` handles TOML.
 | Module | Responsibility |
 | --- | --- |
 | `storage.py` | Root discovery, safe paths, bounded atomic writes, schema-3 loading |
-| `model.py` | Pure need/change selection, complete intent context, task readiness |
+| `model.py` | Pure selection, sparse need graph, retention groups, context, task readiness |
 | `validation.py` | Typed records, references, local acyclic prerequisites |
 | `budgets.py` | Context/artifact limits, Git-aware source discovery, source-size checks |
 | `workflow.py` | Latest review, one result fingerprint, closure, conservative cleanup |
@@ -49,6 +49,47 @@ Needs have no implementation status, mode, gate receipts, review sidecars, or
 reopen lifecycle. Changes derive their need links directly. Closing one change
 does not claim the entirety of a need is delivered or erase its future relevance.
 Closure does not infer human confirmation of intent.
+
+Optional `relations` are inline TOML tables on the source need, each with `kind`,
+target `need`, and `reason`. `requires` expresses an outcome prerequisite;
+`constrains` expresses a limit on the target's acceptable solutions. Validation
+rejects missing targets, self-links, duplicate kind/target pairs, empty reasons,
+and current-to-retired links. Semantic cycles are valid; this is not a task DAG.
+Incoming links and retained change references must be reconciled on deletion.
+
+`graph [N-001 ...] [--json]` constructs an edge list in one pass over the validated
+need snapshot. Selection includes incident edges and endpoints, with currency,
+not transitive impact or an inferred complete graph. Relations survive change
+disposal and are included in complete need context and review freshness. There
+is no graph sidecar, all-pairs inference, persistent cache, or need-to-code ledger.
+Agents preserve established intent facts, reuse valid working assessments, and
+revisit changed inputs/neighbors and possible new interactions. Code dependencies
+are reconstructed from source/tests as needed. All current needs remain binding.
+
+## Architectural reasoning
+
+The `ow-align` skill owns a shared rubric used by onboarding, implementation, and
+review: discoverability, rule ownership/locality, explicit dependencies/data ownership,
+isolated effects, independent tests, justified complexity, and understanding after
+disposal. Findings connect code-grounded observations to consequences, proposed
+improvements, and verification. Small files alone do not establish good architecture.
+
+Pure decisions, validation, transformations, and transitions accept explicit data.
+Time/randomness/configuration and external results enter at identifiable effect
+boundaries; core and integration checks have distinct purposes. Avoid abstractions
+added solely to appear functional. Greenfield work starts with a minimal conventional
+layout and an end-to-end slice; subsequent asks reassess affected boundaries.
+
+Onboarding inspects actual paths and compares retaining satisfactory structure with
+targeted improvements. Useful refactor proposals include scope, behavior baseline,
+incremental steps, cost/risk, and verification/rollback. The human authorizes that
+scope before edits. Assessments live in conversation or disposable changes; only
+otherwise unrecoverable rationale survives near the implementation.
+
+Need-sizing guidance distinguishes coherent outcomes from mechanism-sized records
+and broad bundles. Acceptance/retirement independence justifies a split; matching
+intent justifies reuse/merge. Scope/meaning changes require a decision. Stable IDs
+aid continuity, not permanent immutability.
 
 ## Temporary changes and tasks
 
@@ -103,6 +144,10 @@ Repository discovery uses Git tracked and unignored untracked files; non-Git
 projects use filesystem traversal. Build/dependency directories and symlinks are
 excluded. External/manual observations remain explicit reported evidence. Source
 hashing is intentionally conservative; code changes require refreshed review.
+Executable permission changes also invalidate review. Status/summary lazily reuse
+one repository fingerprint within the command; batch closure also shares one
+snapshot. Subsequent commands read fresh inputs. Need-to-change reverse lookup
+is built once per status projection. No persistent cache can mask later edits.
 Other changes' temporary plans and runtime status/closure metadata are excluded.
 This is one pending-result check, not a receipt chain. Closed reviews are historical.
 
@@ -136,6 +181,20 @@ the soft target, under 1000 the hard maximum. Data formats are exempt. Exact-pat
 low-complexity exceptions require rationale and do not exempt OW artifacts.
 Closed changes prompt cleanup rather than failing an arbitrary working-set count.
 
+At 80% of the token budget or 400 current-context lines, warn before failure.
+Status derives retention groups for closed changes, review-state changes (which
+may need refreshed checks), blocked/manual work, and retired needs. Agents also
+look for duplicates, broad bundles, mechanism-sized needs, and drift. Total file
+count has no hard cap: disposal is normal completion, deferrals are reported,
+and abandoned-looking work is reconciled rather than silently discarded. Retired
+needs can be removed after a retention decision and reference reconciliation.
+
+Tests/manual procedures enable new evidence. Run results and closure provenance
+are disposable; OW has no durable delivery ledger or satisfaction certification.
+Only selected operational facts and non-obvious rationale survive in docs/comments.
+Historical proof is product data when a need explicitly calls for it. Tool config,
+policy, reference, skills/adapters, and installer bookkeeping are not evidence.
+
 ## Integration and compatibility
 
 Eight canonical skills describe activities, not eight artifact tiers. They are
@@ -158,6 +217,21 @@ local config, policy, needs, and work in current-schema projects.
 
 ## Verification
 
+The `ow-plan` skill owns Strategic verification guidance, shared by alignment,
+implementation, onboarding, review, and consolidation. Select a small, fast set of
+checks for stable outcomes, important decisions/invariants, and consequential
+boundaries. Reuse existing coverage, add checks for real gaps, and state remaining
+uncertainty. Not every task, function, or layer warrants its own test. Large mock
+setups for simple rules can expose poor boundaries rather than demand more scaffolding.
+
+Tests should withstand harmless refactors and detect meaningful violations of needs.
+Avoid incidental text/layout snapshots, private-call assertions, and speculative
+negative matrices. Narrow exact assertions suit actual contracts; credible failures
+with serious consequences deserve checks even without a coverage target. Explicit
+human/project coverage requirements are honored without treating 100% as correctness.
+Temporary probes may disappear; lasting tests enable fresh verification after
+change disposal, without a permanent archive of stage-by-stage execution evidence.
+
 Tests cover many-to-many need links, local task readiness, manual blockers, cycles,
 malformed artifacts, complete context, safe cleanup, provenance, stale reviews,
 and schema refusal without writes. CLI scenarios execute default and fast-forward
@@ -169,3 +243,7 @@ and source packages, both CLI aliases, assets, and the change lifecycle.
 Semantic skill scenarios cover intent reuse, conflicts, plan-only scope, opt-outs,
 routine work, manual blockers, change-scoped delegation, and disposal. They
 complement deterministic tests and do not prove behavior across every model/harness.
+The greenfield evaluation reruns retained tests and checks their useful protection
+and cost against current needs. Final artifacts do not establish historical run
+order; evaluating that would require separate harness-captured checkpoints outside
+the product. Test-count growth alone earns no evaluation credit.

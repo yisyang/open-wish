@@ -8,6 +8,18 @@ from tests.support import ProjectCase
 
 
 class CliTests(ProjectCase):
+    def test_graph_exposes_reasoned_intent_and_preserves_all_current_context(self):
+        self.fixture()
+        self.add_need()
+        self.edit_document("needs/N-002.md", relations=[{
+            "kind": "constrains", "need": "N-001", "reason": "Reconciliation stays local."}])
+        graph = json.loads(self.cli("graph", "N-001", "--json").stdout)
+        self.assertEqual(graph["relations"], [{"source": "N-002", "target": "N-001",
+                                              "kind": "constrains", "reason": "Reconciliation stays local."}])
+        self.assertIn("N-002 constrains N-001", self.cli("graph").stdout)
+        self.assertIn("Reconciliation stays local.", self.cli("context", "N-001").stdout)
+        self.cli("graph", "N-999", success=False)
+
     def cli(self, *arguments, success=True, cwd=None):
         environment = os.environ.copy()
         environment["PYTHONPATH"] = str(Path(__file__).resolve().parents[1] / "src")

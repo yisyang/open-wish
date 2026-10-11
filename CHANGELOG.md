@@ -2,6 +2,41 @@
 
 Release notes for OpenWish, newest first. Update this file for every release.
 
+## v0.6.0
+
+### Added
+
+- A shared, code-grounded architecture rubric covering discoverability, rule
+  ownership, dependencies, effects, independent checks, and justified complexity.
+- Greenfield first-slice/evolution guidance and brownfield architecture assessment
+  with bounded refactor proposals and human approval of additional scope.
+- Need-sizing and consolidation criteria for mechanisms, independent outcomes,
+  duplicates, broad bundles, and evolving intent.
+- Optional reasoned `requires`/`constrains` relations on needs and a derived
+  `ow graph [N-001 ...] --json` view. Semantic cycles are allowed; links do not
+  replace all-current-needs review or create a permanent analysis registry.
+- Retention attention groups in status, early context-budget warnings, and explicit
+  guidance for disposal, retired needs, manual procedures, and durable evidence.
+- Repository-grounded skill evaluations for architecture discovery and evolution.
+- Strategic verification guidance: small, fast checks of stable outcomes and
+  consequential failures, reuse of existing coverage, and deliberate test retention.
+
+### Changed
+
+- The greenfield skill evaluation assesses independently rerunnable current tests,
+  proportionate protection, and useful retained artifacts instead of requiring
+  historical first-slice execution evidence after disposal.
+- Status/summary and batch closure share a repository fingerprint within one command;
+  subsequent commands read a fresh snapshot. Status builds reverse change links once.
+- Bundled integrations and package version advance together to 0.6.0. Artifact
+  schema remains 3; optional relation tables live in the existing need records.
+
+### Fixed
+
+- Misplaced/nested need artifacts produce a validation error instead of silently
+  disappearing from current intent.
+- Executable-permission changes invalidate pending result reviews.
+
 ## v0.5.0
 
 OW now preserves durable needs and uses disposable changes/tasks for execution.

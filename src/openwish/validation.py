@@ -3,7 +3,7 @@
 from datetime import date, datetime
 import re
 
-from .model import CHANGE_STATES, CURRENCY, MODES, TASK_STATES, topological_order
+from .model import CHANGE_STATES, CURRENCY, MODES, RELATIONS, TASK_STATES, topological_order
 from .storage import SCHEMA_VERSION, WishError, contained
 
 
@@ -16,7 +16,33 @@ def nonempty(value):
 
 
 def header_value(value):
-    return isinstance(value, (str, bool, int)) or (isinstance(value, list) and all(header_value(v) for v in value))
+    return (isinstance(value, (str, bool, int))
+            or (isinstance(value, list) and all(header_value(v) for v in value))
+            or (isinstance(value, dict) and all(isinstance(k, str) and header_value(v) for k, v in value.items())))
+
+
+def relation_errors(key, meta, needs):
+    relations = meta.get("relations", [])
+    if not isinstance(relations, list):
+        return [f"{key}: relations must be an array of kind/need/reason tables"]
+    errors, seen = [], set()
+    for relation in relations:
+        if (not isinstance(relation, dict) or set(relation) != {"kind", "need", "reason"}
+                or relation.get("kind") not in RELATIONS or not nonempty(relation.get("need"))
+                or not nonempty(relation.get("reason"))):
+            errors.append(f"{key}: each relation needs kind (requires or constrains), need ID, and reason")
+            continue
+        target, kind = relation["need"], relation["kind"]
+        if target == key:
+            errors.append(f"{key}: a need relation cannot target itself")
+        if (kind, target) in seen:
+            errors.append(f"{key}: duplicate {kind} relation to {target}")
+        seen.add((kind, target))
+        if target not in needs:
+            errors.append(f"{key}: unknown relation target {target}")
+        elif meta.get("currency") == "current" and needs[target]["meta"].get("currency") == "retired":
+            errors.append(f"{key}: reconcile relation to retired need {target} before use")
+    return errors
 
 
 def validate(project):
@@ -50,6 +76,10 @@ def validate(project):
                 "config: each code exception needs path, reason, and kind (data or low-complexity)")
 
     base = project["root"] / "openwish"
+    for path in (base / "needs").glob("*"):
+        contained(project["root"], path.relative_to(project["root"]))
+        require(path.is_file() and path.suffix == ".md" and path.stem in project["needs"],
+                f"Unrecognized need artifact: {path.name}; needs must be flat needs/N-NNN.md files.")
     for path in (base / "changes").glob("*"):
         contained(project["root"], path.relative_to(project["root"]))
         require(path.is_dir() and path.name in project["changes"],
@@ -58,10 +88,11 @@ def validate(project):
     for kind in ("needs", "changes"):
         for key, record in project[kind].items():
             require(all(header_value(value) for value in record["meta"].values()),
-                    f"{key}: header values must be strings, booleans, integers, or arrays of these values")
+                    f"{key}: header values must be strings, booleans, integers, arrays, or inline tables")
 
     for key, record in project["needs"].items():
         meta = record["meta"]
+        errors.extend(relation_errors(key, meta, project["needs"]))
         for field in ("title", "actor", "outcome"):
             require(nonempty(meta.get(field)), f"{key}: {field} is required")
         require(meta.get("currency") in CURRENCY, f"{key}: invalid currency")

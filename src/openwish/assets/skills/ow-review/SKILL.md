@@ -13,11 +13,23 @@ report, and stop without creating records or asking final acceptance.
    relevant error paths, compatibility, reliability, security, and maintainability.
    Determine affected checks and explain unaffected constraints briefly. Passing
    tests alone do not prove user benefit or excuse tests that repeat a code mistake.
+   Apply Strategic verification in `../ow-plan/SKILL.md`: do the retained checks
+   detect important need violations and survive harmless refactors? Look for genuine
+   gaps before adding tests. Question brittle presentation snapshots, private-call
+   assertions, redundant coverage, and unjustified edge-case matrices; preserve exact
+   checks for actual contracts and credible failures with meaningful consequences.
 2. Remediate within authorized intent and rerun affected checks. Continue available
    work before requesting human input. Retain unresolved manual observations and
    limitations honestly. Material intent changes require an actual decision.
 3. Ensure the repository will remain understandable after disposal: preserve
    lasting behavior/tests, updated needs, and useful rationale before final review.
+   Apply the Architecture rubric in `../ow-align/SKILL.md` to the actual changed
+   paths. Check rule ownership, dependency direction, effects, and independent
+   outcome checks. Explain consequential regressions in maintainability; a small
+   file or passing suite alone is not evidence of good architecture.
+   Judge the suite by useful protection and execution/maintenance cost, not test
+   count or an unrequested coverage target. Verify the current result; describe
+   observed checks and remaining uncertainty without demanding a historical run ledger.
 4. Run `ow check`, then `ow record-review C-001 --summary "user outcome" --check
    "command/observation: result" --covered-need N-001 ...`. Include every
    `review_needs` ID from the context manifest. Unresolved findings use
@@ -36,3 +48,5 @@ report, and stop without creating records or asking final acceptance.
    change, tasks, and review once useful knowledge is preserved. Needs remain
    current. Further implementation uses a new change with default mode unless
    explicitly delegated again; closing one increment does not complete a need forever.
+   Completion includes disposal or an explicit reason it is deferred, so closed
+   records do not silently become an execution archive.

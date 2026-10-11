@@ -1,4 +1,5 @@
 from openwish.budgets import check_budgets
+from openwish.model import estimate_tokens, needs_context
 from openwish.storage import read_json, write_json
 
 from tests.support import ProjectCase
@@ -23,6 +24,14 @@ class BudgetTests(ProjectCase):
         self.edit_document("needs/N-001.md", outcome="long outcome " * 100)
         self.config(needs_token_budget=100)
         self.assertIn("tokens", "\n".join(check_budgets(self.project())[0]))
+
+    def test_context_warns_before_reaching_its_budget(self):
+        self.fixture()
+        tokens = estimate_tokens(needs_context(self.project()))
+        self.config(needs_token_budget=tokens + 1)
+        errors, warnings = check_budgets(self.project())
+        self.assertFalse(errors)
+        self.assertIn("review sizing and duplication", "\n".join(warnings))
 
     def test_source_soft_and_hard_boundaries(self):
         path = self.root / "app.py"

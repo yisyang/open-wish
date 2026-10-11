@@ -33,11 +33,12 @@ def source_fingerprint(project):
         if relative.startswith("openwish/"):
             continue
         with path.open("rb") as source:
-            records[relative] = hashlib.file_digest(source, "sha256").hexdigest()
+            records[relative] = {"content": hashlib.file_digest(source, "sha256").hexdigest(),
+                                 "executable": path.stat().st_mode & 0o111}
     return digest(records)
 
 
-def review_fingerprint(project, key):
+def review_fingerprint(project, key, *, source=None):
     """Protect a pending result from stale checks, without stage authorization gates."""
     change = project["changes"][key]
     policy = contained(project["root"], "openwish/policy.md")
@@ -49,7 +50,7 @@ def review_fingerprint(project, key):
         "tasks": change_tasks(project, key),
         "config": project["config"],
         "policy": policy.read_text(encoding="utf-8") if policy.exists() else "",
-        "source": source_fingerprint(project),
+        "source": source if source is not None else source_fingerprint(project),
     })
 
 
@@ -105,7 +106,7 @@ def record_review(project, key, summary, checks, needs, verdict="pass"):
     save_change(change, status=status)
 
 
-def validate_review(project, key, *, fresh=True):
+def validate_review(project, key, *, fresh=True, source=None):
     review = read_json(review_path(project, key))
     review_fields(review.get("summary"), review.get("checks"), review.get("needs"), review.get("verdict"))
     if review["verdict"] != "pass" or any(task["status"] != "done" for task in change_tasks(project, key)):
@@ -117,7 +118,7 @@ def validate_review(project, key, *, fresh=True):
     if fresh:
         if set(review_needs(project, key)).difference(review["needs"]):
             raise WishError("Review is missing current/linked needs.")
-        if review.get("fingerprint") != review_fingerprint(project, key):
+        if review.get("fingerprint") != review_fingerprint(project, key, source=source):
             raise WishError("Review is stale: needs, approach, tasks, policy, or repository files changed. "
                             "Refresh verification and AI review before closing.")
     return review
@@ -127,11 +128,14 @@ def close_changes(project, keys, by):
     if by not in ("human", "fast-forward"):
         raise WishError("Closure must be attributed to human or explicit fast-forward.")
     pending = []
+    source = None
     for key in dict.fromkeys(keys):
         change = require_change(project, key)
         if by == "fast-forward" and change["meta"]["mode"] != "fast-forward":
             raise WishError(f"{key}: fast-forward closure requires explicitly enabling this change's mode.")
-        validate_review(project, key)
+        if source is None:
+            source = source_fingerprint(project)
+        validate_review(project, key, source=source)
         meta, text = change_update(change, status="closed", closed_by=by,
                                    closed_at=datetime.now(timezone.utc).isoformat())
         pending.append((change, meta, text))

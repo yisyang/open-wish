@@ -56,18 +56,24 @@ release workflow:
 | Trigger | Destination | GitHub environment |
 | --- | --- | --- |
 | Publish a stable GitHub release | PyPI | `pypi` |
-| Manually run the Release workflow | TestPyPI | `testpypi` |
+| Push a `vMAJOR.MINOR.PATCH` tag | TestPyPI | `testpypi` |
 | Publish a GitHub prerelease | No publication | — |
 
 Only the publishing job receives `id-token: write`. Pull requests and ordinary
-pushes run the checks without publishing. Pushing a tag by itself does not publish;
-the production trigger is publishing the GitHub release.
+branch pushes run the checks without publishing. Version tags publish to TestPyPI;
+the production trigger remains publishing the stable GitHub release.
 
 ## TestPyPI rehearsal
 
 1. Finish the TestPyPI setup above.
-2. Open **GitHub Actions → Release → Run workflow** and select the branch to test.
-   Manual runs always target TestPyPI.
+2. Create and push a version tag matching the package version, for example:
+
+   ```sh
+   git tag v0.5.0
+   git push origin v0.5.0
+   ```
+
+   Version-tag pushes always target TestPyPI.
 3. Confirm the build and publication jobs succeed, then exercise the package:
 
    ```sh
@@ -86,11 +92,12 @@ be overwritten; use a new version for revised artifacts on the same registry.
    `## v0.5.0`, and use that entry for GitHub release notes.
    Bundled skill/adapter changes require a version bump for existing installations.
 2. Merge the release commit after Check passes.
-3. Create a tag such as `v0.5.0` pointing to that commit, then publish a GitHub
-   release for that tag. Leave **Set as a pre-release** unchecked.
-4. The Release workflow reruns Check for the tagged revision and publishes only
+3. Create and push a tag such as `v0.5.0` pointing to that commit. Confirm the
+   automatic TestPyPI publication succeeds and exercise the uploaded package.
+4. Publish a GitHub release for that tag. Leave **Set as a pre-release** unchecked.
+5. The Release workflow reruns Check for the tagged revision and publishes only
    after the tests, version checks, metadata validation, and install checks pass.
-5. Confirm the version appears at <https://pypi.org/project/openwish/> and verify
+6. Confirm the version appears at <https://pypi.org/project/openwish/> and verify
    installation with `uv tool install openwish==0.5.0` in a clean tool environment.
 
 If a build or check fails, no publication occurs. Fix the issue before creating

@@ -61,12 +61,15 @@ def read_document(path):
 
 
 def document(metadata, body):
-    # OW headers deliberately use only strings, booleans, integers and lists.
+    # Inline tables keep reasoned need relations in the need's own frontmatter.
     def encode(value):
         if isinstance(value, (str, bool, int)):
             return json.dumps(value, ensure_ascii=False)
         if isinstance(value, list):
             return "[" + ", ".join(encode(item) for item in value) + "]"
+        if isinstance(value, dict) and all(isinstance(key, str) for key in value):
+            return "{" + ", ".join(f"{json.dumps(key)} = {encode(item)}"
+                                   for key, item in value.items()) + "}"
         raise WishError(f"Unsupported header value: {value!r}")
 
     header = "\n".join(f"{key} = {encode(value)}" for key, value in metadata.items())

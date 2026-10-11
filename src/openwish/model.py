@@ -9,6 +9,40 @@ CURRENCY = ("current", "retired")
 CHANGE_STATES = ("open", "in-progress", "review", "closed")
 TASK_STATES = ("open", "in-progress", "blocked", "done")
 MODES = ("default", "fast-forward")
+RELATIONS = ("requires", "constrains")
+
+
+def need_graph(project, keys=()):
+    """Derive a sparse intent graph once from a validated snapshot; never a ledger.
+
+    A selection returns incident edges and their endpoints, not a claim of complete
+    impact or transitive execution order. Retirement remains visible on nodes.
+    """
+    selected = set(select_needs(project, keys)) if keys else set(project["needs"])
+    edges = [{"source": key, "target": relation["need"], "kind": relation["kind"],
+              "reason": relation["reason"]}
+             for key, need in sorted(project["needs"].items())
+             for relation in need["meta"].get("relations", [])
+             if key in selected or relation["need"] in selected]
+    included = selected | {edge[end] for edge in edges for end in ("source", "target")}
+    nodes = [{"id": key, "title": project["needs"][key]["meta"]["title"],
+              "currency": project["needs"][key]["meta"]["currency"]} for key in sorted(included)]
+    return {"needs": nodes, "relations": sorted(edges, key=lambda e: (e["source"], e["kind"], e["target"]))}
+
+
+def retention_data(project):
+    """Expose retained work without guessing abandonment or supplying authority."""
+    blocked = {task["change"] for task in project["tasks"]
+               if task["status"] == "blocked" or (task.get("kind") == "manual" and task["status"] != "done")}
+    return {
+        "cleanup_candidates": [key for key, change in project["changes"].items()
+                               if change["meta"]["status"] == "closed"],
+        "awaiting_acceptance": [key for key, change in project["changes"].items()
+                                if change["meta"]["status"] == "review"],
+        "blocked_changes": sorted(blocked),
+        "retired_needs": [key for key, need in project["needs"].items()
+                          if need["meta"]["currency"] == "retired"],
+    }
 
 
 def select_needs(project, keys):

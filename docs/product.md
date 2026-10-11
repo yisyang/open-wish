@@ -19,6 +19,14 @@ OW workflow imposed on contributors. Architecture is in [design.md](design.md).
 - Distinguish inferred intent from human confirmation. Preserve constraints and
   independently valuable outcomes; surface real conflicts rather than silently
   weakening acceptance to make implementation easier.
+- Right-size needs by outcome independence, not implementation effort. Reuse intent
+  across mechanisms, split separable outcome bundles, and consolidate duplicates.
+  Preserve meaning and reconcile references when IDs change; seek decisions for
+  material intent changes. Retired needs can be removed by a retention decision.
+- Store only useful, reasoned semantic relationships on needs. Derive the sparse
+  graph without another durable artifact tier; relationships focus investigation
+  but never exempt unlinked current needs from consideration. Reassess changed
+  intent, neighboring facts, and possible new interactions instead of all pairs.
 
 ## Disposable execution
 
@@ -52,9 +60,33 @@ OW workflow imposed on contributors. Architecture is in [design.md](design.md).
 
 - Code expresses implemented behavior; needs supply independent intent; tests
   provide executable checks of that connection. Avoid prose mirrors of code.
+- Use the smallest set of fast, independent checks protecting affected needs and
+  consequential failure modes. Reuse existing checks before adding tests; place
+  them at representative outcomes, important pure decisions, and meaningful boundary
+  contracts. Harmless refactors should normally preserve tests; need violations
+  should fail them. A task or module does not automatically need a new test.
+- Avoid brittle incidental wording/layout snapshots, private-call assertions,
+  duplicated checks, and unjustified edge-case matrices. Exact assertions are useful
+  for actual public or human-specified contracts. Credible costly failures merit
+  focused checks even without a coverage request. Expand for risk, uncertainty,
+  observed failures, or explicit requirements; honor requested coverage targets
+  without confusing percentages or test counts with correctness.
+- Keep regression tests for lasting obligations; discard temporary probes after
+  preserving useful findings. Report current verification and remaining limitations,
+  rather than requiring a permanent history of development-stage test runs.
 - Favor functional cores, effects at boundaries, cohesive modules, explicit
   dependencies, thoughtful layout, and established dependencies. Preserve useful
   rationale that cannot be recovered from code near the implementation.
+- Supply operational architectural criteria: discoverability, rule ownership/change
+  locality, dependency/data ownership, explicit effects, independent outcome checks,
+  justified complexity, and understanding after disposal. Evidence and consequences
+  matter more than file size, named patterns, or a numeric architecture score.
+- Establish greenfield architecture through a minimal conventional structure and
+  representative end-to-end behavior. Evolve affected boundaries as asks arrive.
+- Brownfield onboarding assesses representative code paths and proposes refactoring
+  only when benefits justify cost/risk. Present incremental scope, baseline behavior
+  checks, and verification/rollback; obtain approval before that additional work.
+  Retaining satisfactory architecture is a valid recommendation.
 - Reviews assess all current needs and relevant regressions with direct evidence.
   A change's latest review is disposable. Changed intent, approach, task evidence,
   policy, or repository content makes pending review stale before acceptance.
@@ -70,6 +102,13 @@ OW workflow imposed on contributors. Architecture is in [design.md](design.md).
   never exempt OW artifacts. Replace latest summaries rather than accumulating logs.
 - Configuration, policy, and installer bookkeeping support the tool. They do not
   create more mandatory product knowledge layers.
+- Warn before current-intent budgets fail; also consolidate on semantic overlap,
+  mechanism-sized needs, broad bundles, and drift. Expose retention attention groups.
+  Completion includes disposal or a stated deferral; reconcile abandoned-looking
+  work explicitly. Per-file limits are not a global retention cap.
+- Preserve repeatable checks/manual procedures and selective rationale, not copies
+  of execution history in docs. Tests enable fresh evidence, not historical proof.
+  Product needs may require historical evidence as product data; OW keeps no ledger.
 
 ## Adoption and distribution
 

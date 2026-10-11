@@ -49,8 +49,12 @@ def check_budgets(project, *, code=True):
     budget = project["config"]["needs_token_budget"]
     if tokens > budget:
         errors.append(f"Current needs use ~{tokens} tokens; budget is {budget}. Consolidate without losing intent.")
+    elif tokens >= budget * 0.8:
+        warnings.append(f"Current needs use ~{tokens}/{budget} tokens; review sizing and duplication before the limit.")
     if len(context.splitlines()) >= 500:
         errors.append("Combined current-needs context must be under 500 lines; splitting files is insufficient.")
+    elif len(context.splitlines()) >= 400:
+        warnings.append("Current needs approach 500 lines; review outcome boundaries and redundant wording.")
     closed = [key for key, change in project["changes"].items() if change["meta"]["status"] == "closed"]
     if closed:
         warnings.append("Closed changes can be disposed after preserving useful knowledge: " + ", ".join(closed))

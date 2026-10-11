@@ -38,6 +38,28 @@ change may have none.
 - Keep asks in conversation. Store interpreted durable intent and a bounded
   working improvement, rather than conversation transcripts or request journals.
 
+### Sizing and relationships
+
+One need expresses a coherent valuable outcome, independent of its implementation
+effort. Reuse it for different mechanisms. Split a broad bundle when outcomes can
+be accepted, changed, or retired independently. Merge duplicate intent without
+losing acceptance or constraints. Stable IDs support continuity, not artificial
+resistance to necessary splits/merges. Confirm material meaning changes.
+
+Keep optional, sparse `relations` on needs, with `kind`, target `need`, and a
+concrete `reason`. `requires` means the source outcome needs the target outcome;
+`constrains` means the source limits acceptable solutions for the target. These
+are semantic facts, not scheduling, shared-code links, or a complete pairwise map.
+Cycles can be meaningful. `ow graph [N-001 ...] --json` derives incident links
+and endpoints from the current records; nothing is stored in a second registry.
+Reconcile incoming/outgoing links and retained change references on intent edits,
+splits/merges, retirement, or deletion. Current links target current needs.
+
+Use relationships to focus investigation, while considering all current needs and
+possible new interactions. Reuse established facts and valid working assessments;
+reconstruct code/test dependencies from the repository when relevant inputs change.
+Absent links do not prove independence. Do not regenerate all pairs on every ask.
+
 ## Design and engineering
 
 Inspect code, tests, interfaces, and repository conventions to reconstruct the
@@ -53,10 +75,58 @@ established dependencies. Repository layout and public interfaces should make
 responsibilities discoverable. Preserve rationale that cannot be recovered from
 code in a nearby comment or ordinary repository document when useful.
 
+Use the shared Architecture rubric in the installed `ow-align` skill: discoverable
+behavior, rule ownership/change locality, explicit dependencies/data ownership,
+isolated effects, independent outcome tests, justified complexity, and maintainability
+after disposal. Ground findings in actual paths and consequences, not pattern names
+or line counts. Prefer pure decisions/transformations with explicit inputs and
+outputs; supply time, randomness, config, and external results at effect boundaries.
+
+Greenfield work starts with a conventional, minimal structure and a representative
+end-to-end slice. As asks arrive, inspect the affected boundaries for duplicated
+rules, scattered responsibilities, and effects leaking into decisions. Keep useful
+structure and evolve only what the evidence justifies.
+
+Brownfield onboarding includes a proportionate architecture assessment. Explain
+observed friction, consequences, and whether refactoring earns its cost. When it
+does, propose bounded, incremental steps, preserved behavior, baseline checks,
+risks, and verification/rollback. Seek human approval for that additional scope
+before edits; onboarding alone authorizes no product rewrite. A satisfactory
+architecture needs an explanation, not invented refactoring work.
+
 Changes reference needs directly, many-to-many. All current needs are regression
 constraints, including those outside a change's motivating scope. Distinguish
 incompatible intent from an implementation that does not yet satisfy compatible
 needs; adapt the implementation when possible.
+
+### Strategic verification
+
+Use the smallest set of fast, independent checks that protects affected needs and
+consequential failure modes. Prefer stable outcomes, business invariants, and
+boundary contracts. Ask what could meaningfully break, which existing checks
+already protect it, what small additional check closes a real gap, and what remains
+unverified. A task or module does not automatically require a new test.
+
+Place representative checks at need-level outcomes, important pure decisions, and
+consequential integrations where each contributes distinct evidence. Expectations
+come from intent, not the implementation's own calculation. Tests should normally
+survive harmless refactors while detecting meaningful need violations.
+
+Avoid brittle assertions about incidental wording, whitespace, layout, private
+helpers/call order, or broad snapshots. Exact text, schemas, or layout are worth
+checking narrowly when they are actual contracts. Cover credible failures with
+meaningful consequences even without a coverage request; avoid speculative input
+matrices and elaborate negative suites without corresponding risk or requirements.
+Expand for risk, uncertainty, observed failures, or explicit requirements. Honor
+requested coverage targets; do not impose unrequested percentages or mistake 100%
+coverage for correctness. Test count is not a quality target either.
+
+The installed `ow-plan` skill owns the shared Strategic verification guidance.
+Retain regression tests for lasting obligations; temporary experiments can disappear
+after useful findings are preserved. Reuse or consolidate checks without losing
+meaningful protection. Routine prose/presentation edits may need inspection or a
+focused smoke check rather than new permanent tests. Record concise current results
+and limitations; tests enable fresh evidence without a history of every stage's run.
 
 ## Authority and communication
 
@@ -122,6 +192,19 @@ refresh the review before closing; after closure treat new implementation work
 as a new change. Future maintainers should be able to work from needs and the
 repository without recovering a deleted change.
 
+Disposal is a normal completion action; report any reason for deferring it. Use
+`ow status` retention groups to find closed work, pending acceptance (refresh stale
+reviews first), blocked/manual work, and retired needs. Reconcile abandoned-looking
+work explicitly; age or quantity never establishes completion. Retired needs may
+be removed after a retention decision and reference/rationale reconciliation.
+
+Preserve useful manual verification procedures and expectations, not every run's
+output. Tests enable new evidence; they do not certify historical runs. OW retains
+no permanent satisfaction claim or execution/evidence ledger. Historical evidence
+is product data only when an actual need calls for it. Docs/comments retain selected
+facts and non-obvious rationale, replacing obsolete guidance rather than archiving
+whole changes, assessments, or reviews.
+
 ## Bounds
 
 - Each OW artifact is under 500 lines. Compact near 400 lines.
@@ -131,7 +214,13 @@ repository without recovering a deleted change.
   Exact-path, justified data/low-complexity exceptions never exempt OW artifacts.
 - Token estimation uses UTF-8 bytes/3; these limits are proxies for manageable
   context, not substitutes for thoughtful design.
+- Review need granularity and duplication before budgets fail; the CLI warns at
+  80% of the current-needs token budget and at 400 context lines. Outcome overlap,
+  mechanism-sized needs, broad bundles, and intent drift also prompt consolidation.
 - Replace latest working summaries rather than accumulating journals. Compact
   wording without silently losing acceptance, constraints, or independent outcomes.
+- Per-file and current-context limits do not cap total retained files. Keep total
+  working material manageable through completion/disposal and explicit reconciliation,
+  never through silently deleting unfinished work or moving journals into docs.
 
 Read `openwish/artifacts.md` for schema 3 and command examples.

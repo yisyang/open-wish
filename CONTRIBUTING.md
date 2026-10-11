@@ -56,6 +56,6 @@ workflow tests the supported Python matrix, checks version agreement, builds a
 wheel and source distribution, validates metadata, and installs both with uv.
 The Release workflow reuses those checks and publishes the exact tested artifacts.
 
-Published stable GitHub releases go to PyPI; a manual Release workflow run goes
-to TestPyPI. See [release setup and procedure](docs/releases.md) for the one-time
-Trusted Publisher configuration and the steps for each release.
+Published stable GitHub releases go to PyPI; pushed version tags go to TestPyPI.
+See [release setup and procedure](docs/releases.md) for the one-time Trusted
+Publisher configuration and the steps for each release.

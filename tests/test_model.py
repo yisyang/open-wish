@@ -120,3 +120,11 @@ class ModelTests(ProjectCase):
     def test_orphan_change_directory_is_not_silently_ignored(self):
         (self.root / "openwish/changes/old-request").mkdir(parents=True)
         self.assertIn("Unrecognized change artifact", "\n".join(validate(self.project())))
+
+    def test_nested_need_cannot_silently_leave_current_context(self):
+        self.add_need()
+        path = self.root / "openwish/needs/N-002.md"
+        nested = path.parent / "privacy"
+        nested.mkdir()
+        path.rename(nested / path.name)
+        self.assertIn("Unrecognized need artifact", "\n".join(validate(self.project())))

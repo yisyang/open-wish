@@ -44,6 +44,33 @@ and an ISO date only after actual human confirmation.
 Currency is `current | retired`. Needs have no implementation status, mode,
 reopen cycle, copied change links, or approval state. Retiring a need changes intent.
 
+Optional reasoned links live on their source need, in the same TOML header:
+
+```toml
+# On N-002, the local-only privacy need:
+relations = [
+  {kind = "constrains", need = "N-001", reason = "Reconciliation must keep raw records on-device."},
+]
+```
+
+Each inline table has exactly `kind`, `need`, and nonempty `reason`. `requires`
+means the source outcome needs the target outcome; `constrains` means the source
+limits acceptable solutions for the target. Targets must exist; self-links and
+duplicate kind/target pairs are invalid. Current sources must target current needs;
+retired sources may retain historical links. Semantic cycles are allowed and have
+no effect on task scheduling. Do not infer links from shared modules or changes.
+
+`ow graph --json` derives all retained nodes (with currency) and recorded edges.
+`ow graph N-001 --json` returns incoming/outgoing edges and their endpoints, not
+transitive impact. There is no graph file or semantic analysis cache. All current
+need content, including relation reasons, enters context and review freshness.
+Reassess links on intent revisions and consider possible new relationships; missing
+edges never exempt current needs from review. Reconcile links before deleting IDs.
+
+Use one coherent valuable outcome per need. Formats/modules/tasks are usually too
+small; bundles that can be accepted or retired independently are too broad. Compare
+actor/outcome/acceptance before adding a need; preserve constraints during consolidation.
+
 ## Changes
 
 ```sh
@@ -158,6 +185,7 @@ edits because its accepted review is historical.
 
 ```sh
 ow status --json
+ow graph N-001 --json              # recorded incident intent links and their reasons
 ow context                        # every current need, without truncation
 ow context N-001                   # plus linked changes and review scope
 ow ready                          # all active changes; accepts need/change IDs
@@ -180,3 +208,34 @@ Config contains `version: 3`, `product`, `needs_token_budget` (default 6000), an
 `low-complexity`, and a meaningful `reason`. OW artifacts stay under 500 lines;
 source exceptions do not relax artifact or global current-needs limits. Closed
 changes produce a cleanup reminder rather than an arbitrary working-set limit.
+
+Status includes `retention`: `cleanup_candidates` (closed), `awaiting_acceptance`
+(review-state; check freshness), `blocked_changes` (blocked or pending manual tasks),
+and `retired_needs`. These are derived attention groups, not deletion permissions.
+Near-budget context warnings prompt semantic consolidation before a hard failure.
+Per-file limits do not cap total retained material; normal completion includes
+disposal or explaining its deferral. Retired needs require a deliberate retention
+decision and reconciliation of incoming relations and retained change references.
+
+## Durable knowledge and evidence
+
+Retain strategically placed, fast tests of stable outcomes, important decisions,
+and consequential boundary contracts. Reuse existing protection before adding
+checks; temporary experiments need not become permanent regression tests. Avoid
+incidental text/layout snapshots or private-call assertions unless the asserted
+detail is itself a real contract. Credible costly failures still merit focused
+checks; test counts, speculative edge matrices, and unrequested coverage percentages
+are not substitutes for meaningful evidence. See the installed `ow-plan` skill's
+Strategic verification guidance.
+
+Only needs are mandatory durable OW product knowledge. Source, types, schemas,
+tests, and selective comments/docs explain the implemented solution. Keep useful
+manual verification procedures and expected outcomes where maintainers can find
+them. Run-specific results, working assessments, and closure provenance disappear
+with a cleaned change; tests enable fresh evidence rather than certify a past run.
+Git history is optional. Historical proof belongs in product data when a genuine
+need requires it, not in a framework-wide evidence ledger.
+
+Config, policy, this reference, installed skills/adapters, and the installation
+manifest support the tool. They are not delivery evidence. Docs are for selected
+lasting facts/rationale, not copies of every discarded approach or review.

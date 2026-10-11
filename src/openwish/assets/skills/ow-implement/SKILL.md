@@ -15,8 +15,17 @@ does not grant it. For routine work, implement and verify directly, then report.
 2. Implement the smallest coherent solution. Preserve current needs and existing
    user work. Prefer functional cores, explicit effects, and discoverable module
    boundaries consistent with the repository. Keep checks independent of the code's assumptions.
-3. Run meaningful verification and record concise direct evidence before marking
-   a task done. Retain completed tasks for integration review. Manual observations
+   Use the Architecture rubric in `../ow-align/SKILL.md` when a new ask changes
+   boundaries. Keep decisions and transformations pure where practical, passing
+   external results/time/configuration explicitly; isolate I/O at the edges.
+   Verify core behavior and relevant integration contracts where each adds useful
+   evidence. Avoid speculative abstractions.
+3. Follow Strategic verification in `../ow-plan/SKILL.md`. Run existing affected
+   checks and add only the smallest checks for genuine gaps. Assert stable outcomes,
+   not incidental wording/layout or private call sequences. Keep credible,
+   consequential failure checks; expand only when the work justifies their cost.
+   Record concise direct evidence before marking a task done. Retain completed
+   tasks for integration review. Manual observations
    require real evidence; fast-forward cannot invent them.
 4. Continue independent ready work around blocked/manual tasks. A task's list
    position alone does not block later work. Repair the approach and remaining
@@ -24,6 +33,8 @@ does not grant it. For routine work, implement and verify directly, then report.
    existing authority. Material intent/scope changes return to the relevant decision.
 5. Put enduring behavior in code, regression checks in tests, and otherwise
    unrecoverable rationale near code or in ordinary repository documentation.
+   Retain tests protecting lasting obligations; temporary probes need not become
+   permanent tests. Report current verification and limitations without a run archive.
    Never establish another permanent spec or execution ledger.
 6. When only genuine human blockers remain, explain the need and desired outcome,
    then ask numbered questions with useful A/B/C choices and `(Recommended)` before

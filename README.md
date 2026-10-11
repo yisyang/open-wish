@@ -20,7 +20,7 @@ feature does not quietly undo what the previous one accomplished.
 
 OW takes inspiration from [Spec Kit](https://github.com/github/spec-kit) and
 [OpenSpec](https://github.com/Fission-AI/OpenSpec), centering durable needs and
-bounded agent context. OpenWish **0.5.0** uses **artifact schema 3**.
+bounded agent context. OpenWish **0.6.0** uses **artifact schema 3**.
 
 ## Get started
 
@@ -68,6 +68,8 @@ or manual observations, and does not apply to unrelated future changes.
 ## The workflow
 
 OW is opt-in. Installing skills does not require using them for every edit.
+See [Workflows](docs/workflows.md) for greenfield onboarding, brownfield onboarding,
+and the change lifecycle, with step-by-step guidance and vertical diagrams.
 
 **Routine work:** inspect → implement → verify → report. Clear, localized,
 reversible work within existing intent needs no change file, new need, or final
@@ -102,7 +104,7 @@ authorization receipts.
 | `ow-review` | Review outcomes and regressions; present results and close accepted work |
 | `ow-consolidate` | Preserve useful knowledge and dispose closed changes/tasks |
 | `ow-fast-forward` | Run through review and disposal under explicit delegation |
-| `ow-onboard` | Infer candidate needs from product context and the repository |
+| `ow-onboard` | Infer right-sized needs, assess architecture, and propose useful refactoring for approval |
 
 ### Harness invocation
 
@@ -143,6 +145,31 @@ justify a separate need. Compare actor, outcome, and acceptance before adding on
 Prefer functional cores, explicit effects, cohesive modules, and clear dependency
 direction. Code explains what is implemented; needs supply the independent intent
 against which code and tests are reviewed.
+
+OW's shared architecture rubric asks whether behavior is discoverable, rules have
+clear owners, dependencies and effects are explicit, tests check outcomes, and
+complexity earns its cost. Greenfield work starts with a representative end-to-end
+slice. New asks reassess affected boundaries. Brownfield onboarding recommends
+retaining satisfactory structure or proposes a bounded refactor with evidence,
+cost/risk, and verification, seeking approval before that additional scope.
+
+Need size follows independent value, not implementation effort. Split outcomes
+that can be accepted or retired separately; merge duplicate intent without losing
+constraints. Optional reasoned `requires`/`constrains` relations live on needs;
+`ow graph` derives their links without another durable registry. All current needs
+remain binding, including those with no recorded relationships.
+
+Tests and manual procedures enable fresh evidence rather than certify historical
+runs. OW retains no permanent delivery ledger. Keep selected rationale and useful
+operational facts, rather than copying disposed plans/reviews into documentation.
+
+Verification is strategic: reuse small, fast checks of stable outcomes, important
+decisions, and consequential boundaries. Add tests for real gaps, rather than every
+function or incidental wording/layout change. Test exact details when they are
+actual contracts; cover credible costly failures without pursuing speculative edge
+matrices or unrequested coverage percentages. Retain tests for lasting obligations
+and discard temporary probes after preserving useful findings. Report what was
+checked and what remains uncertain.
 
 ## CLI
 
@@ -190,12 +217,13 @@ selection. Unknown files are preserved. Git can hold history; future maintenance
 should work from needs and the repository without resurrecting old plans.
 
 ```sh
-ow status --json                   # needs, changes, task progress, review freshness
-ow context                        # all current intent, without truncation
-ow context N-001                   # plus related changes
-ow ready                          # ready tasks and blockers across active changes
-ow summary N-001                   # desired outcome and retained work/results
-ow check --json                    # schema, references, dependencies, size budgets
+ow status --json                    # needs, changes, task progress, review freshness
+ow graph N-001 --json               # recorded incoming/outgoing intent relationships
+ow context                          # all current intent, without truncation
+ow context N-001                    # plus related changes
+ow ready                            # ready tasks and blockers across active changes
+ow summary N-001                    # desired outcome and retained work/results
+ow check --json                     # schema, references, dependencies, size budgets
 ```
 
 `--root PATH` works before the subcommand; otherwise roots are discovered from the
@@ -210,6 +238,12 @@ current directory and parents. See `ow --help` and the installed `openwish/artif
 - Routine verification should finish within **five minutes**; identify necessary
   slower checks and report missing observations honestly.
 - Replace latest summaries and dispose completed work rather than growing journals.
+
+The CLI warns near current-needs budgets. Consolidate on semantic overlap and
+poor granularity too, not just size. Status exposes cleanup candidates, pending
+acceptance, blocked/manual work, and retired needs. Disposal is normal completion;
+report deferrals and reconcile abandoned-looking work explicitly. These lifecycle
+controls do not impose a total-file cap or permit deleting unfinished work.
 
 ## Updating integrations
 

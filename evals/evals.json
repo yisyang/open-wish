@@ -141,6 +141,96 @@
       ]
     },
     {
+      "id": 13,
+      "name": "brownfield-discover-refactor",
+      "skills": ["ow-onboard", "ow-align", "ow-propose"],
+      "prompt": "The human requests OW onboarding and an assessment, not implementation. Inspect the supplied shop-a repository. Infer a compact set of needs from its README and code, distinguishing behavior from confirmed intent. Assess whether architecture changes would help and give the next human-facing recommendation with any proposed plan and decision. Cite actual file paths. You may run checks in a temporary copy, but do not edit the fixture or initialize OW in the source checkout. Save response.md with your findings, evidence, proposed needs, and next step.",
+      "expected_output": "Discover duplicate pricing in checkout and batch and implicit environment/time/file effects. Explain practical costs and propose a bounded, behavior-preserving improvement with baseline outcome tests, explicit decisions/effect boundaries, risks and incremental verification. Seek scope approval before edits. Infer receipt production, local-only constraints, and required receipt history without a need per module; do not discard product audit data with OW evidence.",
+      "files": ["evals/fixtures/shop-a"],
+      "assertions": [
+        "Identifies duplicated pricing in checkout.py and batch.py and explains a concrete consistency/change cost.",
+        "Identifies implicit environment/time/file effects and proposes explicit inputs with a shared decision core and identifiable I/O boundaries.",
+        "Proposes incremental behavior-preserving refactoring with baseline outcome checks and verification or rollback, rather than a speculative rewrite.",
+        "Seeks human approval of refactor scope before product edits and distinguishes inferred needs from confirmed intent.",
+        "Preserves required product receipt history and avoids creating needs for individual modules or functions."
+      ]
+    },
+    {
+      "id": 14,
+      "name": "brownfield-retain-satisfactory-architecture",
+      "skills": ["ow-onboard", "ow-align", "ow-propose"],
+      "prompt": "The human requests OW onboarding and an assessment, not implementation. Inspect the supplied shop-b repository. Infer a compact set of needs from its README and code, distinguishing behavior from confirmed intent. Assess whether architecture changes would help and give the next human-facing recommendation with any proposed plan and decision. Cite actual file paths. You may run checks in a temporary copy, but do not edit the fixture or initialize OW in the source checkout. Save response.md with your findings, evidence, proposed needs, and next step.",
+      "expected_output": "Recognize useful existing pricing, recording, and external boundaries with observable tests. Recommend retaining the core structure, while acknowledging limited fixture coverage and proportionate verification opportunities. Do not invent a rewrite, plugin architecture, or class hierarchy to justify onboarding. Confirm inferred intent without authorizing product edits.",
+      "files": ["evals/fixtures/shop-b"],
+      "assertions": [
+        "Recognizes existing pricing, recording, and external-effect boundaries using concrete source references.",
+        "Recommends retaining the core structure instead of inventing a rewrite or speculative abstraction hierarchy.",
+        "Distinguishes observed test coverage from unverified behavior and proposes only proportionate follow-up checks.",
+        "Keeps onboarding an assessment with inferred intent, without product edits or invented implementation authority."
+      ]
+    },
+    {
+      "id": 15,
+      "name": "greenfield-evolve-real-code",
+      "skills": ["ow-propose", "ow-align", "ow-plan", "ow-implement", "ow-review", "ow-consolidate"],
+      "prompt": "Work only in the assigned temporary output directory. The human has authorized and delegated acceptance for two improvements under current N-001: finance staff reconcile monthly category totals without copying rows, and N-002: raw records remain local. First implement a dependency-free Python CLI: python reconcile.py INPUT --month YYYY-MM reads CSV date/category/cents (integer cents including refunds) and prints JSON mapping category to that month's total. Empty months produce {} and invalid months produce a concise error and nonzero exit without a traceback. Implement and verify this first slice. Then handle the next ask: support --format csv with category,cents columns while preserving default JSON. Use the skills to establish and evolve a proportionate architecture; implement real code and meaningful tests, not just a plan. Save the runnable final product under outputs/project and response.md explaining needs, architecture decisions, a command to run retained tests, current verification actually performed, why the retained checks are useful, and any remaining limitations. The supplied acceptance_test.py is a final external check; do not edit it. No coverage percentage is requested. Keep temporary OW records out of the final product after accepted completion if you create them. Do not modify the source checkout.",
+      "expected_output": "Build a small discoverable product, isolating aggregation/decisions from I/O; add the second representation without duplicating business rules or creating a format-specific need. Preserve default behavior with a small, fast suite independently checking stable outcomes and consequential risks. Reuse useful checks, avoid incidental text/layout or private-call assertions and speculative edge matrices, and explain any extra checks by needs or credible risk. Retain useful code/tests and current intent after delegated disposal. Current verification is observable by rerunning the suite; no historical execution ledger or proof of phase order is required.",
+      "files": ["evals/fixtures/reconcile/acceptance_test.py"],
+      "assertions": [
+        "The final product passes all independent acceptance_test.py checks for JSON, CSV, empty months, and invalid months.",
+        "Aggregation/decision behavior can run without file/process effects and is shared by both representations.",
+        "The implementation remains small and discoverable without speculative plugin registries or framework layers.",
+        "Reuses reconciliation intent for CSV and retains the local-only constraint rather than adding a format-specific need.",
+        "A small, fast retained regression suite passes when independently rerun and checks stable reconciliation outcomes and JSON/CSV compatibility using independently determined expectations.",
+        "Retained tests protect genuine needs and consequential failure modes rather than incidental wording/layout, private call sequences, or speculative edge-case matrices; exact-match checks protect actual contracts.",
+        "The final product retains useful code/tests and current intent without an OW execution archive; its report identifies current verification and remaining limitations without claiming historical execution order as independently proven."
+      ]
+    },
+    {
+      "id": 17,
+      "name": "strategic-test-selection",
+      "skills": ["ow-plan", "ow-implement", "ow-review", "ow-consolidate"],
+      "prompt": "Read-only verification planning; do not implement or invent execution results. An authorized refactor renames private receipt helpers, moves modules, and revises non-contract help wording. A public receipt JSON schema and charge amounts are unchanged. Existing fast outcome tests protect charge calculations and the public schema and have passed in the supplied baseline. Cleanup also accepts a new output directory; no test currently establishes that it preserves unrelated existing files there. A colleague proposes exact help-text and file-tree snapshots, tests for every private call sequence, a generated matrix of malformed names, and raising coverage to 100% without a human request. Which existing checks should be reused, what minimal new verification is useful, and what should remain durable? Explain any limitation. Save response.md only.",
+      "expected_output": "Reuse stable amount/schema checks; propose a focused real temporary-directory preservation check for cleanup because data loss is consequential. Avoid freezing incidental text/layout/private calls or blanket coverage targets and speculative matrices. Retain useful outcome/boundary tests, not every probe; honor actual public schema exactness. Report supplied versus unperformed verification honestly.",
+      "files": [],
+      "assertions": [
+        "Reuses existing charge-outcome and public-schema checks without requiring new tests merely for helper renames or module moves.",
+        "Proposes a focused real temporary-directory check that exercises intended cleanup and preserves unrelated existing files, recognizing consequential data-loss risk despite no coverage target.",
+        "Rejects incidental help/file-tree snapshots, private call-order assertions, speculative malformed-name matrices, and an unrequested 100% target while preserving exact public-schema checks.",
+        "Retains useful regression tests for stable obligations and treats temporary probes as disposable without deleting meaningful protection solely to reduce test count.",
+        "Distinguishes the supplied baseline result from unperformed proposed checks and identifies remaining uncertainty without claiming execution."
+      ]
+    },
+    {
+      "id": 18,
+      "name": "explicit-coverage-contract",
+      "skills": ["ow-plan", "ow-review"],
+      "prompt": "Read-only planning, no edits or invented runs. The human explicitly requires 100% branch coverage for a small refund-calculation module and exact preservation of its public JSON keys. The current meaningful outcome tests cover ordinary charges; refund and rejected-negative-quantity branches are uncovered. The rest of the application has no coverage target. Explain the proportionate verification plan and what a passing coverage report would and would not establish. Save response.md only.",
+      "expected_output": "Honor the scoped human branch-coverage target and public schema contract with independently expected refund and invalid-quantity cases, using actual coverage instrumentation to establish the metric. Do not expand the target globally, add private-call assertions, or claim percentages prove correctness or exhaustive inputs. No fabricated measurement.",
+      "files": [],
+      "assertions": [
+        "Honors the explicitly requested 100% branch-coverage target for the refund module without expanding it to the whole application.",
+        "Reuses meaningful existing tests and plans independently expected refund and invalid-quantity outcomes, retaining exact public JSON-key checks rather than freezing private implementation details.",
+        "Requires actual scoped branch-coverage measurement and explains that 100% neither proves correctness nor exhaustively covers inputs.",
+        "Treats the response as a plan, with no invented implementation, passing tests, or coverage measurements."
+      ]
+    },
+    {
+      "id": 16,
+      "name": "needs-sizing-relations-retention",
+      "skills": ["ow-propose", "ow-consolidate", "ow-align"],
+      "prompt": "Read-only OW consolidation assessment; no edits or invented commands. Current draft needs are N-001: finance staff reconcile monthly category totals without row copying; N-002: add CSV output for that same workflow; N-003: reconciliation, auditor proof of approver identity, and payroll payments in one outcome; N-004: sensitive raw records stay on device. N-004 has a reasoned constrains relation to N-001. Retired N-005 covers an abandoned hosted report and is still referenced by a retained change. C-001 is closed and its only copy of a required deployment setting is in its approach; C-002 awaits a manual observation. The human asks to reduce repeated analysis and accumulated artifacts while preserving useful intent. Propose what to reuse, split, merge, retain, or dispose, explain relationship storage and invalidation, and identify decisions needed. Save response.md. Do not presume semantic merges, retirement, or deletion have been approved.",
+      "expected_output": "Reuse N-001 for CSV, split independent accountability/payroll from the broad bundle without losing acceptance, preserve the privacy fact on the need and derive sparse relations without a ledger. Reassess changed neighbors and possible new interactions while considering all current needs. Preserve selected operational knowledge before disposing C-001; retain manual work and reconcile retained references before removal of N-005. Confirm intent/retention decisions.",
+      "files": [],
+      "assertions": [
+        "Reuses N-001 for CSV and separates independent accountability/payroll outcomes from N-003 without silently losing intent.",
+        "Preserves useful reasoned relationships on needs and derives a sparse graph rather than maintaining a duplicate permanent registry.",
+        "Reassesses changed inputs/neighbors and possible new interactions while retaining all-current-needs consideration; absent links are not proof of independence.",
+        "Preserves the unique deployment fact before disposing C-001 and retains C-002's unfinished manual work.",
+        "Requires intent/retention decisions and reconciles references before removing retired N-005; does not claim those edits or approvals occurred."
+      ]
+    },
+    {
       "id": 12,
       "name": "default-results-await-human-review",
       "skills": ["ow-review"],

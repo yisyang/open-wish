@@ -8,7 +8,7 @@ import sys
 from . import __version__
 from .budgets import check_budgets
 from .integrations import HARNESSES, install_skills, installed_harnesses
-from .model import needs_context, ready_tasks, review_needs, select_changes
+from .model import need_graph, needs_context, ready_tasks, review_needs, select_changes
 from .scaffold import initialize, new_artifact
 from .storage import WishError, load_project, project_config, project_root
 from .terminal import confirm_downgrade, select_harnesses
@@ -41,6 +41,9 @@ def parser():
     status.add_argument("--json", action="store_true")
     context = commands.add_parser("context", help="Print all current needs, optionally with relevant changes")
     context.add_argument("selection", nargs="*", help="Need or change IDs")
+    graph = commands.add_parser("graph", help="Derive reasoned need relationships; selections show incident links")
+    graph.add_argument("selection", nargs="*", help="Need IDs; default all retained needs")
+    graph.add_argument("--json", action="store_true")
     ready = commands.add_parser("ready", help="List ready work and blockers (readiness does not grant authority)")
     ready.add_argument("selection", nargs="*", help="Need or change IDs; default all")
     ready.add_argument("--json", action="store_true")
@@ -127,6 +130,19 @@ def run(args):
             for change in data["changes"]:
                 print(f"{change['id']} [{change['status']}] {change['title']} — "
                       f"{change['done']}/{change['tasks']} tasks; review: {change['review']}")
+            for label, keys in data["retention"].items():
+                if keys:
+                    print(f"{label.replace('_', ' ').capitalize()}: {', '.join(keys)}")
+    elif args.command == "graph":
+        graph = need_graph(project, args.selection)
+        if args.json:
+            print(json.dumps(graph, indent=2, ensure_ascii=False))
+        else:
+            for need in graph["needs"]:
+                print(f"{need['id']} [{need['currency']}] {need['title']}")
+            for edge in graph["relations"]:
+                print(f"{edge['source']} {edge['kind']} {edge['target']}: {edge['reason']}")
+            print("Recorded intent links guide investigation; all current needs remain binding.")
     elif args.command == "context":
         text = needs_context(project)
         if args.selection:

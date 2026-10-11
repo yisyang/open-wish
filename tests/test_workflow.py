@@ -1,7 +1,10 @@
+from unittest.mock import patch
+
 from openwish.model import needs_context
 from openwish.storage import WishError, read_json, write_json
 from openwish.views import status_data, summary
-from openwish.workflow import (clean_changes, close_changes, record_review, set_mode, validate_review)
+from openwish.workflow import (clean_changes, close_changes, record_review, set_mode,
+                               source_fingerprint, validate_review)
 
 from tests.support import ProjectCase
 
@@ -74,6 +77,45 @@ class WorkflowTests(ProjectCase):
         path.unlink()
         with self.assertRaisesRegex(WishError, "stale"):
             validate_review(self.project(), "C-001")
+
+    def test_executable_permission_changes_invalidate_review(self):
+        self.reviewed()
+        path = self.root / "app.py"
+        for mode in (0o644, 0o655):
+            with self.subTest(mode=oct(mode)):
+                path.chmod(0o755)
+                self.review()
+                path.chmod(mode)
+                with self.assertRaisesRegex(WishError, "stale"):
+                    close_changes(self.project(), ["C-001"], "human")
+
+    def test_projections_share_one_snapshot_but_next_command_observes_edits(self):
+        self.reviewed()
+        self.add_change()
+        self.review("C-002")
+        for project_view in (lambda: status_data(self.project()),
+                             lambda: summary(self.project(), ["N-001"])):
+            with patch("openwish.views.source_fingerprint", wraps=source_fingerprint) as snapshot:
+                project_view()
+                self.assertEqual(snapshot.call_count, 1)
+        (self.root / "app.py").write_text("# changed after the first projection\n", encoding="utf-8")
+        self.assertEqual({c["review"] for c in status_data(self.project())["changes"]}, {"stale"})
+
+    def test_batch_closure_shares_snapshot_and_retention_distinguishes_unfinished_work(self):
+        self.reviewed()
+        self.add_change()
+        self.review("C-002")
+        with patch("openwish.workflow.source_fingerprint", wraps=source_fingerprint) as snapshot:
+            close_changes(self.project(), ["C-001", "C-002"], "human")
+            self.assertEqual(snapshot.call_count, 1)
+        self.add_change("C-003")
+        self.write_tasks([self.task("C-003/T-001", kind="manual")], "C-003")
+        self.add_need()
+        self.edit_document("needs/N-002.md", currency="retired")
+        retention = status_data(self.project())["retention"]
+        self.assertEqual(retention, {"cleanup_candidates": ["C-001", "C-002"],
+                                     "awaiting_acceptance": [], "blocked_changes": ["C-003"],
+                                     "retired_needs": ["N-002"]})
 
     def test_need_approach_evidence_and_policy_edits_each_invalidate_review(self):
         self.reviewed()
