@@ -7,14 +7,17 @@ import sys
 
 from . import __version__
 from .budgets import check_budgets
+from .context import context_data
 from .integrations import HARNESSES, install_skills, installed_harnesses
-from .model import need_graph, needs_context, ready_tasks, review_needs, select_changes
+from .model import TASK_STATES, need_graph, ready_tasks
+from .repository import project_files
 from .scaffold import initialize, new_artifact
-from .storage import WishError, load_project, project_config, project_root
+from .storage import WishError, load_project, project_config, project_root, read_json
 from .terminal import confirm_downgrade, select_harnesses
+from .trace import mentions, reference_warnings, trace_data
 from .validation import validate
 from .views import status_data, summary
-from .workflow import clean_changes, close_changes, record_review, set_mode
+from .workflow import clean_changes, close_changes, record_review, set_mode, set_task
 
 
 def parser():
@@ -41,12 +44,20 @@ def parser():
     status.add_argument("--json", action="store_true")
     context = commands.add_parser("context", help="Print all current needs, optionally with relevant changes")
     context.add_argument("selection", nargs="*", help="Need or change IDs")
+    context.add_argument("--json", action="store_true", help="Complete needs and sized retrieval manifest")
     graph = commands.add_parser("graph", help="Derive reasoned need relationships; selections show incident links")
     graph.add_argument("selection", nargs="*", help="Need IDs; default all retained needs")
     graph.add_argument("--json", action="store_true")
     ready = commands.add_parser("ready", help="List ready work and blockers (readiness does not grant authority)")
     ready.add_argument("selection", nargs="*", help="Need or change IDs; default all")
     ready.add_argument("--json", action="store_true")
+    task = commands.add_parser("task", help="Set one task's status and evidence")
+    task.add_argument("task", help="Qualified task ID, such as C-001/T-001")
+    task.add_argument("status", choices=TASK_STATES)
+    task.add_argument("--evidence", help="Concise direct evidence; required to mark work done")
+    trace = commands.add_parser("trace", help="Derive need → check links from IDs mentioned in code, tests and docs")
+    trace.add_argument("selection", nargs="*", help="Need IDs; default all")
+    trace.add_argument("--json", action="store_true")
     report = commands.add_parser("summary", help="Show needs, outcomes, work, and verification")
     report.add_argument("selection", nargs="+", help="Need or change IDs")
     mode = commands.add_parser("mode", help="Set explicitly requested acceptance mode for one active change")
@@ -56,13 +67,18 @@ def parser():
     review.add_argument("change")
     review.add_argument("--summary", required=True)
     review.add_argument("--check", action="append", required=True, dest="checks")
-    review.add_argument("--covered-need", action="append", default=[], dest="covered")
+    review.add_argument("--affected", nargs="+", action="extend", default=[], metavar="NEED",
+                        help="Needs whose behavior this change touches besides its linked needs; "
+                             "other current needs are recorded as assessed and unaffected")
     review.add_argument("--verdict", choices=("pass", "blocked"), default="pass")
+    review.add_argument("--handoff", help="JSON file (or - for stdin) with a handoff array; required for passing review")
     close = commands.add_parser("close", help="Close reviewed changes using actual human or delegated acceptance")
     close.add_argument("changes", nargs="+")
     close.add_argument("--by", choices=("human", "fast-forward"), required=True)
     clean = commands.add_parser("clean", help="Dispose closed changes and tasks after preserving useful knowledge")
     clean.add_argument("changes", nargs="+")
+    clean.add_argument("--dry-run", action="store_true", help="Validate disposal and preview retained destinations")
+    clean.add_argument("--json", action="store_true")
     return cli
 
 
@@ -82,6 +98,21 @@ def print_installation(report):
     counts = (f"{report[key]} {key.replace('_', ' ')}" for key in
               ("installed", "upgraded", "downgraded", "unchanged", "kept_newer") if report[key])
     print("Integration files: " + ", ".join(counts))
+
+
+def handoff_input(source):
+    if source is None:
+        return None
+    if source == "-":
+        try:
+            value = json.load(sys.stdin)
+        except json.JSONDecodeError as error:
+            raise WishError(f"Cannot read handoff JSON from stdin: {error}") from error
+        if not isinstance(value, dict):
+            raise WishError("Expected a JSON object with a handoff array on stdin")
+    else:
+        value = read_json(Path(source))
+    return value.get("handoff")
 
 
 def run(args):
@@ -109,6 +140,8 @@ def run(args):
         errors, warnings = validate(project), []
         if not errors:
             errors, warnings = check_budgets(project, code=not args.artifacts_only)
+            if not args.artifacts_only and not errors:
+                warnings.extend(reference_warnings(project, mentions(project, project_files(root))))
         if args.json:
             print(json.dumps({"errors": errors, "warnings": warnings}, indent=2))
         else:
@@ -118,7 +151,8 @@ def run(args):
             print(f"{'FAIL' if errors else 'PASS'} (structure and budgets): "
                   f"{len(errors)} errors, {len(warnings)} warnings")
         return 1 if errors else 0
-    project = checked_project(root, code=args.command in ("record-review", "close"))
+    project = checked_project(root, code=args.command == "close" or
+                              (args.command == "record-review" and args.verdict == "pass"))
     if args.command == "status":
         data = status_data(project)
         if args.json:
@@ -134,6 +168,8 @@ def run(args):
             for label, keys in data["retention"].items():
                 if keys:
                     print(f"{label.replace('_', ' ').capitalize()}: {', '.join(keys)}")
+            for warning in data["repository_warnings"]:
+                print("WARN " + warning)
     elif args.command == "graph":
         graph = need_graph(project, args.selection)
         if args.json:
@@ -145,16 +181,12 @@ def run(args):
                 print(f"{edge['source']} {edge['kind']} {edge['target']}: {edge['reason']}")
             print("Recorded intent links guide investigation; all current needs remain binding.")
     elif args.command == "context":
-        text = needs_context(project)
-        if args.selection:
-            selected = select_changes(project, args.selection)
-            manifest = [{"id": cid, "needs": project["changes"][cid]["meta"]["needs"],
-                         "review_needs": review_needs(project, cid),
-                         "path": f"openwish/changes/{cid}/change.md"} for cid in selected]
-            text += "\n# Retrieve for this work\n" + json.dumps(manifest, indent=2) + "\n"
-        if len(text.splitlines()) >= 500:
-            raise WishError("Context output would reach 500 lines. Narrow the work selection or compact needs.")
-        print(text)
+        data = context_data(project, args.selection)
+        if args.json:
+            print(json.dumps(data, indent=2, ensure_ascii=False))
+        else:
+            print(data.pop("needs"))
+            print("\n# Retrieval manifest and estimated size\n" + json.dumps(data, indent=2, ensure_ascii=False))
     elif args.command == "ready":
         ready, waiting = ready_tasks(project, args.selection)
         if args.json:
@@ -168,20 +200,43 @@ def run(args):
                         print(f"  {task['blocker']}")
             if not ready:
                 print("No agent-ready tasks. Inspect change scope and evidence before planning work or reviewing results.")
+    elif args.command == "task":
+        set_task(project, args.task, args.status, args.evidence)
+        print(f"{args.task}: {args.status}")
+    elif args.command == "trace":
+        data = trace_data(project, project_files(root), args.selection)
+        if args.json:
+            print(json.dumps(data, indent=2, ensure_ascii=False))
+        else:
+            for need in data["needs"]:
+                print(f"{need['id']} [{need['currency']}] {need['title']}")
+                print("  checks: " + (", ".join(need["checks"]) or "none traced"))
+                if need["files"]:
+                    print("  other: " + ", ".join(need["files"]))
+            for warning in data["warnings"]:
+                print("WARN " + warning)
+            print(data["note"])
     elif args.command == "summary":
         print(summary(project, args.selection))
     elif args.command == "mode":
         set_mode(project, args.change, args.mode)
         print(f"Mode {args.mode}: {args.change}")
     elif args.command == "record-review":
-        record_review(project, args.change, args.summary, args.checks, args.covered, args.verdict)
-        print(f"Recorded {args.verdict} review for {args.change}")
+        record = record_review(project, args.change, args.summary, args.checks, args.affected, args.verdict,
+                               handoff=handoff_input(args.handoff))
+        print(f"Recorded {args.verdict} review for {args.change}. Affected: {', '.join(record['affected'])}; "
+              f"assessed unaffected: {', '.join(record['unaffected']) or 'none'}")
     elif args.command == "close":
         close_changes(project, args.changes, args.by)
         print("Closed " + ", ".join(args.changes) + "; current needs remain binding.")
     elif args.command == "clean":
-        removed = clean_changes(project, args.changes)
-        print("Disposed " + ", ".join(removed) + "; needs, code, and tests retained.")
+        report = clean_changes(project, args.changes, dry_run=args.dry_run)
+        if args.json or args.dry_run:
+            print(json.dumps(report, indent=2, ensure_ascii=False))
+        else:
+            for warning in report["warnings"]:
+                print("WARN " + warning)
+            print("Disposed " + ", ".join(report["changes"]) + "; needs, code, and tests retained.")
     return 0
 
 

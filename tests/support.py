@@ -1,4 +1,7 @@
+import os
 from pathlib import Path
+import subprocess
+import sys
 import tempfile
 import unittest
 
@@ -50,6 +53,27 @@ class ProjectCase(unittest.TestCase):
     def finish_tasks(self, key="C-001"):
         self.write_tasks([self.task(f"{key}/T-001", status="done", evidence="Representative export check passed")], key)
 
-    def review(self, key="C-001", needs=None):
-        record_review(self.project(), key, "Reconciliation works",
-                      ["Representative reconciliation: passed"], needs or ["N-001"], "pass")
+    def handoff(self, **kwargs):
+        return {"requirement": "Export the requested records without retyping",
+                "disposition": "implemented", "destinations": ["app.py"],
+                "evidence": "Representative export result inspected and verified", **kwargs}
+
+    def review_input(self):
+        path = self.root / "handoff-input.json"
+        write_json(path, {"handoff": [self.handoff()]})
+        return str(path)
+
+    def review(self, key="C-001", affected=(), handoff=None):
+        return record_review(self.project(), key, "Reconciliation works",
+                             ["Representative reconciliation: passed"], affected, "pass",
+                             handoff=[self.handoff()] if handoff is None else handoff)
+
+    def cli(self, *arguments, success=True, cwd=None, stdin=None):
+        environment = os.environ.copy()
+        environment["PYTHONPATH"] = str(Path(__file__).resolve().parents[1] / "src")
+        result = subprocess.run([sys.executable, "-m", "openwish", *arguments],
+                                cwd=cwd or self.root, env=environment, input=stdin,
+                                text=True, capture_output=True, timeout=10)
+        self.assertEqual(result.returncode, 0 if success else 1, result.stdout + result.stderr)
+        self.assertNotIn("Traceback", result.stderr)
+        return result

@@ -3,8 +3,9 @@ from unittest.mock import patch
 from openwish.model import needs_context
 from openwish.storage import WishError, read_json, write_json
 from openwish.views import status_data, summary
-from openwish.workflow import (clean_changes, close_changes, record_review, set_mode,
-                               source_fingerprint, validate_review)
+from openwish.repository import repository_snapshot
+from openwish.workflow import (clean_changes, close_changes, record_review, set_mode, set_task,
+                               validate_review)
 
 from tests.support import ProjectCase
 
@@ -52,16 +53,51 @@ class WorkflowTests(ProjectCase):
         with self.assertRaisesRegex(WishError, "Unfinished work"):
             self.review()
 
-    def test_review_requires_direct_results_and_all_current_intent(self):
+    def test_review_records_affected_and_assessed_unaffected_current_intent(self):
         self.fixture()
         self.add_need()
         self.finish_tasks()
-        with self.assertRaisesRegex(WishError, "N-002"):
-            self.review()
         with self.assertRaisesRegex(WishError, "direct verification"):
-            record_review(self.project(), "C-001", "Fine", [], ["N-001", "N-002"])
-        self.review(needs=["N-001", "N-002"])
+            record_review(self.project(), "C-001", "Fine", [])
+        with self.assertRaisesRegex(WishError, "unknown need"):
+            self.review(affected=["N-404"])
+        record = self.review()
+        self.assertEqual((record["affected"], record["unaffected"]), (["N-001"], ["N-002"]))
+        record = self.review(affected=["N-002"])
+        self.assertEqual((record["affected"], record["unaffected"]), (["N-001", "N-002"], []))
         self.assertEqual(validate_review(self.project(), "C-001")["verdict"], "pass")
+
+    def test_stale_review_names_what_changed(self):
+        self.reviewed()
+        (self.root / "new.py").write_text("pass\n", encoding="utf-8")
+        (self.root / "app.py").write_text("def export():\n    return [1]\n", encoding="utf-8")
+        self.edit_document("needs/N-001.md", outcome="Reconcile without retyping or copying")
+        with self.assertRaises(WishError) as raised:
+            validate_review(self.project(), "C-001")
+        for text in ("stale", "new.py added", "app.py modified", "N-001 modified"):
+            self.assertIn(text, str(raised.exception))
+        self.assertEqual(str(raised.exception).count("app.py modified"), 1)
+        self.assertIn("app.py modified", summary(self.project(), ["C-001"]))
+
+    def test_task_updates_require_evidence_and_prerequisites(self):
+        self.fixture()
+        self.write_tasks([self.task(), self.task("C-001/T-002", depends_on=["C-001/T-001"])])
+        with self.assertRaisesRegex(WishError, "evidence"):
+            set_task(self.project(), "C-001/T-001", "done")
+        with self.assertRaisesRegex(WishError, "prerequisites"):
+            set_task(self.project(), "C-001/T-002", "done", "Checked")
+        with self.assertRaisesRegex(WishError, "Unknown task"):
+            set_task(self.project(), "C-001/T-009", "in-progress")
+        set_task(self.project(), "C-001/T-001", "in-progress")
+        self.assertEqual(self.project()["changes"]["C-001"]["meta"]["status"], "in-progress")
+        set_task(self.project(), "C-001/T-001", "done", "Representative export check passed")
+        set_task(self.project(), "C-001/T-002", "done", "Follow-up verified")
+        self.review()
+        self.assertEqual(self.project()["changes"]["C-001"]["meta"]["status"], "review")
+        set_task(self.project(), "C-001/T-002", "open")
+        self.assertEqual(self.project()["changes"]["C-001"]["meta"]["status"], "in-progress")
+        with self.assertRaisesRegex(WishError, "not passing"):
+            close_changes(self.project(), ["C-001"], "human")
 
     def test_repository_add_edit_and_delete_each_invalidate_review(self):
         self.reviewed()
@@ -95,9 +131,10 @@ class WorkflowTests(ProjectCase):
         self.review("C-002")
         for project_view in (lambda: status_data(self.project()),
                              lambda: summary(self.project(), ["N-001"])):
-            with patch("openwish.views.source_fingerprint", wraps=source_fingerprint) as snapshot:
+            with patch("openwish.views.repository_snapshot", wraps=repository_snapshot) as views, \
+                    patch("openwish.workflow.repository_snapshot", wraps=repository_snapshot) as workflow:
                 project_view()
-                self.assertEqual(snapshot.call_count, 1)
+                self.assertEqual(views.call_count + workflow.call_count, 1)
         (self.root / "app.py").write_text("# changed after the first projection\n", encoding="utf-8")
         self.assertEqual({c["review"] for c in status_data(self.project())["changes"]}, {"stale"})
 
@@ -105,7 +142,7 @@ class WorkflowTests(ProjectCase):
         self.reviewed()
         self.add_change()
         self.review("C-002")
-        with patch("openwish.workflow.source_fingerprint", wraps=source_fingerprint) as snapshot:
+        with patch("openwish.workflow.repository_snapshot", wraps=repository_snapshot) as snapshot:
             close_changes(self.project(), ["C-001", "C-002"], "human")
             self.assertEqual(snapshot.call_count, 1)
         self.add_change("C-003")
@@ -141,7 +178,7 @@ class WorkflowTests(ProjectCase):
     def test_blocked_review_cannot_close_and_latest_review_replaces_it(self):
         self.fixture()
         record_review(self.project(), "C-001", "Waiting for observation", ["Import check unavailable"],
-                      ["N-001"], "blocked")
+                      verdict="blocked")
         with self.assertRaisesRegex(WishError, "not passing"):
             close_changes(self.project(), ["C-001"], "human")
         self.finish_tasks()
@@ -162,18 +199,16 @@ class WorkflowTests(ProjectCase):
             close_changes(self.project(), ["C-001", "C-002"], "human")
         self.assertEqual(self.project()["changes"]["C-001"]["meta"]["status"], "review")
 
-    def test_batch_closure_preflights_rendered_artifact_budget(self):
+    def test_readable_long_changes_can_be_reviewed_and_closed(self):
         self.reviewed()
         self.add_change()
         path = self.root / "openwish/changes/C-002/change.md"
         text = path.read_text()
-        path.write_text(text + "Working detail.\n" * (498 - len(text.splitlines())), encoding="utf-8")
+        path.write_text(text + "Working detail.\n" * 600, encoding="utf-8")
         self.review("C-002")
-        self.assertEqual(len(path.read_text().splitlines()), 498)
-        with self.assertRaisesRegex(WishError, "under 500"):
-            close_changes(self.project(), ["C-001", "C-002"], "human")
+        close_changes(self.project(), ["C-001", "C-002"], "human")
         for change in self.project()["changes"].values():
-            self.assertEqual(change["meta"]["status"], "review")
+            self.assertEqual(change["meta"]["status"], "closed")
 
     def test_cleanup_disposes_work_and_leaves_intent_and_product_byte_identical(self):
         self.reviewed()
@@ -228,7 +263,7 @@ class WorkflowTests(ProjectCase):
         self.reviewed()
         path = self.root / "openwish/changes/C-001/review.json"
         review = read_json(path)
-        for field, value in (("checks", []), ("needs", None), ("at", "not-a-date")):
+        for field, value in (("checks", []), ("affected", None), ("at", "not-a-date")):
             with self.subTest(field=field):
                 write_json(path, {**review, field: value})
                 with self.assertRaises(WishError):

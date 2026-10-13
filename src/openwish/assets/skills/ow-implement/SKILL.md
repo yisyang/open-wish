@@ -1,52 +1,42 @@
 ---
 name: ow-implement
-description: Execute or resume an authorized OW change using local tasks. Continue independent work through verification and review. Honor OW opt-outs and keep routine changes lightweight.
+description: Execute or resume an authorized OW change using its tasks, continuing independent work through verification and review. Honor OW opt-outs and keep routine changes lightweight.
 ---
 
 # Implement
 
-Read `openwish/policy.md`, `ow context C-001`, the change approach, and
-`ow ready C-001`. Verify conversation authority before implementation; readiness
-does not grant it. For routine work, implement and verify directly, then report.
+Read `openwish/policy.md`, `ow context C-001`, the change's approach and
+`ow ready C-001`. Confirm the conversation authorizes implementation; readiness
+does not. Routine work: implement, verify, report.
 
-1. On resumption or changed decisions/scope, apply Reconcile the plan in
-   `../ow-plan/SKILL.md` before trusting `ow ready`. Verify prerequisite capabilities
-   from earlier increments in the repository; reconcile stale blockers with actual
-   evidence. Expand an unplanned candidate's tasks before executing it.
-   Select ready work in listed order, subject to local prerequisites. Read its
-   acceptance and the motivating needs, then inspect relevant code and tests.
-   Set the change and task in-progress as work begins.
-2. Implement the smallest coherent solution. Preserve current needs and existing
-   user work. Prefer functional cores, explicit effects, and discoverable module
-   boundaries consistent with the repository. Keep checks independent of the code's assumptions.
-   Use the Architecture rubric in `../ow-align/SKILL.md` when a new ask changes
-   boundaries. Keep decisions and transformations pure where practical, passing
-   external results/time/configuration explicitly; isolate I/O at the edges.
-   Verify core behavior and relevant integration contracts where each adds useful
-   evidence. Avoid speculative abstractions.
-3. Follow Strategic verification in `../ow-plan/SKILL.md`. Run existing affected
-   checks and add only the smallest checks for genuine gaps. Assert stable outcomes,
-   not incidental wording/layout or private call sequences. Keep credible,
-   consequential failure checks; expand only when the work justifies their cost.
-   Record concise direct evidence before marking a task done. Retain completed
-   tasks for integration review. Manual observations
-   require real evidence; fast-forward cannot invent them.
-4. Continue independent ready work around blocked/manual tasks. A task's list
-   position alone does not block later work. Repair the approach and remaining
-   tasks as the implementation teaches you more; keep technical decisions within
-   existing authority. Reassess growing scope with Right-size delivery in
-   `../ow-propose/SKILL.md`; preserve unfinished work/evidence when splitting changes.
-   Material intent/scope changes return to the relevant decision.
-5. Put enduring behavior in code, regression checks in tests, and otherwise
-   unrecoverable rationale near code or in ordinary repository documentation.
-   Retain tests protecting lasting obligations; temporary probes need not become
-   permanent tests. Report current verification and limitations without a run archive.
-   Never establish another permanent spec or execution ledger.
-6. When only genuine human blockers remain, explain the need and desired outcome,
-   then ask numbered questions with useful A/B/C choices and `(Recommended)` before
-   the preferred text. Do not discard unfinished work to manufacture completion.
-7. When the work is complete, enter `ow-review` automatically. Continue remediation
-   and rechecking within scope without an intermediate permission prompt.
+1. **Resume safely.** On resumption or changed scope, apply Reconcile the plan in
+   `ow-plan` first. Verify prerequisite capabilities from earlier increments in
+   the repository. Plan an unplanned candidate's tasks before executing it.
+2. **Pick ready work** in list order. Read its acceptance and motivating needs,
+   retrieve rule files listed by `ow context` (they are not loaded automatically),
+   and inspect the code. If finishing would require inventing product policy,
+   resolve that first (Task sizing in `ow-plan`). Run `ow task C-001/T-001
+   in-progress`.
+3. **Implement** the smallest coherent solution that preserves current needs and
+   existing user work. Follow the repository's structure and the Architecture
+   rubric in `ow-align`: pure decisions, effects at the edges, no speculative
+   abstractions. Keep module headers and boundary READMEs accurate where you
+   change responsibilities.
+4. **Verify** with Strategic verification in `ow-plan`: run affected checks, add the
+   smallest checks for real gaps, mention need IDs in need-level tests. Then
+   `ow task C-001/T-001 done --evidence "what ran and what it showed"`. Manual
+   observations need real evidence; fast-forward cannot supply them.
+5. **Keep going.** Continue independent ready tasks around blocked or manual ones.
+   Update the approach and remaining tasks as you learn; technical repairs within
+   scope need no permission. If scope grows, apply Right-size delivery in
+   `ow-propose`. Material intent changes need a decision.
+6. **Preserve as you go.** Behavior goes in code, checks in tests, non-obvious
+   rationale nearby. Keep material conditions, exceptions and units intact. Put
+   approved unfinished detail in its retained home now. Note in the change where
+   each material rule landed; the review's handoff will reuse it.
+7. **Ask only when blocked.** When only human blockers remain, explain the need and
+   outcome, then ask numbered A/B/C questions with `(Recommended)`. Never discard
+   unfinished work to look complete.
+8. **Review.** When work is complete, continue into `ow-review` without asking.
 
-Updates lead with **need → outcome → evidence**, then limitations or human input.
-Use `ow summary C-001` when useful. Task IDs support rather than replace purpose.
+Lead updates with **need → outcome → evidence**; task IDs support, not replace, that.

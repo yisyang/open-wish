@@ -1,70 +1,94 @@
 # Workflow skill evaluations
 
-`evals.json` is the semantic regression set for the schema-3 workflow. Run each
-prompt in a fresh session with the listed skills and project policy. Compare with
-a snapshot of previous skills when assessing a revision.
+`evals.json` is the semantic regression set for the shipped skills. Deterministic
+tests in `tests/` protect the CLI; these scenarios check whether agents using the
+skills behave well, and whether OW beats working without it.
 
-| Scenario | Behaviors to check |
-| --- | --- |
-| Existing monthly trends versus conflicting upload request | Preserve current intent; clarify the actual choice; avoid duplicate needs |
-| Final fast-forward results | Review/close/clean the change; retain needs; scope delegation; preserve evidence provenance |
-| Independent work around manual observation | Continue ready tasks; retain manual checks and completed task evidence |
-| Routine alias | Implement and verify directly without records or acceptance ceremony |
-| Working design repair | Revise the disposable approach/tasks; use code/tests/layout; reuse existing authority |
-| New format versus accountability | Distinguish mechanism from independently valuable outcome |
-| Plan-only | Prepare change and local tasks, then stop before implementation |
-| Explicit opt-out | Source templates do not impose self-adoption |
-| Fast-forward routine work | Finish after verification/reporting without structured records |
-| Disposal with unique knowledge and active blockers | Preserve useful facts in repo docs; retain unfinished work; handle unknown files deliberately |
-| Default result review | Retain change/tasks until actual human acceptance |
-| Brownfield shop-a | Discover architectural friction from source; propose incremental refactoring and seek approval |
-| Brownfield shop-b | Recognize useful existing boundaries and recommend retaining them |
-| Greenfield reconciliation, then CSV | Implement real code; retain and rerun small, meaningful checks of stable outcomes and consequential risks |
-| Need sizing, relationships, and retention | Reuse/split/merge intent carefully; preserve sparse semantic facts and useful knowledge |
-| Strategic test selection | Reuse stable checks, protect against consequential data loss, avoid brittle incidental assertions and unrequested targets |
-| Explicit coverage contract | Honor scoped human coverage requirements without equating them with correctness |
-| Large modernization | Detect subsystem-sized tasks; scope independently reviewable increments and detail the next executable work |
-| Growing scope and stale blockers | Preserve obligations/evidence, reconcile resolved decisions, repair dependencies, and keep future plans usable after disposal |
-| Narrow change with many needs | Retain a coherent cross-cutting increment; distinguish partial contribution, future work, and actual result acceptance |
+## Running
 
-Grade actual responses rather than claims of compliance. A real decision uses
-numbered A/B/C choices with `(Recommended)` before preferred text; routine work
-needs no question. Prefer concise need → outcome → evidence communication.
-
-The original cases are instruction-following dry runs. Cases 13–14 inspect real
-small repositories under `fixtures/`, without being told the architectural finding.
-Case 15 builds an actual product in a temporary project and evolves it for a second
-ask. Run its independent checks with:
+`run.py` prepares an isolated workspace (always outside this checkout), runs an
+agent command for every stage, and grades what it can mechanically:
 
 ```sh
-PROJECT_DIR=/path/to/run/outputs/project python3 evals/fixtures/reconcile/acceptance_test.py -v
+python3 evals/run.py run --workspace /tmp/ow-evals --ids 15 23 24 \
+  --agent "claude -p --output-format json --permission-mode acceptEdits"
+python3 evals/run.py grade --workspace /tmp/ow-evals --ids 15 23 24
 ```
 
-Inspect the generated source as well as test results: behavioral passes alone do
-not establish discoverability, isolated effects, or proportionate architecture.
-For case 15, independently run the retained suite using its documented command and
-record the result and runtime in the temporary evaluation workspace. Inspect what
-the tests protect: stable outcomes, important decisions, and consequential boundary
-contracts. No fixed test-count target applies; justify complexity by useful evidence,
-not coverage volume. Exact schema checks may be valuable while exact incidental
-diagnostics or layout snapshots are brittle. Judge current runnable artifacts and
-reported limitations, not unobservable historical first-slice execution order.
-Historical sequencing would require separately captured harness checkpoints; it is
-not established by retrospective prose or required in the product's retained files.
-Case 16 assesses semantic consolidation and relationship reuse. Assertions support
-human judgment; none of these small samples prove reliability across harnesses.
-Cases 19–21 exercise delivery planning at different scales. Case 19 uses a supplied
-modernization assessment, not a runnable game; grade attribution accordingly. Inspect
-the proposed acceptance boundaries, early integration and concrete next tasks rather
-than rewarding change/file counts. Case 20 checks scope growth and contradictory
-decision/task state, including preservation of genuine manual blockers and delegation
-boundaries. Case 21 is a control against unnecessary splitting or claims that an empty
-future task list establishes completion. Compare old and revised guidance on identical
-prompts in fresh sessions; report improvements and non-discriminating cases honestly.
-Fixtures are evaluation inputs, not OW's product implementation. Always run/copy
-them in temporary projects; never install an OW workflow into this source checkout.
+- **Arms.** `skills` installs this checkout's skills into the working directory
+  and puts an `ow` shim for this checkout on `PATH`. `baseline` runs the same task
+  without OW; only evals with a `baseline_prompt` have this arm (15, 23, 24).
+  Make sure no other `ow` is on `PATH` for baseline runs.
+- **Stages.** Scenario evals (23, 24) run each stage as a separate agent process
+  over the retained product, so a later session cannot remember the earlier
+  prompt. The runner warns if the product gains Git history, which could leak
+  deleted plans.
+- **Records.** Each stage directory keeps `prompt.md`, `transcript.txt`,
+  `metrics.json` (wall time, exit code, and `usage`/`total_cost_usd`/`num_turns`
+  when the agent prints them as JSON), and a `snapshot/` of the work.
+- **Agents.** The prompt is appended as the final argument, which fits
+  `claude -p`, `codex exec` and `opencode run`. Grant whatever edit permissions
+  the scenario needs.
 
-Keep outputs and comparative scores in a temporary
-workspace rather than this source checkout. Do not reuse scores from earlier
-versions of the prompts. Human feedback can be supplied directly in chat or via
-the skill-creator review viewer; a submission is received only when its data is available.
+`grade` writes `results.json` and prints one line per eval, arm and stage:
+
+- **Acceptance.** External checks of the public contract for that stage
+  (`fixtures/*/acceptance_test.py`).
+- **Mutation.** For 23 and 24, the product's own retained tests are rerun twice:
+  once with the target module replaced by an evaluator-only reference
+  (`fixtures/*/reference.py`), which they must pass, and once per seeded mutant,
+  which they should fail. Tests that fail on the reference are reported as
+  inconclusive: they depend on internals rather than the contract.
+- **Intent.** Need count and size per stage, needs changed since the previous
+  stage, and change directories left behind.
+- **Dry-run evals** get a `grading.md` checklist of their assertions for a
+  human or model grader. Grade actual responses and edits, not claims of
+  compliance.
+
+## What to compare
+
+Compare arms, and compare skill revisions, on identical prompts in fresh sessions.
+Report non-discriminating cases honestly. Useful signals, in rough priority:
+
+1. Acceptance and mutation results of the executable scenarios (15, 23, 24),
+   skills versus baseline.
+2. Lost or invented rules across stages (read the stage responses and needs).
+3. Cost: wall time and tokens per stage, skills versus baseline.
+4. Checklist grades of the dry-run scenarios.
+
+Small samples do not prove reliability across models or harnesses. Do not reuse
+scores from earlier prompt versions. Keep workspaces, transcripts and scores out of
+this checkout.
+
+## Scenarios
+
+| ID | Scenario | Behaviors to check |
+| --- | --- | --- |
+| 1 | Existing on-device trends vs. upload request | Preserve current intent; ask the real choice; no duplicate need |
+| 2 | Fast-forward final results | Review, close and clean the change; keep needs; scope delegation; attribute evidence |
+| 3 | Independent work around a manual observation | Continue ready tasks; keep manual checks and evidence |
+| 4 | Routine alias | Implement and verify directly, no records or acceptance step |
+| 5 | Working design repair | Revise approach and tasks under existing authority |
+| 6 | New format vs. accountability | Mechanism reuses a need; independent outcome may be new |
+| 7 | Plan-only | Prepare change and tasks, then stop |
+| 8 | Explicit opt-out | Installed skills do not impose adoption |
+| 9 | Fast-forward routine work | Finish without structured records |
+| 10 | Disposal with unique knowledge and blockers | Preserve facts in docs; keep unfinished work; handle unknown files |
+| 12 | Default result review | Keep the change until actual human acceptance |
+| 13 | Brownfield shop-a | Find real architectural friction; propose incremental refactoring; seek approval |
+| 14 | Brownfield shop-b | Recognize good boundaries and recommend keeping them |
+| 15 | Greenfield reconciliation, then CSV | Real code; shared core; small meaningful retained checks (baseline arm) |
+| 16 | Need sizing, relations, retention | Reuse/split/merge carefully; sparse relations; preserve knowledge |
+| 17 | Strategic test selection | Reuse stable checks; protect against data loss; avoid brittle assertions |
+| 18 | Explicit coverage contract | Honor a scoped coverage requirement without equating it with correctness |
+| 19 | Large modernization | Detect subsystem-sized tasks; scope reviewable increments |
+| 20 | Growing scope, stale blockers | Preserve obligations and evidence; reconcile decisions; keep plans usable |
+| 21 | Narrow change, many needs | Keep a coherent cross-cutting increment; partial vs. complete delivery |
+| 22 | Material policy and handoff | Resolve missing policy; retain deferred detail; size is not a reason to lose meaning |
+| 23 | Fresh-session handoff (2 stages) | Recover approved future rules after disposal; mutation-graded (baseline arm) |
+| 24 | Long-horizon lending (4 stages) | Rules survive sessions, a revision and a rewrite; intent stays proportionate (baseline arm) |
+
+Fixtures are evaluation inputs, not OW's implementation. Scenario prompts and the
+skills' worked examples deliberately use different domains so that passing a case
+reflects transferable behavior rather than recall of an example; keep it that way
+when adding either.

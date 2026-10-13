@@ -84,8 +84,6 @@ def install_skills(root, harnesses, *, confirm_downgrade=None):
     target = version_key(__version__)
     plan = []
     for relative, content in outputs.items():
-        if len(content.splitlines()) >= 500:
-            raise WishError(f"OW artifacts must be under 500 lines: {relative}")
         path = contained(root, relative)
         try:
             current = path.read_text(encoding="utf-8") if path.exists() else None
@@ -114,8 +112,6 @@ def install_skills(root, harnesses, *, confirm_downgrade=None):
         tracked[relative] = (installed if action == "unchanged" or
                             (action == "downgraded" and not allow_downgrade) else __version__)
     updated = {"format": 1, "harnesses": normalize_harnesses(manifest["harnesses"] + harnesses), "files": tracked}
-    if len(json.dumps(updated, indent=2, ensure_ascii=False).splitlines()) >= 500:
-        raise WishError("OW installation manifest must be under 500 lines.")
 
     report = dict.fromkeys(("installed", "upgraded", "downgraded", "unchanged", "kept_newer"), 0)
     for relative, content, action, installed in plan:

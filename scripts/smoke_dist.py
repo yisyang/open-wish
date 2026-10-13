@@ -74,10 +74,19 @@ def smoke(artifact, version):
         ready = json.loads(command("ready", "N-001", "--json"))
         if ready != {"ready": [], "waiting": []}:
             raise RuntimeError(f"Verification-only change invented work: {ready}")
+        handoff = root / "handoff.json"
+        handoff.write_text(json.dumps({"handoff": [{
+            "requirement": "Retain local-only intent through disposal in this structural smoke fixture",
+            "disposition": "retained", "destinations": ["openwish/needs/N-001.md"],
+            "evidence": "Need content inspected; this smoke scenario claims no delivered product behavior"
+        }]}), encoding="utf-8")
         command("record-review", "C-001", "--summary", "Distribution workflow smoke scenario",
                 "--check", "Synthetic fixture: artifact validation passed; no product behavior claimed",
-                "--covered-need", "N-001")
+                "--handoff", str(handoff))
         command("close", "C-001", "--by", "fast-forward")
+        preview = json.loads(command("clean", "C-001", "--dry-run", "--json"))
+        if not preview["handoff"]["C-001"] or not (project / "openwish/changes/C-001").is_dir():
+            raise RuntimeError("Cleanup preview lost its handoff or modified the change.")
         command("clean", "C-001")
         status = json.loads(command("status", "--json"))
         if status["changes"] or need.read_text(encoding="utf-8") != text:

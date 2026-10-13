@@ -22,17 +22,26 @@ For an installed executable, use a virtual environment and `python -m pip instal
 
 - Keep pure model/validation functions separate from filesystem operations.
 - Prefer standard-library functionality and established packages where needed.
-- Keep source below 500 nonblank lines when practical; 1000 is the hard maximum
-  without a justified low-complexity exception. All Markdown/OW artifacts stay
-  below 500 lines. Data-file exceptions never bypass OW knowledge limits.
+- Favor cohesive source below 500 nonblank lines when practical; assess complexity
+  rather than splitting mechanically. Product source hard limits are opt-in. Knowledge
+  uses soft token targets; preserve readable formatting, constraints and exceptions.
 - Test behaviors that protect intent, user data, local dependencies, safe disposal,
   or review freshness. Avoid tests that merely reproduce implementation text.
 - Run the full suite after substantive changes; it should remain well under
   five minutes. Choose further checks based on actual unresolved risk.
+- Start each module with a one-line docstring stating what it owns; `docs/design.md`
+  points to these rather than repeating them.
 - Keep canonical skills in `src/openwish/assets/skills/`. Test generated adapters
   without copying divergent workflow logic into them.
+- Give each workflow rule one owner (the policy or one skill section) and refer to it
+  by name elsewhere. Keep skills procedural and concise; every sentence costs agent
+  context in every user's project. Use worked examples from domains that no eval
+  scenario uses.
 - Keep workflow overhead proportional to the work. Test routine changes without
-  creating OW records to manage the contribution. See `evals/` for skill scenarios.
+  creating OW records to manage the contribution.
+- For skill changes, run the executable scenarios with both arms
+  (`python3 evals/run.py run ...`, see [evals](evals/README.md)) and compare against
+  the previous skills on the same prompts.
 - In the product, distinguish conversation authority from task readiness and
   human result acceptance from change-scoped fast-forward delegation.
 

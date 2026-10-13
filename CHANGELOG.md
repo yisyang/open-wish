@@ -2,6 +2,50 @@
 
 Release notes for OpenWish, newest first. Update this file for every release.
 
+## v0.7.0
+
+### Added
+
+- A safe-to-forget handoff assessment inside the single disposable review: material
+  obligations, actual retained destinations, independent evidence and explicit disposition.
+- Cleanup preview (`--dry-run`, optional JSON), batch destination checks, incoming
+  handoff dependency protection, and warnings for retained files that still mention
+  a removed change ID.
+- `ow trace`: need → test/file links derived from need IDs mentioned in code, tests and
+  docs. `ow check` warns about mentions of unknown or retired needs.
+- `ow task C-001/T-001 STATUS [--evidence ...]` updates one task, enforcing evidence and
+  prerequisites and moving the change to in-progress.
+- `record-review --handoff -` reads the handoff from stdin.
+- Complete JSON context with sized retrieval manifests and optional durable need
+  references to detailed rule documents/data; referenced content is explicitly not loaded.
+- Recursive submodule discovery and review freshness for gitlink revisions, checked-out
+  revisions and unignored working content, with explicit incomplete-inspection reporting.
+- An evaluation runner (`evals/run.py`) with OW and no-OW baseline arms, fresh-session
+  stages, acceptance checks, seeded-mutant grading of retained tests, and time/token
+  capture; a four-stage long-horizon scenario with a revision and a rewrite.
+
+### Changed
+
+- **Breaking:** `record-review --covered-need` is replaced by `--affected`. Linked needs
+  are always affected; every other current need is recorded as assessed and unaffected.
+  Reviews store `affected`/`unaffected` and per-input digests instead of one fingerprint.
+- Stale reviews name what changed (needs, approach, tasks, policy, specific files).
+- Recording a review, closing or cleaning a batch, and each status/summary projection
+  take one repository snapshot per command.
+- Policy, artifact reference and skills are rewritten to give each rule one owner, cut
+  their size by about half, drop references to concepts OW does not have, and use
+  worked examples from domains no evaluation scenario uses. Skills add short module
+  headers and boundary READMEs as the orientation convention and need IDs in tests.
+- Needs default to a 24,000 estimated-token soft target. OW artifact/global-context
+  line caps are removed; individual artifacts warn at 8,000 estimated tokens
+  (machine-written reviews and installer records are exempt).
+- Source retains a 500-LOC warning; hard enforcement is an explicit project option
+  (`source_hard_limit`, default 0). Size warnings do not block inspection.
+- Evaluation assertions no longer check for concepts the guidance never mentions;
+  scenarios are sorted by ID.
+- Package and bundled integrations advance together to 0.7.0. **Schema 4** requires
+  handoff assessments for passing reviews; only the current schema is supported.
+
 ## v0.6.1
 
 ### Changed

@@ -4,7 +4,8 @@ from datetime import date, datetime
 import re
 
 from .model import CHANGE_STATES, CURRENCY, MODES, RELATIONS, TASK_STATES, topological_order
-from .storage import SCHEMA_VERSION, WishError, contained
+from .repository import repository_snapshot
+from .storage import SCHEMA_VERSION, WishError, contained, repository_file
 
 
 def string_list(value):
@@ -63,10 +64,12 @@ def validate(project):
 
     config = project["config"]
     require(type(config.get("version")) is int and config["version"] == SCHEMA_VERSION,
-            "config: unsupported schema version (expected 3)")
+            f"config: unsupported schema version (expected {SCHEMA_VERSION})")
     require(nonempty(config.get("product")), "config: product is required")
     require(type(config.get("needs_token_budget")) is int and config["needs_token_budget"] > 0,
-            "config: needs_token_budget must be a positive integer")
+             "config: needs_token_budget must be a positive integer")
+    require(type(config.get("source_hard_limit", 0)) is int and config.get("source_hard_limit", 0) >= 0,
+            "config: source_hard_limit must be a nonnegative integer (0 disables enforcement)")
     exceptions = config.get("code_exceptions")
     require(isinstance(exceptions, list), "config: code_exceptions must be an array")
     for exception in exceptions if isinstance(exceptions, list) else []:
@@ -90,9 +93,23 @@ def validate(project):
             require(all(header_value(value) for value in record["meta"].values()),
                     f"{key}: header values must be strings, booleans, integers, arrays, or inline tables")
 
+    visible_references = None
     for key, record in project["needs"].items():
         meta = record["meta"]
         errors.extend(relation_errors(key, meta, project["needs"]))
+        references = meta.get("references", [])
+        require(string_list(references), f"{key}: references must be an array of repository file paths")
+        for relative in references if string_list(references) else []:
+            try:
+                path = repository_file(project["root"], relative)
+                if visible_references is None:
+                    visible_references = set(repository_snapshot(project["root"])["files"])
+                require(path in visible_references,
+                        f"{key}: durable reference is ignored or excluded from repository inspection: {relative}")
+                require(not relative.startswith("openwish/changes/"),
+                        f"{key}: durable references cannot target disposable changes")
+            except WishError as error:
+                errors.append(f"{key}: {error}")
         for field in ("title", "actor", "outcome"):
             require(nonempty(meta.get(field)), f"{key}: {field} is required")
         require(meta.get("currency") in CURRENCY, f"{key}: invalid currency")

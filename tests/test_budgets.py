@@ -10,20 +10,24 @@ class BudgetTests(ProjectCase):
         path = self.root / "openwish/config.json"
         write_json(path, {**read_json(path), **kwargs})
 
-    def test_artifact_499_lines_passes_but_500_fails(self):
+    def test_readable_artifacts_have_size_warnings_not_line_failures(self):
         path = self.root / "openwish/large.md"
         path.write_text("fact\n" * 499, encoding="utf-8")
         errors, warnings = check_budgets(self.project())
         self.assertEqual(errors, [])
-        self.assertTrue(warnings)
-        path.write_text("fact\n" * 500, encoding="utf-8")
-        self.assertIn("under 500", "\n".join(check_budgets(self.project())[0]))
+        self.assertFalse(warnings)
+        path.write_text("Important facts.\n" * 2000, encoding="utf-8")
+        errors, warnings = check_budgets(self.project())
+        self.assertFalse(errors)
+        self.assertIn("preserve meaning", "\n".join(warnings))
 
-    def test_short_lines_do_not_bypass_the_global_token_budget(self):
+    def test_needs_token_budget_is_a_soft_target(self):
         self.fixture()
         self.edit_document("needs/N-001.md", outcome="long outcome " * 100)
         self.config(needs_token_budget=100)
-        self.assertIn("tokens", "\n".join(check_budgets(self.project())[0]))
+        errors, warnings = check_budgets(self.project())
+        self.assertFalse(errors)
+        self.assertIn("soft target", "\n".join(warnings))
 
     def test_context_warns_before_reaching_its_budget(self):
         self.fixture()
@@ -42,6 +46,8 @@ class BudgetTests(ProjectCase):
         self.assertFalse(errors)
         self.assertIn("soft target", "\n".join(warnings))
         path.write_text("pass\n" * 1000, encoding="utf-8")
+        self.assertFalse(check_budgets(self.project())[0])
+        self.config(source_hard_limit=1000)
         self.assertIn("under 1000", "\n".join(check_budgets(self.project())[0]))
 
     def test_justified_source_exception_does_not_exempt_ow_knowledge(self):
@@ -52,7 +58,7 @@ class BudgetTests(ProjectCase):
         self.assertFalse(errors)
         self.assertIn("exception", "\n".join(warnings))
         (self.root / "openwish/routes.json").write_text("{}\n" * 500, encoding="utf-8")
-        self.assertIn("under 500", "\n".join(check_budgets(self.project())[0]))
+        self.assertFalse(check_budgets(self.project())[0])
 
     def test_data_files_are_exempt_but_source_cannot_claim_to_be_data(self):
         (self.root / "data.json").write_text("{}\n" * 1100, encoding="utf-8")

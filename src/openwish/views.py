@@ -2,15 +2,17 @@
 
 from functools import cache
 
+from .handoff import validate_handoff
 from .model import change_tasks, estimate_tokens, needs_context, retention_data, select_changes
+from .repository import repository_snapshot
 from .storage import WishError, read_json
-from .workflow import review_path, source_fingerprint, validate_review
+from .workflow import review_path, validate_review
 
 
 def change_data(project, key, *, snapshot=None):
     change = project["changes"][key]["meta"]
     tasks = change_tasks(project, key)
-    review = "missing"
+    review, reason = "missing", ""
     path = review_path(project, key)
     if path.exists():
         try:
@@ -18,20 +20,22 @@ def change_data(project, key, *, snapshot=None):
                 review = "blocked"
             else:
                 active = change["status"] != "closed"
-                source = snapshot() if active and snapshot is not None else None
-                validate_review(project, key, fresh=active, source=source)
-                review = "historical" if change["status"] == "closed" else "fresh"
-        except (OSError, WishError):
-            review = "stale"
-    return {**change, "done": sum(t["status"] == "done" for t in tasks), "tasks": len(tasks), "review": review}
+                validate_review(project, key, fresh=active,
+                                snapshot=snapshot() if active and snapshot is not None else None)
+                review = "fresh" if active else "historical"
+        except (OSError, WishError) as error:
+            review, reason = "stale", str(error)
+    return {**change, "done": sum(t["status"] == "done" for t in tasks), "tasks": len(tasks),
+            "review": review, **({"review_issue": reason} if reason else {})}
 
 
-def change_rows(project, keys):
-    # One lazy filesystem snapshot per projection, never reused across commands.
-    @cache
-    def snapshot():
-        return source_fingerprint(project)
+def lazy_snapshot(project):
+    # One repository snapshot per projection, never reused across commands.
+    return cache(lambda: repository_snapshot(project["root"]))
 
+
+def change_rows(project, keys, snapshot=None):
+    snapshot = snapshot or lazy_snapshot(project)
     return [change_data(project, key, snapshot=snapshot) for key in keys]
 
 
@@ -43,9 +47,11 @@ def status_data(project):
                 by_need[need].append(key)
     needs = [{**need["meta"], "changes": by_need[key]}
              for key, need in project["needs"].items()]
+    snapshot = lazy_snapshot(project)
     return {"product": project["config"]["product"], "needs": needs,
-            "changes": change_rows(project, project["changes"]), "retention": retention_data(project),
-            "needs_tokens_estimate": estimate_tokens(needs_context(project))}
+            "changes": change_rows(project, project["changes"], snapshot), "retention": retention_data(project),
+            "needs_tokens_estimate": estimate_tokens(needs_context(project)),
+            "repository_warnings": snapshot()["warnings"]}
 
 
 def summary(project, keys):
@@ -65,11 +71,22 @@ def summary(project, keys):
         if path.exists():
             review = read_json(path)
             lines.append(f"Result: {review.get('summary', '')}")
+            if isinstance(review.get("affected"), list) and isinstance(review.get("unaffected"), list):
+                lines.append("Needs affected: " + (", ".join(review["affected"]) or "none")
+                             + "; assessed unaffected: " + (", ".join(review["unaffected"]) or "none"))
+            try:
+                assessment = review.get("handoff", [])
+                validate_handoff(project, key, assessment, passing=False, destinations=False)
+                for item in assessment:
+                    lines.append(f"Handoff ({item['disposition']}): {item['requirement']} → "
+                                 + ", ".join(item["destinations"]))
+            except WishError as error:
+                lines.append(f"Invalid handoff: {error}")
             if change["review"] in ("fresh", "historical"):
                 label = "Historical check" if change["status"] == "closed" else "Verified"
                 lines.extend(f"{label}: {check}" for check in review["checks"])
             else:
-                lines.append("Resolve findings and refresh verification before closure.")
+                lines.append(change.get("review_issue") or "Resolve findings and refresh verification before closure.")
         if change["status"] == "closed":
             lines.append(f"Closed by {change['closed_by']} at {change['closed_at']}; eligible for cleanup.")
         lines.append("")

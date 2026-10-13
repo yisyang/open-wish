@@ -76,13 +76,18 @@ def document(metadata, body):
     return f"+++\n{header}\n+++\n\n{body.strip()}\n"
 
 
-def check_text(path, text):
-    if len(text.splitlines()) >= 500:
-        raise WishError(f"OW artifacts must be under 500 lines: {path}")
+def repository_file(root, relative):
+    """Validate a concrete, repository-relative reference, never a directory or symlink."""
+    if (not isinstance(relative, str) or not relative.strip() or Path(relative).is_absolute()
+            or ".." in Path(relative).parts or Path(relative).as_posix() != relative):
+        raise WishError(f"Expected a repository-relative file path: {relative!r}")
+    path = contained(root, relative)
+    if not path.is_file():
+        raise WishError(f"Referenced file does not exist: {relative}")
+    return path
 
 
 def write_text(path, text, *, create=False):
-    check_text(path, text)
     path.parent.mkdir(parents=True, exist_ok=True)
     if create:
         try:
@@ -112,7 +117,7 @@ def write_json(path, value, *, create=False):
     write_text(path, json.dumps(value, indent=2, ensure_ascii=False) + "\n", create=create)
 
 
-SCHEMA_VERSION = 3
+SCHEMA_VERSION = 4
 
 
 def project_config(root):

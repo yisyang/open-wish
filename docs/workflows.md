@@ -37,7 +37,7 @@ ow init --harness opencode
 `ow init` installs project support files and harness integrations. The `ow-onboard`
 skill performs the assessment and proposes needs. OpenCode and Claude Code expose
 it as `/onboard`; Codex uses `$ow-onboard`. See the
-[harness table](../README.md#harness-invocation) for other invocation details.
+[harness table](../README.md#get-started) for other invocation details.
 
 Onboarding establishes a useful starting point. Product implementation or
 refactoring proceeds when that work is also requested. Create changes/tasks only
@@ -190,37 +190,27 @@ For each candidate, identify:
 | Prerequisites | Which delivered capabilities must be checked before execution? |
 | Exit evidence | What would let someone accept this result independently? |
 
-For a requested resumable plan, retain later candidates as concise ordinary open
-changes. Detail tasks for the next executable increments; later task lists can
-remain empty with an explicit explanation that planning is incomplete. On selection,
-inspect delivered code/tests, resolve relevant uncertainty, and prepare concrete tasks.
-Assessment-only sequences can stay in conversation. No parent implementation change,
-permanent roadmap tier, or cross-change task graph is necessary.
+For a requested resumable plan, retain later candidates as concise open changes
+with empty task lists and say that their planning is incomplete. On selection,
+inspect delivered code and tests, resolve relevant uncertainty, and plan concrete
+tasks. Assessment-only sequences can stay in conversation.
 
-For example, an online economy could progress through reproducible player access,
-an isolated starter, one durable production recipe, and a first sale. Each increment
-includes the interface, persistence and checks needed to demonstrate it. Regional
-freight and native clients follow as separately scoped work. A task called "implement
-all production, commerce, logistics and UI" would conceal most of that delivery plan.
+For example, a clinic scheduling product could progress through one clinician's
+bookable calendar that a patient books end to end, then reminders, then multi-site
+staffing. Each increment includes the interface, persistence and checks needed to
+demonstrate it. A task called "implement scheduling, notifications and staffing"
+would conceal most of that delivery plan.
 
 Use enough tasks to expose meaningful completion and blocking boundaries. Keep
 coherent implementation and focused checks together; do not optimize for a short
 list or create a task per file. Map every promised result to work or existing evidence.
 Integrate representative behavior early instead of postponing all integration.
 
-When requirements grow or work resumes, reconcile decisions, scope, task state and
-dependencies before trusting `ow ready`. A resolved policy task needs actual evidence
-and any remaining application work must stay visible. If the change has grown beyond
-one acceptance boundary, move unfinished obligations into specific retained changes,
-repair local IDs/dependencies, preserve useful evidence, and refresh pending review.
-Decomposition within authorized scope needs no new permission; material changes do.
-New changes retain normal review unless explicitly delegated.
-
-Before disposing an increment, ensure successors describe prerequisites in terms of
-delivered code/interfaces/checks. Deferred obligations must not disappear with the
-earlier change. An empty future task list is not completion; final review checks the
-delivered scope and exit evidence, not only task status. Considering all current needs
-does not mean every future capability must ship in every increment.
+When requirements grow or work resumes, apply
+[Reconcile the plan](../src/openwish/assets/skills/ow-plan/SKILL.md#reconcile-the-plan)
+before trusting `ow ready`. Moved work is not done work, and successors should describe
+prerequisites in terms of delivered code and checks before an earlier change is
+disposed. An empty future task list is not completion.
 
 ## The change workflow
 
@@ -275,16 +265,13 @@ Tasks have concrete acceptance; optional prerequisites form an acyclic graph wit
 that change. A small change may have one task. Verification-only work or future candidates
 awaiting detailed planning may have none; actual completion still needs direct evidence.
 
-Load all current needs with `ow context`; inspect affected interfaces, consumers,
-and tests. Resolve genuine intent conflicts without silently weakening constraints.
-`ow graph` can focus investigation on established relationships, but unlinked
-current needs still constrain the result.
-
-Choose the smallest set of fast, independent checks protecting affected outcomes
-and consequential failures. Reuse useful checks before adding tests. Check exact
-details when they are real contracts; avoid freezing incidental wording, layout,
-or private call order. Honor explicit coverage targets and keep routine checks
-under five minutes, identifying necessary slower checks.
+Load all current needs with `ow context`; inspect affected interfaces, consumers
+and tests. `ow graph` and `ow trace` focus investigation on related intent and the
+checks protecting it, but unlinked current needs still constrain the result.
+A task is executable when it no longer requires inventing consequential product
+policy. Verification follows
+[Strategic verification](../src/openwish/assets/skills/ow-plan/SKILL.md#strategic-verification);
+need-level tests mention the need ID they protect so `ow trace` can find them.
 
 A clear implementation request supplies authority for its scope. Technical plan
 repairs within that scope need no repeated permission. If only planning was
@@ -293,13 +280,10 @@ requested, present the prepared change and stop.
 ### 2. Implement and verify
 
 Use `ow-implement` and `ow ready C-001` to select work subject to local
-prerequisites. Readiness describes scheduling, not permission. Implement the
-smallest coherent solution, preserving current needs and useful existing structure.
-
-Verify before marking a task done and record concise direct evidence. Retain
-completed tasks through integration review. Continue independent tasks around
-blocked or manual work; report indispensable human input with its purpose. Update
-the working approach as the implementation teaches you more.
+prerequisites; readiness is scheduling, not permission. Implement the smallest
+coherent solution, then verify and record evidence with
+`ow task C-001/T-001 done --evidence "..."`. Continue independent tasks around
+blocked or manual work, and update the working approach as you learn.
 
 ### 3. Review and accept
 
@@ -308,15 +292,18 @@ needs**, including delivered outcomes. Check affected behavior and explain
 unaffected constraints briefly. Before final review, put lasting behavior in code,
 regression checks in tests, updated intent in needs, and useful rationale nearby.
 
-Run the relevant checks and `ow check`, then record the latest result with
-`ow record-review`. Cover every `review_needs` ID from `ow context C-001`.
-Unresolved findings require a blocked review; passing requires all tasks done.
-`ow check` validates structure and budgets; it does not establish user benefit.
+Run the relevant checks and `ow check`, then record the result with
+`ow record-review C-001 ... [--affected N-003] --handoff FILE`. Linked needs are
+always recorded as affected; every other current need is recorded as assessed and
+unaffected, so the reviewer must actually judge it. The handoff maps each material
+requirement to retained files and evidence
+([format](../src/openwish/assets/artifacts.md#review-closure-and-disposal)) and lives
+only in the disposable review. Unresolved findings use `--verdict blocked`.
 
 Present **need → outcome → evidence**, with remaining limitations. In default
-mode, retain the change and tasks until the human actually accepts the results.
-If needs, approach, task evidence, policy/configuration, or repository content
-changes while acceptance is pending, refresh verification and review before closure.
+mode, keep the change until the human actually accepts the results. If anything the
+review depended on changes meanwhile, `ow summary C-001` names what changed; refresh
+the affected verification and record the review again before closing.
 
 **Explicit fast-forward** delegates acceptance for the selected change. It retains
 the same implementation, verification, and AI review obligations, and closes with
@@ -336,12 +323,17 @@ preserve useful knowledge and clean the closed change:
 | `ow close C-001 --by human` | After actual human acceptance and a fresh passing review |
 | `ow close C-001 --by fast-forward` | After a fresh passing review under explicit change-scoped delegation |
 | `ow clean C-001` | Dispose the closed change after useful knowledge is preserved |
+| `ow clean C-001 --dry-run --json` | Preview removals, retained handoff destinations and reference warnings |
 
 `ow clean` removes the known change, task, and review files together after
 preflight. Unknown files cause refusal and remain available for deliberate
 handling. Report any reason for deferring disposal. Use `ow status` to find
 cleanup candidates, results awaiting acceptance, blocked/manual work, and retired
 needs.
+
+Preflight also rejects missing or ignored handoff destinations, destinations within the
+deletion batch and incoming handoff dependencies, and warns about retained files that
+still mention the change ID.
 
 ## What survives each completed change
 
@@ -350,17 +342,18 @@ needs.
 | Actors, outcomes, acceptance, and constraints | Current needs |
 | Implemented behavior and interfaces | Source, types, and schemas |
 | Repeatable outcome and regression checks | Tests and useful manual procedures |
+| Module and boundary responsibilities | A short header per module; a README at major boundaries |
 | Essential rationale and operational facts | Nearby comments or ordinary repository docs |
+| Approved unfinished detail | Another active change or appropriate retained domain data |
 
 Needs remain current after delivery and can serve later changes. Retirement,
 merging, splitting, or removal is an intent/retention decision that preserves
 meaning and reconciles references. New changes default to human review unless
 explicitly delegated again.
 
-Retained tests enable fresh verification. Temporary probes and execution results
-can disappear after useful findings are preserved. Keep historical proof as
-product data when a genuine need requires it; OW requires no execution archive or
-permanent satisfaction ledger. Completion does not require an automatic commit.
+Retained tests enable fresh verification; temporary probes and run results can
+disappear once their findings are preserved. Git holds history. Keep historical proof
+as product data only when a need requires it.
 
 For details, see the [product requirements](product.md),
 [framework design](design.md), [workflow policy](../src/openwish/assets/policy.md),

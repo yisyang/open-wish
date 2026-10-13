@@ -11,7 +11,7 @@
       "assertions": [
         "Preserves N-001's local-only constraint pending an actual intent decision.",
         "Uses numbered A/B/C choices with '(Recommended)' before preferred text.",
-        "Does not create a duplicate need, permanent spec, or stage receipt.",
+        "Does not create a duplicate need.",
         "Does not claim edits, command execution, or approval in the dry run."
       ]
     },
@@ -35,13 +35,13 @@
       "name": "independent-work-around-manual-check",
       "skills": ["ow-implement", "ow-review"],
       "prompt": "Dry-run OW implementation; no commands or invented results. N-001 needs monthly reconciliation without retyping. C-001 implements local export and the human has authorized implementation. C-001/T-001 is done. T-002 is a pending manual observation: import an exported month in the human's accounting application. T-003 is agent work depending only on T-001. T-004 depends only on T-003. All task IDs are C-001-qualified. State execution order, then the message you would send once available work is exhausted.",
-      "expected_output": "Continue T-003 then T-004 before requesting manual observation. Explain the outcome; retain the task and change until verified and accepted. No stage approvals or manufactured manual evidence.",
+      "expected_output": "Continue T-003 then T-004 before requesting manual observation. Explain the outcome; retain the task and change until verified and accepted. Does not manufacture manual evidence.",
       "files": [],
       "assertions": [
         "Plans T-003 then T-004 before yielding for manual input, subject to real verification.",
         "Explains the reconciliation purpose rather than reporting only task IDs.",
         "Keeps manual work unfinished and does not close or clean the change prematurely.",
-        "Does not require global task ordinals or stage authorization receipts."
+        "Does not ask permission to continue already-authorized independent tasks."
       ]
     },
     {
@@ -49,7 +49,7 @@
       "name": "routine-alias",
       "skills": ["ow-propose", "ow-plan", "ow-review"],
       "prompt": "Dry-run only. A Python CLI ships ow. Current N-001 covers low-friction CLI adoption. There is no active change. User: Can we make it available through both ow and openwish? Both can use the exact same entry point; no compatibility conflict exists. Give next actions and any question, without claiming execution.",
-      "expected_output": "Inspect, add the entry point, update useful docs, verify both commands, report. Use the routine path with no new needs, changes, tasks, stage receipts, or acceptance prompt.",
+      "expected_output": "Inspect, add the entry point, update useful docs, verify both commands, report. Use the routine path with no new needs, changes, tasks, or acceptance prompt.",
       "files": [],
       "assertions": [
         "Chooses direct implementation and meaningful alias verification.",
@@ -63,12 +63,12 @@
       "name": "working-design-repair",
       "skills": ["ow-align", "ow-plan", "ow-implement"],
       "prompt": "Dry-run only. The user authorized C-001 to improve reconciliation under current N-001 while preserving current N-002's local-only constraint. Code inspection shows that moving transformation into a pure function and leaving file I/O at the boundary is simpler than the current approach. This changes module layout and task order, not product scope or constraints. No final review exists yet. Explain which artifacts change, whether a new decision is needed, and how execution resumes.",
-      "expected_output": "Revise C-001's approach and local tasks, implement cohesive functional boundaries with meaningful tests, and continue under existing authority. Preserve both needs and review both. No permanent spec or receipt synchronization.",
+      "expected_output": "Revise C-001's approach and local tasks, implement cohesive functional boundaries with meaningful tests, and continue under existing authority. Preserve both needs and review both.",
       "files": [],
       "assertions": [
         "Keeps the evolving approach and task plan in C-001 rather than creating a durable spec tier.",
         "Preserves needs and uses code/tests/layout for implemented design.",
-        "Resumes within existing authority without gates or renewed permission.",
+        "Resumes within existing authority without renewed permission.",
         "Retains the local-only need as a regression constraint."
       ]
     },
@@ -91,7 +91,7 @@
       "name": "plan-only-is-not-authority",
       "skills": ["ow-propose", "ow-align", "ow-plan"],
       "prompt": "Dry-run only. User: Use OW to plan local XLSX reconciliation under existing N-001. Only prepare the plan; do not implement yet. Work spans several modules, and needs and constraints are clear. What actions and questions come next?",
-      "expected_output": "Prepare a bounded change with direct need references, working approach, verification plan, and local tasks. Stop at the plan without implementation or invented stage receipts.",
+      "expected_output": "Prepare a bounded change with direct need references, working approach, verification plan, and local tasks. Stop at the plan without implementation.",
       "files": [],
       "assertions": [
         "Prepares change-local approach/tasks using existing N-001.",
@@ -130,14 +130,27 @@
       "name": "disposal-with-useful-knowledge-and-blockers",
       "skills": ["ow-consolidate", "ow-review"],
       "prompt": "Dry-run cleanup; no edits or commands. C-001 is closed after genuine human acceptance. Its behavior and tests are in the repo, but C-001/operations.md is the only explanation of a required deployment setting. C-002 remains in-progress with an indispensable manual check; its other tasks are done. Both refer to current N-001. User: Clean up completed work. Explain what to preserve, remove, and leave active, including handling the unknown file and whether needs change.",
-      "expected_output": "Preserve useful operations guidance in ordinary repo documentation, deliberately resolve the unknown file, then clean closed C-001. Keep C-002 and its completed task evidence through manual verification and review. Retain N-001 unchanged; create no archive or permanent spec layer.",
+      "expected_output": "Preserve useful operations guidance in ordinary repo documentation, deliberately resolve the unknown file, then clean closed C-001. Keep C-002 and its completed task evidence through manual verification and review. Retain N-001 unchanged; do not copy the whole change into docs.",
       "files": [],
       "assertions": [
         "Preserves the unique deployment knowledge outside the disposable change before removal.",
         "Recognizes clean preserves unknown files and resolves operations.md deliberately.",
         "Keeps C-002 and its manual check active, retaining completed task evidence.",
-        "Keeps N-001 current and avoids a permanent spec or execution archive.",
+        "Keeps N-001 current and does not copy the whole change or review into docs.",
         "Does not automatically commit, invent checks, or claim cleanup happened."
+      ]
+    },
+    {
+      "id": 12,
+      "name": "default-results-await-human-review",
+      "skills": ["ow-review"],
+      "prompt": "Dry-run only. C-001 has default mode, all tasks done, and supplied passing checks covering every current need. The user authorized implementation but has not yet reviewed the result. Useful knowledge is already in code/tests. Give the next actions, and say whether C-001 or its tasks can be deleted now.",
+      "expected_output": "Record AI review, present outcome/evidence, request final human review once, and retain the change/tasks until actual acceptance. Implementation authority does not invent result acceptance.",
+      "files": [],
+      "assertions": [
+        "Presents outcome and supplied evidence and asks for actual final human review.",
+        "Does not close or clean the change/tasks before acceptance.",
+        "Does not claim the entire need is permanently delivered or approved."
       ]
     },
     {
@@ -174,7 +187,7 @@
       "name": "greenfield-evolve-real-code",
       "skills": ["ow-propose", "ow-align", "ow-plan", "ow-implement", "ow-review", "ow-consolidate"],
       "prompt": "Work only in the assigned temporary output directory. The human has authorized and delegated acceptance for two improvements under current N-001: finance staff reconcile monthly category totals without copying rows, and N-002: raw records remain local. First implement a dependency-free Python CLI: python reconcile.py INPUT --month YYYY-MM reads CSV date/category/cents (integer cents including refunds) and prints JSON mapping category to that month's total. Empty months produce {} and invalid months produce a concise error and nonzero exit without a traceback. Implement and verify this first slice. Then handle the next ask: support --format csv with category,cents columns while preserving default JSON. Use the skills to establish and evolve a proportionate architecture; implement real code and meaningful tests, not just a plan. Save the runnable final product under outputs/project and response.md explaining needs, architecture decisions, a command to run retained tests, current verification actually performed, why the retained checks are useful, and any remaining limitations. The supplied acceptance_test.py is a final external check; do not edit it. No coverage percentage is requested. Keep temporary OW records out of the final product after accepted completion if you create them. Do not modify the source checkout.",
-      "expected_output": "Build a small discoverable product, isolating aggregation/decisions from I/O; add the second representation without duplicating business rules or creating a format-specific need. Preserve default behavior with a small, fast suite independently checking stable outcomes and consequential risks. Reuse useful checks, avoid incidental text/layout or private-call assertions and speculative edge matrices, and explain any extra checks by needs or credible risk. Retain useful code/tests and current intent after delegated disposal. Current verification is observable by rerunning the suite; no historical execution ledger or proof of phase order is required.",
+      "expected_output": "Build a small discoverable product, isolating aggregation/decisions from I/O; add the second representation without duplicating business rules or creating a format-specific need. Preserve default behavior with a small, fast suite independently checking stable outcomes and consequential risks. Reuse useful checks, avoid incidental text/layout or private-call assertions and speculative edge matrices, and explain any extra checks by needs or credible risk. Retain useful code/tests and current intent after delegated disposal. Current verification is observable by rerunning the suite; no proof of phase order is required.",
       "files": ["evals/fixtures/reconcile/acceptance_test.py"],
       "assertions": [
         "The final product passes all independent acceptance_test.py checks for JSON, CSV, empty months, and invalid months.",
@@ -183,7 +196,27 @@
         "Reuses reconciliation intent for CSV and retains the local-only constraint rather than adding a format-specific need.",
         "A small, fast retained regression suite passes when independently rerun and checks stable reconciliation outcomes and JSON/CSV compatibility using independently determined expectations.",
         "Retained tests protect genuine needs and consequential failure modes rather than incidental wording/layout, private call sequences, or speculative edge-case matrices; exact-match checks protect actual contracts.",
-        "The final product retains useful code/tests and current intent without an OW execution archive; its report identifies current verification and remaining limitations without claiming historical execution order as independently proven."
+        "The final product retains useful code/tests and current intent with no leftover OW change records; its report identifies current verification and remaining limitations without claiming historical execution order as independently proven."
+      ],
+      "baseline_prompt": "Work only in the assigned temporary output directory. The human has authorized and delegated acceptance for two improvements. Finance staff must reconcile monthly category totals without copying rows, and raw records must remain local. First implement a dependency-free Python CLI: python reconcile.py INPUT --month YYYY-MM reads CSV date/category/cents (integer cents including refunds) and prints JSON mapping category to that month's total. Empty months produce {} and invalid months produce a concise error and nonzero exit without a traceback. Implement and verify this first slice. Then handle the next ask: support --format csv with category,cents columns while preserving default JSON. Establish and evolve a proportionate architecture; implement real code and meaningful tests, not just a plan. Save the runnable final product under outputs/project and response.md explaining the intent served, architecture decisions, a command to run retained tests, current verification actually performed, why the retained checks are useful, and any remaining limitations. The supplied acceptance_test.py is a final external check; do not edit it. No coverage percentage is requested. Do not modify the source checkout.",
+      "grading": {
+        "project_dir": "outputs/project",
+        "acceptance": "evals/fixtures/reconcile/acceptance_test.py"
+      }
+    },
+    {
+      "id": 16,
+      "name": "needs-sizing-relations-retention",
+      "skills": ["ow-propose", "ow-consolidate", "ow-align"],
+      "prompt": "Read-only OW consolidation assessment; no edits or invented commands. Current draft needs are N-001: finance staff reconcile monthly category totals without row copying; N-002: add CSV output for that same workflow; N-003: reconciliation, auditor proof of approver identity, and payroll payments in one outcome; N-004: sensitive raw records stay on device. N-004 has a reasoned constrains relation to N-001. Retired N-005 covers an abandoned hosted report and is still referenced by a retained change. C-001 is closed and its only copy of a required deployment setting is in its approach; C-002 awaits a manual observation. The human asks to reduce repeated analysis and accumulated artifacts while preserving useful intent. Propose what to reuse, split, merge, retain, or dispose, explain relationship storage and invalidation, and identify decisions needed. Save response.md. Do not presume semantic merges, retirement, or deletion have been approved.",
+      "expected_output": "Reuse N-001 for CSV, split independent accountability/payroll from the broad bundle without losing acceptance, preserve the privacy fact on the need and derive sparse relations from the needs themselves. Reassess changed neighbors and possible new interactions while considering all current needs. Preserve selected operational knowledge before disposing C-001; retain manual work and reconcile retained references before removal of N-005. Confirm intent/retention decisions.",
+      "files": [],
+      "assertions": [
+        "Reuses N-001 for CSV and separates independent accountability/payroll outcomes from N-003 without silently losing intent.",
+        "Preserves useful reasoned relationships on needs and derives a sparse graph from them rather than maintaining a separate relationship file.",
+        "Reassesses changed inputs/neighbors and possible new interactions while retaining all-current-needs consideration; absent links are not proof of independence.",
+        "Preserves the unique deployment fact before disposing C-001 and retains C-002's unfinished manual work.",
+        "Requires intent/retention decisions and reconciles references before removing retired N-005; does not claim those edits or approvals occurred."
       ]
     },
     {
@@ -216,33 +249,18 @@
       ]
     },
     {
-      "id": 16,
-      "name": "needs-sizing-relations-retention",
-      "skills": ["ow-propose", "ow-consolidate", "ow-align"],
-      "prompt": "Read-only OW consolidation assessment; no edits or invented commands. Current draft needs are N-001: finance staff reconcile monthly category totals without row copying; N-002: add CSV output for that same workflow; N-003: reconciliation, auditor proof of approver identity, and payroll payments in one outcome; N-004: sensitive raw records stay on device. N-004 has a reasoned constrains relation to N-001. Retired N-005 covers an abandoned hosted report and is still referenced by a retained change. C-001 is closed and its only copy of a required deployment setting is in its approach; C-002 awaits a manual observation. The human asks to reduce repeated analysis and accumulated artifacts while preserving useful intent. Propose what to reuse, split, merge, retain, or dispose, explain relationship storage and invalidation, and identify decisions needed. Save response.md. Do not presume semantic merges, retirement, or deletion have been approved.",
-      "expected_output": "Reuse N-001 for CSV, split independent accountability/payroll from the broad bundle without losing acceptance, preserve the privacy fact on the need and derive sparse relations without a ledger. Reassess changed neighbors and possible new interactions while considering all current needs. Preserve selected operational knowledge before disposing C-001; retain manual work and reconcile retained references before removal of N-005. Confirm intent/retention decisions.",
-      "files": [],
-      "assertions": [
-        "Reuses N-001 for CSV and separates independent accountability/payroll outcomes from N-003 without silently losing intent.",
-        "Preserves useful reasoned relationships on needs and derives a sparse graph rather than maintaining a duplicate permanent registry.",
-        "Reassesses changed inputs/neighbors and possible new interactions while retaining all-current-needs consideration; absent links are not proof of independence.",
-        "Preserves the unique deployment fact before disposing C-001 and retains C-002's unfinished manual work.",
-        "Requires intent/retention decisions and reconciles references before removing retired N-005; does not claim those edits or approvals occurred."
-      ]
-    },
-    {
       "id": 19,
       "name": "large-modernization-delivery-boundaries",
       "skills": ["ow-onboard", "ow-propose", "ow-align", "ow-plan"],
       "prompt": "The human asks: Use OW to prepare a resumable modernization plan from the supplied assessment and draft. I want the complete direction visible and a useful next step. Planning only; do not build the game yet. Inspect evals/fixtures/modernization/README.md, then save response.md with your assessment of the draft, proposed working-record actions, delivery sequence, and a concrete task plan for the next executable increment. Do not modify the source fixture or initialize OW in this checkout. You may write only your response in the assigned output directory. Distinguish supplied observations from any checks you perform.",
-      "expected_output": "Identify hidden subsystem-sized tasks despite a short pilot checklist. Preserve the current needs and constraints; propose independently reviewable increments with scoped contributions and exit evidence, integrated representative behavior early, and prerequisite capabilities. Detail the next executable increment and keep future work in lightweight ordinary open changes for resumability. Stop at planning without invented verification or a permanent epic tier.",
+      "expected_output": "Identify hidden subsystem-sized tasks despite a short pilot checklist. Preserve the current needs and constraints; propose independently reviewable increments with scoped contributions and exit evidence, integrated representative behavior early, and prerequisite capabilities. Detail the next executable increment and keep future work in lightweight ordinary open changes for resumability. Stop at planning without invented verification.",
       "files": ["evals/fixtures/modernization/README.md"],
       "assertions": [
         "Explains why the pilot and at least two existing tasks conceal substantial separately reviewable work, rather than judging only the number of needs or tasks.",
         "Proposes multiple increments with observable outcomes and exit evidence that can be accepted while later work is postponed; does not simply rename the original program as a parent implementation change.",
         "Integrates a representative user path early instead of leaving all usable UI and integration until all backend subsystems exist; enabling work proves a concrete capability.",
         "Details concrete verifiable tasks for the next increment, preserves exact/retry-safe state and isolation when applicable, and explicitly defers later portions of needs without retiring or weakening them.",
-        "Keeps future obligations discoverable in concise ordinary open changes, verifies prerequisite capabilities from delivered code/tests before execution, and avoids cross-change task links or a mandatory permanent roadmap/epic tier.",
+        "Keeps future obligations discoverable in concise ordinary open changes, verifies prerequisite capabilities from delivered code/tests before execution, and avoids cross-change task links or a parent change containing the whole program.",
         "Honors plan-only scope and attributes fixture observations honestly without claiming implementation, checks, or acceptance occurred."
       ]
     },
@@ -251,7 +269,7 @@
       "name": "scope-growth-and-stale-plan-reconciliation",
       "skills": ["ow-propose", "ow-plan", "ow-implement", "ow-consolidate"],
       "prompt": "Read-only plan repair; no commands or edits except response.md in the assigned output directory. C-001 is an in-progress, fast-forward change originally authorized to let one player complete one production recipe in the browser. Its T-001 tooling task is done with supplied install/build evidence. T-002 is blocked/manual and its entire acceptance is 'Owner selects immediate or timed completion.' T-003 depends on T-002 and implements the recipe. T-004 implements its browser controls. T-005 is a manual phone observation, still unperformed, depending on T-004. The current change body records the owner's actual choice: timed completion. No other tasks are done. In subsequent messages the owner requested a plan for intercity freight, regional retail, employment/payroll, and native app distribution, all under already-current needs; the agent appended these to T-003/T-004 and kept the original five-task list. The owner now says: Repair this plan so we can resume the originally authorized work, keep the requested future direction visible, and avoid losing anything when completed work is cleaned. Give exact proposed changes to scope, task state/evidence, dependencies, future records and execution order, with any necessary questions. Later implementation has not been authorized. Do not invent phone results, product code or acceptance.",
-      "expected_output": "Restore the narrow delivery boundary, split separately acceptable additions into lightweight future changes, reconcile T-002 using the supplied actual decision without inventing implementation evidence, retain T-005 and T-001 evidence, and repair local dependencies. Prepare/resume only original authorized work; future additions remain planning-only and default review. Successor prerequisites survive cleanup through delivered capabilities, without losing obligations or copying an execution archive.",
+      "expected_output": "Restore the narrow delivery boundary, split separately acceptable additions into lightweight future changes, reconcile T-002 using the supplied actual decision without inventing implementation evidence, retain T-005 and T-001 evidence, and repair local dependencies. Prepare/resume only original authorized work; future additions remain planning-only and default review. Successor prerequisites survive cleanup through delivered capabilities, without losing obligations.",
       "files": [],
       "assertions": [
         "Separates freight, regional retail, employment/payroll and native distribution from the original single-recipe delivery instead of expanding broad task acceptance to contain them.",
@@ -259,7 +277,7 @@
         "Retains the unperformed T-005 manual observation and T-001 completion evidence; does not mark moved or unverified work done or drop it to achieve closure.",
         "Reconciles scoped tasks and local dependencies, then resumes T-003/T-004 subject to actual verification under existing authority without redundant decision questions.",
         "Keeps requested future direction in specific lightweight open changes with prerequisite capabilities and normal review, without inheriting C-001 fast-forward or authorizing later implementation.",
-        "Explains how successor obligations and prerequisite descriptions survive C-001 cleanup using retained future changes and delivered code/interfaces/checks, without permanent completion receipts or cross-change task dependencies."
+        "Explains how successor obligations and prerequisite descriptions survive C-001 cleanup using retained future changes and delivered code/interfaces/checks, without cross-change task dependencies."
       ]
     },
     {
@@ -278,16 +296,60 @@
       ]
     },
     {
-      "id": 12,
-      "name": "default-results-await-human-review",
-      "skills": ["ow-review"],
-      "prompt": "Dry-run only. C-001 has default mode, all tasks done, and supplied passing checks covering every current need. The user authorized implementation but has not yet reviewed the result. Useful knowledge is already in code/tests. Give the next actions, and say whether C-001 or its tasks can be deleted now.",
-      "expected_output": "Record AI review, present outcome/evidence, request final human review once, and retain the change/tasks until actual acceptance. Implementation authority does not invent result acceptance.",
+      "id": 22,
+      "name": "material-policy-and-safe-to-forget",
+      "skills": ["ow-propose", "ow-plan", "ow-review", "ow-consolidate"],
+      "prompt": "Read-only assessment; save response.md only. An economic-game plan has a task 'implement shared retail, conserve consumers and test it'. It specifies price, quality and density affect sales and a finite city-wide demand cap, but never decides allocation among competing stores. A separate organic-research change is ready for review: its organic code and tests pass, yet its approach is the only copy of approved later pesticide prices, effects and compatibility rules. No successor or catalog contains those values. The current needs occupy 6,100 estimated tokens over a configured 6,000 target and a reviewer suggests deleting exceptions to fit. The human asks: repair the planning/review recommendation without implementing anything or inventing policy. Explain what is executable, what must survive disposal, how to check the handoff and how the budget affects inspection. Distinguish actual evidence from proposed checks.",
+      "expected_output": "Identify missing allocation policy and scope an investigation with independent worked examples; preserve deferred research detail in a retained destination before passing review/disposal; use a proportionate disposable handoff rather than outcome IDs alone. Preserve exceptions and treat size as an inspection signal, not permission to lose meaning. Explain two-way review and the absence of runtime evidence for deferred work.",
       "files": [],
       "assertions": [
-        "Presents outcome and supplied evidence and asks for actual final human review.",
-        "Does not close or clean the change/tasks before acceptance.",
-        "Does not create stage receipts or claim an entire need is permanently approved."
+        "Identifies that consumer conservation does not determine allocation and proposes a concrete decision/example before implementation, without inventing an approved policy.",
+        "Requires approved pesticide detail to be moved to an identifiable retained candidate or domain data before the organic change can disappear.",
+        "Describes material requirement-to-destination/evidence review, including consequential implementation choices checked against intent, without a permanent per-function traceability matrix.",
+        "Preserves meaningful exceptions and does not let soft size excess block inspection or claim a smaller outcome summary is equivalent.",
+        "Makes no claims of edits, executed checks, pesticide delivery or human approval."
+      ]
+    },
+    {
+      "id": 23,
+      "name": "fresh-session-handoff-evolution",
+      "skills": ["ow-propose", "ow-plan", "ow-implement", "ow-review", "ow-consolidate"],
+      "prompt": "Staged scenario: the runner sends each stage of the scenario file to a fresh session over the retained product.",
+      "expected_output": "The second session finds approved efficiency calibration without the first conversation or deleted change, implements additive effects while preserving input basis and rounding, and leaves useful code/tests/intent with no leftover change records. Report independent behavioral results, any lost facts and actual runtime/usage measurements rather than assuming a context optimum.",
+      "files": [],
+      "assertions": [
+        "Both stages pass their independently executed public-contract checks.",
+        "A fresh second session recovers the exact deferred calibration solely from retained product files.",
+        "Retained tests detect a plausible multiplicative-stacking or modified-input-basis regression.",
+        "Completed change directories are disposed and unfinished detail survives in retained files.",
+        "Reports the evidence boundary and does not claim a measured optimal context budget from a small scenario."
+      ],
+      "scenario": "evals/fixtures/handoff/scenario.json",
+      "grading": {
+        "acceptance": "evals/fixtures/handoff/acceptance_test.py",
+        "reference": "evals/fixtures/handoff/reference.py",
+        "target": "rules.py"
+      }
+    },
+    {
+      "id": 24,
+      "name": "long-horizon-lending",
+      "skills": ["ow-propose", "ow-align", "ow-plan", "ow-implement", "ow-review", "ow-consolidate"],
+      "prompt": "Staged scenario: the runner sends each stage of the scenario file to a fresh session over the retained product.",
+      "scenario": "evals/fixtures/lending/scenario.json",
+      "expected_output": "Each fresh session recovers prior rules from retained needs, code and tests; preserves the grace exception, caps and renewal limits; revises the book cap in place without duplicating intent; and survives a data-driven rewrite with needs essentially unchanged. Retained tests stay small and kill seeded rule mutants; completed changes are disposed.",
+      "files": [],
+      "grading": {
+        "acceptance": "evals/fixtures/lending/acceptance_test.py",
+        "reference": "evals/fixtures/lending/reference.py",
+        "target": "lending.py"
+      },
+      "assertions": [
+        "Every stage passes the external acceptance check for its stage, including all earlier behavior.",
+        "Retained tests pass on the reference contract and kill most seeded mutants at each stage.",
+        "Stage 3 revises the existing fee intent rather than adding a duplicate need, and keeps the grace exception.",
+        "Stage 4 changes structure and adds DVDs without new needs for the restructuring or the item kind, and without losing earlier rules.",
+        "Need count and size stay proportionate across stages; completed changes are disposed and no plan copies accumulate in docs."
       ]
     }
   ]

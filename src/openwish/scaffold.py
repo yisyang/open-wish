@@ -27,8 +27,8 @@ def initialize(root, harnesses="generic", *, confirm_downgrade=None):
     report = install_skills(root, harnesses, confirm_downgrade=confirm_downgrade)
     for relative, content in outputs.items():
         write_text(contained(root, relative), content, create=True)
-    write_json(config, {"version": SCHEMA_VERSION, "product": root.name, "needs_token_budget": 6000,
-                        "code_exceptions": []}, create=True)
+    write_json(config, {"version": SCHEMA_VERSION, "product": root.name, "needs_token_budget": 24000,
+                        "source_hard_limit": 0, "code_exceptions": []}, create=True)
     return {"root": root, "initialized": True, **report}
 
 
@@ -65,10 +65,15 @@ def new_artifact(root, kind, key, title, *, needs=(), fast_forward=False):
                            "- Preserves: applicable constraints and existing behavior.\n"
                            "- Defers: remaining outcomes, with follow-up changes when planned.\n\n"
                            "## Approach\n\nKeep working design and engineering decisions here. "
-                           "Identify prerequisite capabilities to verify in code/tests.\n\n"
+                            "Identify prerequisite capabilities to verify in code/tests. Record material "
+                            "conditions, exceptions, units/boundaries and consequences; distinguish confirmed "
+                            "rules, engineering choices and unresolved decisions.\n\n"
                            "## Verification\n\nDescribe exit evidence for this increment and "
                            "meaningful regression checks. The result should remain useful "
-                           "if later changes are postponed.")
+                            "if later changes are postponed.\n\n"
+                            "## Handoff\n\nIdentify where material intent, behavior/checks, rationale and "
+                            "approved unfinished work will survive disposal. Final review verifies these "
+                            "destinations and independent evidence; do not leave deferred detail only here.")
         extras[f"openwish/changes/{key}/tasks.json"] = '{"tasks": []}\n'
     for name in (relative, *extras):
         if contained(root, name).exists():

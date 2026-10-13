@@ -22,7 +22,7 @@ class RelationTests(ProjectCase):
         self.assertIn("No uploads.", needs_context(project))
         before = need_graph(project)
         self.finish_tasks()
-        self.review(needs=["N-001", "N-002"])
+        self.review()
         close_changes(self.project(), ["C-001"], "human")
         clean_changes(self.project(), ["C-001"])
         self.assertEqual(need_graph(self.project()), before)
@@ -74,7 +74,7 @@ class RelationTests(ProjectCase):
     def test_changing_a_relationship_requires_fresh_review(self):
         self.linked()
         self.finish_tasks()
-        self.review(needs=["N-001", "N-002"])
+        self.review()
         self.edit_document("needs/N-002.md", relations=[{**self.relation, "reason": "Stricter local-only scope."}])
         with self.assertRaisesRegex(WishError, "stale"):
             validate_review(self.project(), "C-001")

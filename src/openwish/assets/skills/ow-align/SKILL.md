@@ -1,71 +1,58 @@
 ---
 name: ow-align
-description: Establish or reassess architecture for substantive OW work, from a greenfield first slice to evolving an existing product. Align design with current needs using code-grounded trade-offs. Honor OW opt-outs and plan-only scope.
+description: Establish or reassess architecture for substantive OW work, from a greenfield first slice to evolving an existing product. Align the working design with all current needs using code-grounded trade-offs. Honor OW opt-outs and plan-only scope.
 ---
 
 # Align
 
-Read `openwish/policy.md`, `ow context C-001`, the change, and relevant code/tests.
-Routine work follows the lightweight path without creating design records.
+Read `openwish/policy.md`, `ow context C-001`, the change, and the affected code
+and tests. Routine work needs no design record.
 
-1. Review all current needs, including delivered outcomes. Retrieve retired needs
-   when useful for history without making them binding again. Inspect affected
-   modules, interfaces, consumers, tests, and operational constraints.
-2. Distinguish incompatible intent from an implementation that cannot yet satisfy
-   compatible needs. Adapt the solution; never silently weaken acceptance.
-   Clarify actual decisions with numbered A/B/C options and `(Recommended)` before
-   the preferred text. Technical repairs within authorized intent need no new permission.
-3. Apply the architecture rubric below to representative behavior and the affected
-   dependency paths. Compare retaining the current structure with the smallest
-   useful improvement. Cite actual code, tests, or operational constraints for
-   consequential trade-offs; do not infer quality from file size or pattern names.
-4. Check the delivery boundary using Right-size delivery in `../ow-propose/SKILL.md`.
-   Architecture spanning several capabilities does not put their full implementation
-   in this change. Describe what is delivered now, preserved, and deferred, with exit
-   evidence. Split independently acceptable work and integrate a representative path
-   early; shared modules or sequential dependencies alone do not require one change.
-   Put the working design in the change's approach: responsibility/data ownership,
-   dependency direction, effects, meaningful alternatives, and verification of
-   preserved constraints. For greenfield work, start with a representative end-to-end
-   slice and conventional layout; introduce boundaries for demonstrated needs.
-   For later asks, look for duplicated rules, responsibility spread, and effects
-   leaking into decisions. Evolve the affected structure rather than redesigning
-   the whole product or anticipating hypothetical platforms.
-5. Plan to preserve only otherwise unrecoverable rationale near code or in ordinary
-   repository docs. The approach remains disposable; do not create a parallel
-   persistent spec, design registry, or another artifact tier.
-6. Continue to `ow-plan` without a stage approval. A material intent revision
-   returns to Propose. Verification-only work can use an empty task list and an
-   honest verification plan rather than invented implementation.
+1. **Know the constraints.** Every current need binds, including delivered ones.
+   Inspect affected modules, interfaces, consumers, tests and operational limits.
+   Use `ow graph N-001 --json` and `ow trace N-001` to find related intent and the
+   checks protecting it; neither proves that unlinked needs are unaffected.
+2. **Separate conflict from difficulty.** Distinguish intent that truly conflicts
+   from an implementation that cannot yet satisfy compatible needs. Adapt the
+   solution; never quietly weaken acceptance. Ask for a decision (numbered A/B/C,
+   `(Recommended)`) only for a real conflict.
+3. **Assess** the affected paths with the Architecture rubric below. Compare keeping
+   the current structure with the smallest useful improvement, citing actual code,
+   tests or operational constraints.
+4. **Write the working design** in the change's Approach: responsibilities and data
+   ownership, dependency direction, where effects happen, alternatives that matter,
+   and how each preserved constraint will be verified. Check the boundary against
+   Right-size delivery in `ow-propose`.
+   - Greenfield: a conventional minimal layout and one representative end-to-end
+     slice; add boundaries when behavior demands them.
+   - Later asks: look for duplicated rules, scattered responsibilities and effects
+     leaking into decisions; evolve only the affected structure.
+5. **Plan what survives.** Decide where non-obvious rationale will live (a module
+   header, a boundary README, a nearby comment) so the change can be deleted later.
+6. **Continue** to `ow-plan`. A material intent revision returns to `ow-propose`.
 
 ## Architecture rubric
 
-Use these questions proportionately in alignment, onboarding, and review. A useful
+Use these questions proportionately in alignment, onboarding and review. A useful
 finding connects **observation → consequence → improvement → verification**.
-Keep assessments in conversation or the active change, not a permanent scorecard.
 
-| Question | Useful evidence | Friction to investigate |
+| Question | Good signs | Friction to investigate |
 | --- | --- | --- |
-| Can a maintainer find behavior? | Domain/responsibility names, clear entry points and interfaces | Generic helpers or hidden dispatch obscure the path |
-| Does a rule have one owner? | Changes to one rule stay reasonably local | Duplicated decisions or one responsibility scattered across modules |
-| Are dependencies explicit? | Understandable direction, clear data ownership and contracts | Cycles, hidden globals, leaking implementation details |
-| Can decisions run independently? | Explicit inputs and outputs, pure calculations and transitions | Business decisions require network, database, clock, or environment access |
-| Do tests check intent? | Small, fast checks of stable outcomes, invariants, and consequential failures | Incidental snapshots, private-call assertions, duplicated or speculative cases |
-| Is complexity earning its cost? | Boundaries serve current behavior and constraints | Speculative frameworks, unnecessary layers, arbitrary file splitting |
-| Will disposal preserve understanding? | Code/tests explain behavior; nearby rationale explains non-obvious choices | The working plan is the only map or explanation |
+| Can a maintainer find behavior? | Domain names, clear entry points, a one-line responsibility header per module, a README at major boundaries | Generic helpers, hidden dispatch, headers that no longer match the code |
+| Does each rule have one owner? | Changing a rule stays local | Duplicated decisions; one responsibility spread across modules |
+| Are dependencies explicit? | Clear direction, data ownership and contracts | Cycles, hidden globals, leaking internals |
+| Can decisions run without effects? | Pure calculations and transitions with explicit inputs | Business rules that need network, database, clock or environment |
+| Do tests check intent? | Small, fast checks of outcomes and invariants | Snapshots of incidental output, private-call assertions |
+| Does complexity earn its cost? | Boundaries serve current behavior | Speculative frameworks, layers, arbitrary file splits |
+| Will deleting the change lose understanding? | Code, tests and nearby rationale explain the behavior | The change's plan is the only map |
 
-Prefer pure functions for decisions, validation, transformations, and state
-transitions. Pass time, randomness, configuration, and external results explicitly
-when they affect decisions. Keep I/O and mutation at identifiable boundaries;
-use direct core and focused integration checks where each adds evidence. An application
-needs effects; do not add elaborate wrappers merely to claim purity.
+**Effects.** Prefer pure functions for decisions, validation, transformations and
+state transitions. Pass time, randomness, configuration and external results in
+explicitly. Keep I/O and mutation at identifiable boundaries. Do not wrap effects
+elaborately just to look functional.
 
-Use Strategic verification in `../ow-plan/SKILL.md` to choose checks that protect
-the affected needs without freezing the design. Existing outcome checks may already
-cover the work; do not require a new test for every module or architecture boundary.
-
-Use `ow graph N-001 --json` when investigating established intent relationships.
-Relations narrow investigation, not regression obligations: all current needs
-still matter, and missing edges do not prove independence. Reuse the working
-assessment while its inputs hold; revisit changed needs, their neighbors, possible
-new interactions, and affected code rather than repeating an all-pairs analysis.
+**Orientation comments.** A module header states, in a line or two, what the module
+owns and any non-obvious rule or boundary. A README belongs only at major boundaries
+(top-level packages, services, plugin roots): responsibilities, entry points,
+dependency direction, invariants and how to run its checks. Keep IDs, statuses and
+dates out of both; they go stale. A wrong header is worse than none.

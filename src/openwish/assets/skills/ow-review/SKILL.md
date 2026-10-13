@@ -1,57 +1,63 @@
 ---
 name: ow-review
-description: Review an OW change against needs, code, tests, and regressions; present results and close accepted work. Routine changes receive concise verified results without a closure ceremony. Honor OW opt-outs.
+description: Review an OW change against all current needs, code, tests and regressions; record the result, present it, and close accepted work. Routine changes get concise verified results without a closure step. Honor OW opt-outs.
 ---
 
 # Review
 
-Read `openwish/policy.md`, `ow context C-001`, the working approach/tasks, and
-the actual code diff. Review from intent. For routine work, verify, remediate,
-report, and stop without creating records or asking final acceptance.
+Read `openwish/policy.md`, `ow context C-001`, the change and its tasks, and the
+actual diff. Routine work: verify, fix, report, stop.
 
-1. Assess the change against all current needs and its linked needs. Inspect
-   relevant error paths, compatibility, reliability, security, and maintainability.
-   Determine affected checks and explain unaffected constraints briefly. Passing
-   tests alone do not prove user benefit or excuse tests that repeat a code mistake.
-   Compare actual results with the change's delivers-now scope and exit evidence,
-   not just checked-off tasks. Explain partial contributions and explicit deferrals;
-   reviewing all needs does not mean implementing every future outcome. Deferral
-   cannot excuse a violated constraint or an omitted agreed deliverable. An empty
-   task list in a candidate change is not completion evidence.
-   Apply Strategic verification in `../ow-plan/SKILL.md`: do the retained checks
-   detect important need violations and survive harmless refactors? Look for genuine
-   gaps before adding tests. Question brittle presentation snapshots, private-call
-   assertions, redundant coverage, and unjustified edge-case matrices; preserve exact
-   checks for actual contracts and credible failures with meaningful consequences.
-2. Remediate within authorized intent and rerun affected checks. Continue available
-   work before requesting human input. Retain unresolved manual observations and
-   limitations honestly. Material intent changes require an actual decision.
-3. Ensure the repository will remain understandable after disposal: preserve
-   lasting behavior/tests, updated needs, and useful rationale before final review.
-   Apply the Architecture rubric in `../ow-align/SKILL.md` to the actual changed
-   paths. Check rule ownership, dependency direction, effects, and independent
-   outcome checks. Explain consequential regressions in maintainability; a small
-   file or passing suite alone is not evidence of good architecture.
-   Judge the suite by useful protection and execution/maintenance cost, not test
-   count or an unrequested coverage target. Verify the current result; describe
-   observed checks and remaining uncertainty without demanding a historical run ledger.
-4. Run `ow check`, then `ow record-review C-001 --summary "user outcome" --check
-   "command/observation: result" --covered-need N-001 ...`. Include every
-   `review_needs` ID from the context manifest. Unresolved findings use
-   `--verdict blocked`. Each change retains one latest review, not a history.
-5. Passing review requires all tasks done. Later changes to needs, approach,
-   evidence, policy/config, or repository content require refreshed verification
-   and review before closure. `ow summary C-001` shows whether results are fresh.
-6. Present **need → outcome → evidence**, plus limitations. In default mode, ask
-   once for final human review/acceptance after available work is complete. Use a
-   numbered question and meaningful A/B/C choices with `(Recommended)` before the
-   preferred text. Only after actual acceptance run `ow close C-001 --by human`.
-7. In explicitly selected fast-forward mode, close with `--by fast-forward`
-   after the same checks, without an acceptance question. Attribute delegation
-   honestly; never claim a human reviewed or confirmed inferred needs.
-8. After closure, follow `ow-consolidate` and `ow clean C-001` to dispose the
-   change, tasks, and review once useful knowledge is preserved. Needs remain
-   current. Further implementation uses a new change with default mode unless
-   explicitly delegated again; closing one increment does not complete a need forever.
-   Completion includes disposal or an explicit reason it is deferred, so closed
-   records do not silently become an execution archive.
+1. **Assess the needs.** Run `ow trace` and compare the traced checks and files
+   with the diff.
+   - **Affected needs:** the linked needs plus any whose behavior the diff touches.
+     Check each with direct evidence.
+   - **Unaffected needs:** every other current need. Confirm briefly why the change
+     cannot violate it. If you cannot, treat it as affected.
+   Compare results with the change's delivers-now scope and exit evidence, not just
+   ticked tasks. Explain partial contributions and deferrals; an empty task list in
+   a candidate change is not completion.
+2. **Judge the checks** (Strategic verification in `ow-plan`): would they catch a
+   need violation, survive a harmless refactor, and test intent rather than repeat
+   the code's own logic? Ask what plausible wrong implementation would still pass.
+3. **Judge the structure** with the Architecture rubric in `ow-align` on the changed
+   paths, including whether module headers and boundary READMEs still describe them.
+4. **Fix** within authorized intent and rerun affected checks. Keep unresolved
+   manual observations and limitations visible.
+5. **Make it safe to forget** (below) before recording the result.
+6. **Record:** run `ow check`, then
+   `ow record-review C-001 --summary "user-visible outcome" --check "command: result"
+   [--affected N-003] --handoff FILE` (or `--handoff -` with JSON on stdin; format
+   in `openwish/artifacts.md`). Unresolved findings use `--verdict blocked`.
+   Passing needs every task done. If anything changes afterwards, `ow summary C-001`
+   names what made the review stale; refresh the affected verification and record
+   again.
+7. **Present need → outcome → evidence**, plus limitations.
+   - Default mode: ask once for human acceptance (numbered A/B/C, `(Recommended)`),
+     after all available work is done. Only after actual acceptance:
+     `ow close C-001 --by human`.
+   - Explicit fast-forward: `ow close C-001 --by fast-forward` after the same checks,
+     attributed to delegation, never to a human.
+8. **Dispose** via `ow-consolidate`. Needs stay current; further work uses a new
+   change in default mode unless delegated again.
+
+## Safe to forget
+
+Before passing, every material requirement or decision this change introduced has
+a retained home and evidence, so nobody needs the change or conversation later.
+Group related rules and reuse task evidence; this is a short assessment, not a
+per-function matrix.
+
+- `implemented`: behavior in product files, with independently expected checks or
+  a repeatable manual procedure.
+- `retained`: intent or rationale in a need or ordinary doc/data.
+- `deferred`: approved unfinished detail in another open change or domain data,
+  with its limits explicit. Deferral cannot drop a promised result.
+- `superseded`: the replacement intent and the actual human decision.
+- `unresolved`: anything missing; the review stays blocked.
+
+Read both directions: requirements → code and checks, and consequential code
+choices → the intent that justifies them. Could a maintainer find, explain, verify
+and safely change this behavior with only the repository? The CLI checks that
+destinations exist and are fresh, not that they say the right thing. In submodule
+projects, inspect component diffs too.
