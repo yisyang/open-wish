@@ -2,6 +2,22 @@
 
 Release notes for OpenWish, newest first. Update this file for every release.
 
+## v0.8.2
+
+### Fixed
+
+- An empty `.git` directory, such as the read-only placeholder Codex's sandbox mounts
+  into plain directories, is no longer treated as an unreadable repository, so
+  `ow check`, `ow trace` and reviews work there instead of reporting an incomplete
+  inspection.
+
+### Changed
+
+- Evaluation presets run each agent with an isolated `HOME`, so login shells (which
+  Codex uses) cannot reread the user's profile and pick up an installed `ow` instead
+  of the checkout. A preflight resolves `ow` exactly as agent shells do and refuses to
+  run on a mismatch, and baseline arms get failing `ow` and `openwish` stubs.
+
 ## v0.8.1
 
 ### Fixed

@@ -42,7 +42,9 @@ presets when a newer flagship model ships, and do not compare scores across mode
   `openwish/`), then `setup.json` runs real `ow` commands, such as recording a passing
   review, so `ow context` agrees with the scenario. `tests/test_eval_seeds.py` keeps
   every seed valid. Unseeded dry runs tell the agent the described project is absent.
-  Make sure no other `ow` is on `PATH` for baseline runs.
+  Baselines get failing `ow` and `openwish` stubs. Before each arm, a preflight resolves
+  `ow` in a login shell, as Codex does, and refuses to run if another installation would
+  be used; presets avoid that with an isolated `HOME`.
 - **Stages.** Scenario evals (23, 24) run each stage as a separate agent process
   over the retained product, so a later session cannot remember the earlier
   prompt. The runner warns if the product gains Git history, which could leak

@@ -84,14 +84,29 @@ def work_dir(item, directory):
 
 
 def shim(workspace):
-    path = workspace / "bin/ow"
-    path.parent.mkdir(parents=True, exist_ok=True)
+    """`ow` and `openwish` for this checkout (skills arm), and failing stubs (baseline arm)."""
     # OW_EVAL_LOG, set per stage, records each invocation so grading can see the workflow an agent used.
-    path.write_text(f'#!/bin/sh\n[ -n "$OW_EVAL_LOG" ] && printf \'%s\\n\' "$*" >> "$OW_EVAL_LOG"\n'
-                    f'PYTHONPATH="{ROOT / "src"}${{PYTHONPATH:+:$PYTHONPATH}}" '
-                    f'exec "{sys.executable}" -m openwish "$@"\n', encoding="utf-8")
-    path.chmod(0o755)
-    return path
+    script = (f'#!/bin/sh\n[ -n "$OW_EVAL_LOG" ] && printf \'%s\\n\' "$*" >> "$OW_EVAL_LOG"\n'
+              f'PYTHONPATH="{ROOT / "src"}${{PYTHONPATH:+:$PYTHONPATH}}" exec "{sys.executable}" -m openwish "$@"\n')
+    stub = '#!/bin/sh\necho "$(basename "$0"): command not found" >&2\nexit 127\n'
+    for directory, content in (("bin", script), ("bin-baseline", stub)):
+        for name in ("ow", "openwish"):
+            path = workspace / directory / name
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(content, encoding="utf-8")
+            path.chmod(0o755)
+    return workspace / "bin/ow"
+
+
+def preflight(work, environment, expected):
+    """Resolve `ow` the way agent shells do (Codex uses login shells, which reread the
+    profile) and refuse to run when another installation would be used instead."""
+    result = subprocess.run(["bash", "-lc", "command -v ow"], cwd=work, env=environment,
+                            capture_output=True, text=True, timeout=30)
+    found = result.stdout.strip()
+    if found != str(expected):
+        raise SystemExit(f"In the agent's login shell `ow` resolves to {found or 'nothing'}, not {expected}. "
+                         "Remove the profile's PATH change or use a preset, whose isolated HOME avoids it.")
 
 
 def resolve_agent(agent, harness):
@@ -124,11 +139,13 @@ def agent_environment(workspace, agent):
     if not source.exists():
         raise SystemExit(f"Sign in to {agent['name']} first: {source} not found.")
     home = workspace / "agent-home" / agent["name"]
-    home.mkdir(parents=True, exist_ok=True)
+    (home / "home").mkdir(parents=True, exist_ok=True)
     link = home / credentials
     if not link.is_symlink():
         link.symlink_to(source)
-    return {variable: str(home)}
+    # An empty HOME keeps login shells from rereading the user's profile, which can put an
+    # installed `ow` ahead of the eval shim, and keeps personal git and tool settings out.
+    return {variable: str(home), "HOME": str(home / "home")}
 
 
 def prepare(workspace, evals, arms, agent):
@@ -234,13 +251,16 @@ def run(workspace, evals, arms, agent, timeout):
                 raise SystemExit(f"Run prepare first: {directory}")
             work = work_dir(item, directory)
             environment = {**os.environ, **isolated}
-            if arm == "skills":
-                environment["PATH"] = f"{workspace / 'bin'}{os.pathsep}{environment.get('PATH', '')}"
+            tools = workspace / ("bin" if arm == "skills" else "bin-baseline")
+            environment["PATH"] = f"{tools}{os.pathsep}{environment.get('PATH', '')}"
+            preflight(work, environment, tools / "ow")
             for number, stage in enumerate(stages(item), 1):
                 stage_dir = directory / f"stage-{number}"
                 if (stage_dir / "metrics.json").exists():
                     continue
                 stage_dir.mkdir(exist_ok=True)
+                if arm == "skills":
+                    (stage_dir / "ow-calls.log").touch()  # present even if the agent never runs ow
                 prompt = prompt_for(item, arm, number, stage, directory)
                 (stage_dir / "prompt.md").write_text(prompt, encoding="utf-8")
                 calls = stage_dir / "ow-calls.log"

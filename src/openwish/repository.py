@@ -8,6 +8,13 @@ from .storage import WishError
 EXCLUDED = {".git", ".hg", ".venv", "venv", "node_modules", "__pycache__", "dist", "build", ".tox"}
 
 
+def is_repository(directory):
+    """A `.git` file (worktree or submodule) or a `.git` directory with a HEAD. Sandboxes such as
+    Codex's mount an empty read-only `.git` into plain directories; that is not a repository."""
+    marker = directory / ".git"
+    return marker.is_file() or (marker / "HEAD").exists()
+
+
 def git(root, *arguments):
     return subprocess.run(["git", *arguments], cwd=root, capture_output=True,
                           check=True, timeout=10).stdout
@@ -27,7 +34,7 @@ def repository_snapshot(root):
             entries = git(directory, "ls-files", "--stage", "-z", "--", ".").split(b"\0")
             others = git(directory, "ls-files", "--others", "--exclude-standard", "-z", "--", ".")
         except (OSError, subprocess.SubprocessError) as error:
-            if component or (directory / ".git").exists():
+            if component or is_repository(directory):
                 warnings.append(f"Cannot inspect repository {directory.relative_to(root)}: {error}")
                 return
             files.update(p for p in directory.rglob("*") if safe(p) and p.is_file())
@@ -52,7 +59,7 @@ def repository_snapshot(root):
             if stage != "0":
                 warnings.append(f"Cannot inspect conflicted submodule {relative}; resolve its gitlink")
                 continue
-            if not (path / ".git").exists():
+            if not is_repository(path):
                 warnings.append(f"Cannot inspect submodule {relative}; initialize its checkout")
                 continue
             try:

@@ -93,3 +93,14 @@ class RepositoryTests(ProjectCase):
         with self.assertRaisesRegex(WishError, "Retained handoff"):
             clean_changes(self.project(), ["C-002"])
         self.assertTrue((self.root / "openwish/changes/C-002/change.md").exists())
+
+
+class SandboxPlaceholderTests(ProjectCase):
+    def test_an_empty_git_placeholder_is_not_a_repository(self):
+        # Codex's sandbox mounts an empty read-only `.git` into plain directories.
+        self.fixture()
+        (self.root / ".git").mkdir()
+        snapshot = repository_snapshot(self.root)
+        self.assertEqual(snapshot["warnings"], [])
+        self.assertIn(self.root / "app.py", snapshot["files"])
+        self.assertIn("PASS", self.cli("check").stdout)
