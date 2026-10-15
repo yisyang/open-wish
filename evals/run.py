@@ -1,8 +1,10 @@
 """Prepare, run and grade OW skill evaluations in a workspace outside this checkout.
 
-  python3 evals/run.py prepare --workspace DIR [--ids 15 23 24] [--arms skills baseline] [--agent codex]
-  python3 evals/run.py run --workspace DIR [--agent codex|claude|"COMMAND" --harness H]
-  python3 evals/run.py grade --workspace DIR
+  python3 evals/run.py run --workspace DIR [--full | --ids 24 30] [--agent codex|claude|"COMMAND" --harness H]
+  python3 evals/run.py grade --workspace DIR [--full | --ids 24 30]
+
+Without --full or --ids, the core suite runs (the `core` list in evals.json), with up
+to --jobs arms in parallel.
 
 Agents are presets with a pinned model and planning-level reasoning (`codex`, the
 default, and `claude`), or a custom command that may use {work} and {stage_dir}; the
@@ -20,6 +22,7 @@ assertion checklist for human or model grading.
 """
 
 import argparse
+from concurrent.futures import ThreadPoolExecutor
 import hashlib
 import importlib.util
 import json
@@ -50,8 +53,12 @@ AGENTS = {
 SETUP_DIRECTORIES = {"openwish", ".claude", ".agents", ".opencode", "__pycache__", ".git", ".venv"}
 
 
-def load_evals(ids):
-    evals = json.loads((ROOT / "evals/evals.json").read_text(encoding="utf-8"))["evals"]
+def load_evals(ids, full=False):
+    """Explicit IDs, every eval with `full`, or by default the core suite."""
+    data = json.loads((ROOT / "evals/evals.json").read_text(encoding="utf-8"))
+    evals = data["evals"]
+    if not ids and not full:
+        ids = data["core"]
     if ids:
         known = {item["id"] for item in evals}
         missing = set(ids) - known
@@ -242,49 +249,61 @@ def usage(stdout):
     return {"usage": totals, "tool_calls": tool_calls} if totals else {}
 
 
-def run(workspace, evals, arms, agent, timeout):
+def run(workspace, evals, arms, agent, timeout, jobs=1):
+    """Run every arm; arms are independent, so up to `jobs` run at once while each arm's
+    stages stay sequential over its own evolving product."""
     isolated = agent_environment(workspace, agent)
+    pending = []
     for item in evals:
         for arm in arms_for(item, arms):
-            directory = arm_dir(workspace, item, arm)
-            if not directory.exists():
-                raise SystemExit(f"Run prepare first: {directory}")
-            work = work_dir(item, directory)
-            environment = {**os.environ, **isolated}
-            tools = workspace / ("bin" if arm == "skills" else "bin-baseline")
-            environment["PATH"] = f"{tools}{os.pathsep}{environment.get('PATH', '')}"
-            preflight(work, environment, tools / "ow")
-            for number, stage in enumerate(stages(item), 1):
-                stage_dir = directory / f"stage-{number}"
-                if (stage_dir / "metrics.json").exists():
-                    continue
-                stage_dir.mkdir(exist_ok=True)
-                if arm == "skills":
-                    (stage_dir / "ow-calls.log").touch()  # present even if the agent never runs ow
-                prompt = prompt_for(item, arm, number, stage, directory)
-                (stage_dir / "prompt.md").write_text(prompt, encoding="utf-8")
-                calls = stage_dir / "ow-calls.log"
-                if arm == "skills":
-                    environment["OW_EVAL_LOG"] = str(calls)
-                command = [part.replace("{work}", str(work)).replace("{stage_dir}", str(stage_dir))
-                           for part in shlex.split(agent["command"])]
-                started = time.monotonic()
-                try:
-                    result = subprocess.run([*command, prompt], cwd=work, env=environment, stdin=subprocess.DEVNULL,
-                                            capture_output=True, text=True, timeout=timeout)
-                    code, stdout, stderr = result.returncode, result.stdout, result.stderr
-                except subprocess.TimeoutExpired as error:
-                    code, stdout, stderr = "timeout", error.stdout or "", error.stderr or ""
-                    stdout, stderr = (s.decode() if isinstance(s, bytes) else s for s in (stdout, stderr))
-                metrics = {"seconds": round(time.monotonic() - started, 1), "exit_code": code, **usage(stdout)}
-                if calls.exists():
-                    metrics["ow_calls"] = len(calls.read_text(encoding="utf-8").splitlines())
-                if "scenario" in item and (work / ".git").exists():
-                    metrics["warning"] = "Product has Git history; later sessions may recover earlier context."
-                (stage_dir / "transcript.txt").write_text(stdout + "\n--- stderr ---\n" + stderr, encoding="utf-8")
-                shutil.copytree(work, stage_dir / "snapshot", ignore=SKIP)
-                (stage_dir / "metrics.json").write_text(json.dumps(metrics, indent=2) + "\n", encoding="utf-8")
-                print(f"{item['id']:>2} {arm:<8} stage {number}: exit {code} in {metrics['seconds']}s")
+            if not arm_dir(workspace, item, arm).exists():
+                raise SystemExit(f"Run prepare first: {arm_dir(workspace, item, arm)}")
+            pending.append((item, arm))
+    # Long multi-stage arms start first so they do not finish last.
+    pending.sort(key=lambda pair: -len(stages(pair[0])))
+    with ThreadPoolExecutor(max_workers=max(1, jobs)) as pool:
+        for future in [pool.submit(run_arm, workspace, item, arm, agent, timeout, isolated) for item, arm in pending]:
+            future.result()
+
+
+def run_arm(workspace, item, arm, agent, timeout, isolated):
+    directory = arm_dir(workspace, item, arm)
+    work = work_dir(item, directory)
+    environment = {**os.environ, **isolated}
+    tools = workspace / ("bin" if arm == "skills" else "bin-baseline")
+    environment["PATH"] = f"{tools}{os.pathsep}{environment.get('PATH', '')}"
+    preflight(work, environment, tools / "ow")
+    for number, stage in enumerate(stages(item), 1):
+        stage_dir = directory / f"stage-{number}"
+        if (stage_dir / "metrics.json").exists():
+            continue
+        stage_dir.mkdir(exist_ok=True)
+        if arm == "skills":
+            (stage_dir / "ow-calls.log").touch()  # present even if the agent never runs ow
+        prompt = prompt_for(item, arm, number, stage, directory)
+        (stage_dir / "prompt.md").write_text(prompt, encoding="utf-8")
+        calls = stage_dir / "ow-calls.log"
+        if arm == "skills":
+            environment["OW_EVAL_LOG"] = str(calls)
+        command = [part.replace("{work}", str(work)).replace("{stage_dir}", str(stage_dir))
+                   for part in shlex.split(agent["command"])]
+        started = time.monotonic()
+        try:
+            result = subprocess.run([*command, prompt], cwd=work, env=environment, stdin=subprocess.DEVNULL,
+                                    capture_output=True, text=True, timeout=timeout)
+            code, stdout, stderr = result.returncode, result.stdout, result.stderr
+        except subprocess.TimeoutExpired as error:
+            code, stdout, stderr = "timeout", error.stdout or "", error.stderr or ""
+            stdout, stderr = (s.decode() if isinstance(s, bytes) else s for s in (stdout, stderr))
+        metrics = {"seconds": round(time.monotonic() - started, 1), "exit_code": code, **usage(stdout)}
+        if calls.exists():
+            metrics["ow_calls"] = len(calls.read_text(encoding="utf-8").splitlines())
+        if "scenario" in item and (work / ".git").exists():
+            metrics["warning"] = "Product has Git history; later sessions may recover earlier context."
+        (stage_dir / "transcript.txt").write_text(stdout + "\n--- stderr ---\n" + stderr, encoding="utf-8")
+        shutil.copytree(work, stage_dir / "snapshot", ignore=SKIP)
+        (stage_dir / "metrics.json").write_text(json.dumps(metrics, indent=2) + "\n", encoding="utf-8")
+        print(f"{item['id']:>2} {arm:<8} stage {number}: exit {code} in {metrics['seconds']}s", flush=True)
 
 
 def retained_tests(project):
@@ -444,7 +463,9 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("command", choices=("prepare", "run", "grade"))
     parser.add_argument("--workspace", type=Path, required=True)
-    parser.add_argument("--ids", type=int, nargs="+", default=[])
+    parser.add_argument("--ids", type=int, nargs="+", default=[], help="Default: the core suite")
+    parser.add_argument("--full", action="store_true", help="Every eval, not only the core suite")
+    parser.add_argument("--jobs", type=int, default=4, help="Arms run in parallel")
     parser.add_argument("--arms", nargs="+", choices=ARMS, default=list(ARMS))
     parser.add_argument("--agent", default="codex",
                         help=f"Preset ({', '.join(AGENTS)}) or a command with optional {{work}} and {{stage_dir}}")
@@ -453,13 +474,13 @@ def main():
     parser.add_argument("--timeout", type=int, default=3600, help="Seconds per stage")
     args = parser.parse_args()
     workspace = args.workspace.resolve()
-    evals = load_evals(args.ids)
+    evals = load_evals(args.ids, args.full)
     if args.command == "prepare":
         prepare(workspace, evals, args.arms, resolve_agent(args.agent, args.harness))
     elif args.command == "run":
         agent = resolve_agent(args.agent, args.harness)
         prepare(workspace, evals, args.arms, agent)
-        run(workspace, evals, args.arms, agent, args.timeout)
+        run(workspace, evals, args.arms, agent, args.timeout, args.jobs)
     else:
         grade(workspace, evals, args.arms)
 

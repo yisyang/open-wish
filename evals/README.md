@@ -7,12 +7,25 @@ skills behave well, and whether OW beats working without it.
 ## Running
 
 `run.py` prepares an isolated workspace (always outside this checkout), runs an
-agent command for every stage, and grades what it can mechanically:
+agent command for every stage, and grades what it can mechanically. By default it
+runs the **core suite**, the `core` list in `evals.json`: 6 evals and 11 agent
+sessions, with arms in parallel (`--jobs`, default 4), so a run takes about as long
+as its slowest arm.
 
 ```sh
-python3 evals/run.py run --workspace /tmp/ow-evals --ids 15 23 24
-python3 evals/run.py grade --workspace /tmp/ow-evals --ids 15 23 24
+python3 evals/run.py run --workspace /tmp/ow-evals
+python3 evals/run.py grade --workspace /tmp/ow-evals
 ```
+
+`--full` runs every eval (run it before a release or after broad guidance changes),
+and `--ids` selects specific ones. Use a fresh workspace per sample.
+
+The core suite covers the behaviors most at risk, one eval each: direct versus
+managed delivery and rule survival across fresh sessions, graded mechanically
+against a baseline (30); keeping current intent under a conflicting ask (1);
+authority without confirmation gates (7); repairing a grown plan and resuming
+without redundant questions (20); needs that hold rules rather than calibration or
+setup (25); and planning a successor against delivered code (26).
 
 OW is meant to be judged against the most popular coding agents, each pinned to
 its current flagship model at a reasoning level suited to planning. `--agent`
@@ -102,15 +115,14 @@ this checkout.
 
 | ID | Scenario | Behaviors to check |
 | --- | --- | --- |
-| 1 | Existing on-device trends vs. upload request | Preserve current intent; ask the real choice; no duplicate need |
+| 1 | Existing on-device trends vs. upload request (core) | Preserve current intent; ask the real choice; no duplicate need |
 | 2 | Fast-forward final results | Review, close and clean the change; keep needs; scope delegation; attribute evidence |
 | 3 | Independent work around a manual observation | Continue ready tasks; keep manual checks and evidence |
 | 4 | Routine alias | Implement and verify directly, no records or acceptance step |
 | 5 | Working design repair | Revise approach and tasks under existing authority |
 | 6 | New format vs. accountability | Mechanism reuses a need; independent outcome may be new |
-| 7 | Plan-only | Prepare change and tasks, then stop |
+| 7 | Plan-only (core) | Prepare change and tasks, then stop |
 | 8 | Explicit opt-out | Installed skills do not impose adoption |
-| 9 | Fast-forward routine work | Finish directly without change records |
 | 10 | Disposal with unique knowledge and blockers | Preserve facts in docs; keep unfinished work; handle unknown files |
 | 12 | Default result review | Keep the change until actual human acceptance |
 | 13 | Brownfield shop-a | Find real architectural friction; propose incremental refactoring; seek approval |
@@ -120,17 +132,15 @@ this checkout.
 | 17 | Strategic test selection | Reuse stable checks; protect against data loss; avoid brittle assertions |
 | 18 | Explicit coverage contract | Honor a scoped coverage requirement without equating it with correctness |
 | 19 | Large modernization | Detect subsystem-sized tasks; scope reviewable increments |
-| 20 | Growing scope, stale blockers | Preserve obligations and evidence; reconcile decisions; keep plans usable |
+| 20 | Growing scope, stale blockers (core) | Preserve obligations and evidence; reconcile decisions; keep plans usable |
 | 21 | Narrow change, many needs | Keep a coherent cross-cutting increment; partial vs. complete delivery |
 | 22 | Material policy and handoff | Resolve missing policy; retain deferred detail; size is not a reason to lose meaning |
 | 23 | Fresh-session handoff (2 stages) | Recover approved future rules after disposal; mutation-graded (baseline arm) |
 | 24 | Long-horizon lending (4 stages) | Rules survive sessions, a revision and a rewrite; intent stays proportionate (baseline arm) |
-| 25 | Bike-share need | Structural rules in needs, calibration in its home |
-| 26 | Event-ticketing sequence | Plan a successor on a reviewed predecessor's delivered code |
+| 25 | Bike-share need (core) | Structural rules in needs, calibration in its home |
+| 26 | Event-ticketing sequence (core) | Plan a successor on a reviewed predecessor's delivered code |
 | 27 | School timetable open items | Open items do not bind until decided |
-| 28 | Meal-planner printable list | Direct delivery for bounded cross-file work, with intent and review |
-| 29 | Housekeeping badge | Promote direct work to a change when coordination appears |
-| 30 | Garden watering (3 stages) | Direct delivery, then managed work with deferral and delayed acceptance, then continuing that change; mechanically graded (baseline arm) |
+| 30 | Garden watering (3 stages) (core) | Direct delivery, then managed work with deferral and delayed acceptance, then continuing that change; mechanically graded (baseline arm) |
 
 Fixtures are evaluation inputs, not OW's implementation. Scenario prompts and the
 skills' worked examples deliberately use different domains so that passing a case

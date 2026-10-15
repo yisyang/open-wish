@@ -15,7 +15,7 @@ spec.loader.exec_module(runner)
 
 class EvalSeedTests(unittest.TestCase):
     def test_every_seed_materializes_a_valid_project_with_fresh_reviews(self):
-        seeded = [item for item in runner.load_evals([]) if "seed" in item]
+        seeded = [item for item in runner.load_evals([], full=True) if "seed" in item]
         self.assertTrue(seeded)
         with tempfile.TemporaryDirectory() as directory:
             ow = runner.shim(Path(directory))
@@ -36,12 +36,18 @@ class EvalSeedTests(unittest.TestCase):
                             self.assertEqual(change["review"], "fresh", change)
 
     def test_baselines_receive_seed_files_but_no_ow_records(self):
-        item = next(item for item in runner.load_evals([]) if item.get("seed", "").endswith("28-direct-delivery"))
+        item = next(item for item in runner.load_evals([30]))
         with tempfile.TemporaryDirectory() as directory:
             work = Path(directory)
             runner.apply_seed(ROOT / item["seed"], work, None)
-            self.assertTrue((work / "app/list_builder.py").exists())
+            self.assertTrue((work / "watering.py").exists())
             self.assertFalse((work / "openwish").exists())
+
+    def test_core_suite_is_the_default_and_names_known_evals(self):
+        core = [item["id"] for item in runner.load_evals([])]
+        everything = [item["id"] for item in runner.load_evals([], full=True)]
+        self.assertTrue(core and set(core) < set(everything))
+        self.assertTrue(any("scenario" in item for item in runner.load_evals([])), "core keeps an executable scenario")
 
 
 if __name__ == "__main__":

@@ -1,5 +1,6 @@
 {
   "skill_name": "openwish-workflow",
+  "core": [30, 1, 7, 20, 25, 26],
   "evals": [
     {
       "id": 1,
@@ -111,19 +112,6 @@
         "Treats source/templates as product assets rather than instructions to adopt OW.",
         "Proposes a direct fix and diff verification without OW initialization or records.",
         "Asks no permission or final acceptance question."
-      ]
-    },
-    {
-      "id": 9,
-      "name": "fast-forward-routine-change",
-      "skills": ["ow-fast-forward", "ow-propose"],
-      "prompt": "Dry-run only. User: /fast-forward Add openwish as an exact alias of ow. Both use one entry point, without behavior or compatibility changes. Current N-001 covers easy CLI adoption and no active change exists. Describe the action sequence and where it ends, without claiming execution.",
-      "expected_output": "Routine inspect/implement/verify/report, then stop. Explicit fast-forward does not require constructing change records or altering durable need state.",
-      "files": [],
-      "assertions": [
-        "Chooses routine verification and reporting, then finishes.",
-        "Creates no need/change/task records and sets no mode or need state.",
-        "Asks no acceptance question and invents no execution results."
       ]
     },
     {
@@ -403,38 +391,6 @@
         "Raises the room-change proposal as now decidable and asks the human whether to confirm it, with a recommendation.",
         "Leaves the substitute-teacher question open rather than inventing an answer.",
         "Does not claim the need was edited, confirmed or accepted."
-      ]
-    },
-    {
-      "id": 28,
-      "name": "direct-delivery-bounded-cross-file",
-      "seed": "evals/fixtures/seeds/28-direct-delivery",
-      "skills": ["ow-propose", "ow-align", "ow-plan", "ow-implement", "ow-review"],
-      "prompt": "Dry-run only; save response.md. A meal-planning web app uses OW. Current N-001: households plan a week of meals. Current N-002: households get a shopping list of everything their planned meals need, merged by ingredient and unit. There is no active change. The list is shown on screen only. The owner says: 'Add a printable shopping list grouped by store aisle. Implementation and acceptance are yours; ship it today.' Each ingredient's aisle already exists in ingredients.json. The work touches the list builder, a print template and its route. Give your actions, the records you would create or edit, and any questions, without claiming execution.",
-      "expected_output": "Recover current intent first. Printing is another mechanism for N-002's outcome; the owner's aisle grouping is a new criterion recorded faithfully in N-002 without an approval round. The work is one result finished in the session with nothing deferred, so deliver directly: design a pure aisle-grouping step over the existing merged list, implement, verify grouping and merging outcomes, review against N-002 and explain why N-001 is unaffected, and report. Create no change, tasks, review record or acceptance prompt.",
-      "files": [],
-      "assertions": [
-        "Reuses N-002 for the printable list (recording the owner's aisle grouping there if anything) rather than creating a need for the print mechanism.",
-        "Chooses direct delivery despite several files: no change, tasks, review record or acceptance prompt.",
-        "Plans a pure grouping step over the existing merged list and checks grouping and merging outcomes, not incidental template layout.",
-        "Reviews the planned result against N-002 and says why other current needs, such as N-001, are unaffected.",
-        "Asks no redundant approval or confirmation question and does not claim execution."
-      ]
-    },
-    {
-      "id": 29,
-      "name": "promote-direct-work-when-coordination-appears",
-      "seed": "evals/fixtures/seeds/29-promote-direct",
-      "skills": ["ow-propose", "ow-plan", "ow-implement", "ow-review"],
-      "prompt": "Dry-run only; save response.md. A hotel housekeeping app uses OW. Current N-004: supervisors see which rooms are ready for inspection. You are delivering directly, without a change, a 'ready for inspection' badge the owner authorized. Midway you find that rooms cleaned during a guest's do-not-disturb hold need a rule the owner has not decided, and the owner now says they will check the badge on the floor tablets next week before accepting it. Badge logic for all other rooms is done and its checks pass. What do you do now, which records do you create or edit, and what do you ask?",
-      "expected_output": "Promote the work to a managed change for N-004: delayed acceptance and an undecided rule now need durable coordination. Record the delivered scope and its passing checks as evidence, the do-not-disturb question in N-004's open list (or a blocked task) without inventing the rule, and the tablet check as an unperformed manual task. Continue work that does not depend on the decision. Ask one concise question about do-not-disturb rooms with a recommendation; acceptance waits for the human after the tablet check.",
-      "files": [],
-      "assertions": [
-        "Promotes the direct work into a change referencing N-004 because an undecided rule and delayed acceptance appeared.",
-        "Records the do-not-disturb question as open or blocked without inventing the rule, and continues work that does not depend on it.",
-        "Records the tablet check as an unperformed manual task and keeps acceptance with the human after it.",
-        "Keeps the completed badge logic and its passing checks as evidence rather than discarding or redoing them.",
-        "Asks one concise do-not-disturb question with a recommendation and does not claim execution."
       ]
     },
     {

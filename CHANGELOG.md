@@ -17,6 +17,10 @@ Release notes for OpenWish, newest first. Update this file for every release.
   Codex uses) cannot reread the user's profile and pick up an installed `ow` instead
   of the checkout. A preflight resolves `ow` exactly as agent shells do and refuses to
   run on a mismatch, and baseline arms get failing `ow` and `openwish` stubs.
+- Evaluations run a 6-eval core suite by default (30, 1, 7, 20, 25, 26: 11 agent
+  sessions), with arms in parallel (`--jobs`); `--full` runs everything. Evaluations
+  9, 28 and 29 are removed because executable scenario 30 now grades direct delivery
+  and promotion mechanically.
 
 ## v0.8.1
 
