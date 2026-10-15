@@ -2,6 +2,14 @@
 
 Release notes for OpenWish, newest first. Update this file for every release.
 
+## v0.8.1
+
+### Fixed
+
+- The release smoke test expects `ow ready --json` to list a verification-only change
+  as unplanned (with no tasks) instead of failing on the new `unplanned` key. The
+  v0.8.0 release build stopped at this check; 0.8.1 ships the same product.
+
 ## v0.8.0
 
 ### Changed

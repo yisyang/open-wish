@@ -20,7 +20,7 @@ needs stay binding after delivery, so the next feature does not quietly undo the
 last one.
 
 OW takes inspiration from [Spec Kit](https://github.com/github/spec-kit) and
-[OpenSpec](https://github.com/Fission-AI/OpenSpec). OpenWish **0.8.0** uses
+[OpenSpec](https://github.com/Fission-AI/OpenSpec). OpenWish **0.8.1** uses
 **artifact schema 4**.
 
 ## Get started

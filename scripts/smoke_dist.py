@@ -72,8 +72,9 @@ def smoke(artifact, version):
         command("new", "change", "C-001", "--title", "Verify local behavior", "--need", "N-001", "--fast-forward")
         command("check")
         ready = json.loads(command("ready", "N-001", "--json"))
-        if ready != {"ready": [], "waiting": []}:
-            raise RuntimeError(f"Verification-only change invented work: {ready}")
+        unplanned = [(change["id"], change["waiting_on"]) for change in ready["unplanned"]]
+        if ready["ready"] or ready["waiting"] or unplanned != [("C-001", [])]:
+            raise RuntimeError(f"Verification-only change invented work or lost visibility: {ready}")
         handoff = root / "handoff.json"
         handoff.write_text(json.dumps({"handoff": [{
             "requirement": "Retain local-only intent through disposal in this structural smoke fixture",
