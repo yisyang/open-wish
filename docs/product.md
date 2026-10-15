@@ -40,6 +40,10 @@ contributors; architecture is in [design.md](design.md).
   `after`; successors may start once predecessors pass review (configurable to wait
   for acceptance), acceptance follows the sequence, and `ow ready` surfaces what
   can be planned next.
+- A proposed sequence is complete: each prerequisite has a provider among existing
+  code or predecessors, each deferral has a destination change, and each acceptance
+  criterion of the needs the ask covers is met, planned or held by an unplanned
+  change. Uncovered intent is surfaced as an omission, never left implicit.
 - Tasks have checkable acceptance and direct completion evidence; dependencies stay
   within their change. Independent work continues around manual blockers.
 - Executable tasks do not require inventing product policy; consequential unknowns
@@ -103,6 +107,8 @@ contributors; architecture is in [design.md](design.md).
 - Eight canonical skills with thin OpenCode, Claude Code, Codex and generic adapters;
   interactive and explicit harness selection; preserving, version-aware reinstall.
 - Only the current schema is supported before v1.0.0, rejected before any write.
+  A CLI older than a project's installed integrations refuses to use it and asks for
+  an upgrade instead of misreporting newer records as invalid.
 - Skill evaluations compare OW against a no-OW baseline on executable, multi-session
   scenarios, grade behavior mechanically where possible (acceptance checks, seeded
   mutants against retained tests), and record time and token cost.

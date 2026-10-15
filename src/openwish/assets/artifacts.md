@@ -75,8 +75,8 @@ mode = "default"
 ```
 
 The body's template headings (Purpose, Scope, Approach, Verification, Handoff) are
-guidance, not a required schema. Scope states **delivers now**, **preserves** and
-**defers**; Verification states **exit evidence**.
+guidance, not a required schema. Scope states **delivers now**, **preserves**,
+**defers** (each with its destination) and **prerequisites** (each with its provider); Verification states **exit evidence**.
 
 - `status`: `open | in-progress | review | closed`. `ow task` moves an open or
   reviewed change to `in-progress`; `record-review` sets `review` (pass) or

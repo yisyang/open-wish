@@ -6,12 +6,25 @@ Release notes for OpenWish, newest first. Update this file for every release.
 
 ### Fixed
 
+- A CLI older than a project's installed integrations now refuses to run there and
+  asks for an upgrade. Previously it reported records written for the newer version,
+  such as `generated` code exceptions, as invalid configuration. `ow skills` keeps
+  its explicit downgrade prompt.
+
 - An empty `.git` directory, such as the read-only placeholder Codex's sandbox mounts
   into plain directories, is no longer treated as an unreadable repository, so
   `ow check`, `ow trace` and reviews work there instead of reporting an incomplete
   inspection.
 
 ### Changed
+
+- `ow-propose` adds **Check the sequence**: before a sequence is presented or revised,
+  every prerequisite names its provider (existing code or a transitive predecessor),
+  every deferral names the change that takes it, and every acceptance criterion of
+  the covered needs is met, planned, or held by an unplanned change. Uncovered needs
+  are reported as omissions. `ow-plan` rechecks after reconciling, `ow-review`
+  requires deferral destinations to list the work, and the change template and
+  artifact reference ask for prerequisite providers and deferral destinations.
 
 - Evaluation presets run each agent with an isolated `HOME`, so login shells (which
   Codex uses) cannot reread the user's profile and pick up an installed `ow` instead

@@ -210,3 +210,16 @@ class CliTests(ProjectCase):
         self.assertIn("Downgrade requires confirmation", result.stderr)
         self.assertFalse((self.root / ".claude").exists())
         self.assertIn("9.0.0", (self.root / ".opencode/skills/ow-propose/SKILL.md").read_text())
+
+    def test_older_cli_refuses_projects_installed_by_a_newer_one(self):
+        from unittest.mock import patch
+        from openwish.integrations import install_skills
+        self.fixture()
+        with patch("openwish.integrations.__version__", "9.0.0"):
+            install_skills(self.root, "opencode")
+        for command in (("check",), ("context",), ("status",)):
+            result = self.cli(*command, success=False)
+            self.assertIn("newer than this CLI", result.stderr)
+            self.assertIn("9.0.0", result.stderr)
+        # Installing keeps its own handling of newer files: an explicit downgrade prompt.
+        self.assertIn("Downgrade requires confirmation", self.cli("skills", "--harness", "opencode", success=False).stderr)

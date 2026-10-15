@@ -58,7 +58,9 @@ per-function matrix.
   a repeatable manual procedure.
 - `retained`: intent or rationale in a need or ordinary doc/data.
 - `deferred`: approved unfinished detail in another open change or domain data,
-  with its limits explicit. Deferral cannot drop a promised result.
+  with its limits explicit. A destination change lists it in delivers now, and
+  successors relying on it come after that change. Deferral cannot drop a
+  promised result.
 - `superseded`: the replacement intent and the actual human decision.
 - `unresolved`: anything missing; the review stays blocked.
 

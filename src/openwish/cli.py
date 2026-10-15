@@ -8,7 +8,7 @@ import sys
 from . import __version__
 from .budgets import check_budgets
 from .context import context_data
-from .integrations import HARNESSES, install_skills, installed_harnesses
+from .integrations import HARNESSES, install_skills, installed_harnesses, require_current_cli
 from .model import TASK_STATES, need_graph, ready_tasks, unplanned_changes
 from .repository import project_files
 from .scaffold import initialize, new_artifact
@@ -156,6 +156,8 @@ def run(args):
             print("Start with ow-onboard or ow-propose in your agent.")
         return 0
     root = project_root(args.root)
+    if args.command != "skills":  # installing handles newer files through its downgrade prompt
+        require_current_cli(root)
     project_config(root)
     if args.command == "skills":
         print_installation(install_skills(root, args.harness, confirm_downgrade=confirm_downgrade))

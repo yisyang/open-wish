@@ -113,6 +113,21 @@ Prerequisites describe capabilities to verify in code and tests, never another
 change's tasks or files. If a human wants detailed tasks everywhere, note once that
 blocked ones will need re-planning, then comply.
 
+**Check the sequence** before presenting or revising one, walking it in `after`
+order. Structure checks cannot see these gaps:
+
+- **Providers.** Each prerequisite names its provider: existing code, or a change
+  this one comes after, directly or transitively. A capability that no predecessor
+  delivers, or that a predecessor defers, is a gap: add it to a change's delivers
+  now and repair `after`.
+- **Destinations.** Each deferral names where the work goes: a change that lists it
+  in delivers now, or an unplanned open change. A deferral without a destination
+  drops the result.
+- **Coverage.** Every acceptance criterion of the needs the ask covers is already
+  met in code, delivered by a change, or held by an unplanned open change that says
+  why it waits. A need or criterion with none of these is an omission, not a
+  deferral: give it a change, or ask whether it should wait or be retired.
+
 When new requirements arrive, ask these questions again. Repair tasks within the
 current boundary; scope separately acceptable additions as new changes (Reconcile
 the plan in `ow-plan`).

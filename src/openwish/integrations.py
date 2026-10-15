@@ -42,6 +42,14 @@ def load_manifest(root):
     return manifest
 
 
+def require_current_cli(root):
+    """Refuse to judge records installed by a newer OW, whose rules this CLI may not know."""
+    newest = max(load_manifest(root)["files"].values(), key=version_key, default=None)
+    if newest is not None and version_key(newest) > version_key(__version__):
+        raise WishError(f"This project's OW integrations are {newest}, newer than this CLI "
+                        f"({__version__}). Upgrade OpenWish (uv tool upgrade openwish) before using it here.")
+
+
 def installed_harnesses(root):
     manifest = load_manifest(root)
     detected = set(manifest["harnesses"])

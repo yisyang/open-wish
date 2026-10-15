@@ -186,8 +186,8 @@ For each candidate, identify:
 | --- | --- |
 | Delivers now | Which observable results does this increment contribute to its needs? |
 | Preserves | Which existing behavior and applicable constraints must hold? |
-| Defers | Which remaining outcomes belong to later work? |
-| Prerequisites | Which delivered capabilities must be checked before execution? |
+| Defers | Which remaining outcomes belong to later work, and which change takes each? |
+| Prerequisites | Which delivered capabilities must be checked before execution, and which existing code or predecessor provides each? |
 | Exit evidence | What would let someone accept this result independently? |
 
 Write tasks only for ready increments: their prerequisite capabilities exist in the
@@ -199,7 +199,10 @@ acceptance, if configured), `ow ready` shows the change as `PLAN`; apply
 verify prerequisites in the code, refresh the approach against delivered interfaces,
 then write tasks. Acceptance follows the sequence, and a predecessor's review usually
 needs refreshing before it closes because successors have since edited files.
-Assessment-only sequences can stay in conversation.
+Assessment-only sequences can stay in conversation. Before presenting a sequence,
+[check it](../src/openwish/assets/skills/ow-propose/SKILL.md#right-size-delivery):
+every prerequisite has a provider among existing code or predecessors, every
+deferral has a destination, and every covered acceptance criterion has an owner.
 
 For example, a clinic scheduling product could progress through one clinician's
 bookable calendar that a patient books end to end, then reminders, then multi-site

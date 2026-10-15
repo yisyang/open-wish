@@ -97,7 +97,9 @@ needs, scope, tasks, evidence and the actual repository:
 2. Recheck scope with Right-size delivery. When splitting, give each unfinished
    obligation to a specific change or task, repair qualified IDs and dependencies,
    and keep useful evidence with the work it supports. Moved work is not done work,
-   manual checks stay, and pending reviews must be refreshed.
+   manual checks stay, and pending reviews must be refreshed. After splitting,
+   reordering or deferring, recheck the affected sequence (Check the sequence in
+   `ow-propose`).
 3. Recompute `ow ready`, continue independent authorized work, and ask only for
    missing evidence, authority, or material scope decisions.
 
