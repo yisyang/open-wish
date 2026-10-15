@@ -1,0 +1,30 @@
+{
+  "tasks": [
+    {
+      "id": "C-007/T-001",
+      "title": "Fix the parser",
+      "depends_on": [],
+      "kind": "agent",
+      "status": "done",
+      "files": [
+        "money/parse.py"
+      ],
+      "acceptance": "Money strings parse to exact cents, including negative and thousands-separated input.",
+      "evidence": "python -m unittest tests.test_money: 14 passed, including existing consumers."
+    },
+    {
+      "id": "C-007/T-002",
+      "title": "Integrate the serializer contract",
+      "depends_on": [
+        "C-007/T-001"
+      ],
+      "kind": "agent",
+      "status": "done",
+      "files": [
+        "money/serialize.py"
+      ],
+      "acceptance": "Serialized amounts round-trip through the parser unchanged.",
+      "evidence": "Round-trip property check passed over 10,000 generated amounts."
+    }
+  ]
+}

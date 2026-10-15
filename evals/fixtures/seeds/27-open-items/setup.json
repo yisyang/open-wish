@@ -1,0 +1,29 @@
+[
+  {
+    "args": [
+      "record-review",
+      "C-005",
+      "--summary",
+      "Students see room changes live; staging updates reached them in about two minutes",
+      "--check",
+      "python -m unittest tests.test_room_changes: 4 passed",
+      "--check",
+      "Staging latency: about 2 minutes",
+      "--handoff",
+      "-"
+    ],
+    "stdin": {
+      "handoff": [
+        {
+          "requirement": "Room changes reach students of the affected class",
+          "disposition": "implemented",
+          "destinations": [
+            "timetable/room_changes.py",
+            "tests/test_room_changes.py"
+          ],
+          "evidence": "Unit checks and staging measurement"
+        }
+      ]
+    }
+  }
+]

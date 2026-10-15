@@ -1,0 +1,5 @@
+{
+  "basil": {"interval_days": 2, "hardy": false},
+  "tomato": {"interval_days": 3, "hardy": false},
+  "rosemary": {"interval_days": 7, "hardy": true}
+}

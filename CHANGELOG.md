@@ -10,6 +10,16 @@ Release notes for OpenWish, newest first. Update this file for every release.
   as unplanned (with no tasks) instead of failing on the new `unplanned` key. The
   v0.8.0 release build stopped at this check; 0.8.1 ships the same product.
 
+### Added
+
+- Evaluation seeds materialize the needs, changes, code and passing reviews that
+  dry-run cases 7, 20, 21 and 25–29 describe, validated by a unit test, so `ow context`
+  agrees with each scenario.
+- Executable evaluation 30 checks direct delivery, managed work with deferral and
+  delayed acceptance, and continuing that change, mechanically for both arms.
+- The evaluation `ow` shim logs every invocation per stage (`ow_calls`), so graders
+  and cost comparisons can see the workflow an agent used.
+
 ## v0.8.0
 
 ### Changed

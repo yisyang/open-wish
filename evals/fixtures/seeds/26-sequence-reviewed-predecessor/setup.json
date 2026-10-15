@@ -1,0 +1,27 @@
+[
+  {
+    "args": [
+      "record-review",
+      "C-001",
+      "--summary",
+      "Buyers see the seat map and hold seats; holds expire after ten minutes",
+      "--check",
+      "npm test -- hold: 6 passed",
+      "--handoff",
+      "-"
+    ],
+    "stdin": {
+      "handoff": [
+        {
+          "requirement": "One holder per seat; holds expire after ten minutes",
+          "disposition": "implemented",
+          "destinations": [
+            "src/seats/hold.ts",
+            "src/seats/hold.test.ts"
+          ],
+          "evidence": "Concurrent-hold and expiry checks passed"
+        }
+      ]
+    }
+  }
+]

@@ -1,0 +1,14 @@
+{
+  "flour": {
+    "aisle": "Baking"
+  },
+  "milk": {
+    "aisle": "Dairy"
+  },
+  "eggs": {
+    "aisle": "Dairy"
+  },
+  "basil": {
+    "aisle": "Produce"
+  }
+}

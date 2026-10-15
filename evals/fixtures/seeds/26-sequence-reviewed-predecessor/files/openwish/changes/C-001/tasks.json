@@ -1,0 +1,16 @@
+{
+  "tasks": [
+    {
+      "id": "C-001/T-001",
+      "title": "Hold seats",
+      "depends_on": [],
+      "kind": "agent",
+      "status": "done",
+      "files": [
+        "src/seats/hold.ts"
+      ],
+      "acceptance": "Holding a free seat succeeds once; a second concurrent hold fails.",
+      "evidence": "npm test -- hold: 6 passed, including the concurrent-hold check."
+    }
+  ]
+}

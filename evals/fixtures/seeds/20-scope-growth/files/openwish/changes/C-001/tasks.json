@@ -1,0 +1,66 @@
+{
+  "tasks": [
+    {
+      "id": "C-001/T-001",
+      "title": "Install and build the tooling",
+      "depends_on": [],
+      "kind": "agent",
+      "status": "done",
+      "files": [
+        "package.json"
+      ],
+      "acceptance": "Clean install and build succeed.",
+      "evidence": "npm ci and npm run build passed (supplied install/build log)."
+    },
+    {
+      "id": "C-001/T-002",
+      "title": "Choose the completion mode",
+      "depends_on": [],
+      "kind": "manual",
+      "status": "blocked",
+      "files": [],
+      "acceptance": "Owner selects immediate or timed completion.",
+      "evidence": "Waiting for the owner's choice."
+    },
+    {
+      "id": "C-001/T-003",
+      "title": "Implement the recipe",
+      "depends_on": [
+        "C-001/T-002"
+      ],
+      "kind": "agent",
+      "status": "open",
+      "files": [
+        "src/recipes.ts"
+      ],
+      "acceptance": "One player completes the recipe and receives its goods; also intercity freight and regional retail.",
+      "evidence": ""
+    },
+    {
+      "id": "C-001/T-004",
+      "title": "Build the browser controls",
+      "depends_on": [
+        "C-001/T-003"
+      ],
+      "kind": "agent",
+      "status": "open",
+      "files": [
+        "src/RecipePanel.tsx"
+      ],
+      "acceptance": "The browser starts the recipe and shows progress; also employment, payroll and native app distribution.",
+      "evidence": ""
+    },
+    {
+      "id": "C-001/T-005",
+      "title": "Observe the controls on a phone",
+      "depends_on": [
+        "C-001/T-004"
+      ],
+      "kind": "manual",
+      "status": "open",
+      "files": [],
+      "acceptance": "The owner starts a recipe on a phone and sees it complete.",
+      "evidence": ""
+    }
+  ]
+}

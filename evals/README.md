@@ -36,14 +36,20 @@ presets when a newer flagship model ships, and do not compare scores across mode
 
 - **Arms.** `skills` installs this checkout's skills into the working directory
   and puts an `ow` shim for this checkout on `PATH`. `baseline` runs the same task
-  without OW; only evals with a `baseline_prompt` have this arm (15, 23, 24).
+  without OW; only evals with a `baseline_prompt` have this arm (15, 23, 24, 30).
+- **Seeds.** An eval's `seed` (`fixtures/seeds/*`) materializes the state its prompt
+  describes: `files/` is copied after `ow init` (baselines get everything except
+  `openwish/`), then `setup.json` runs real `ow` commands, such as recording a passing
+  review, so `ow context` agrees with the scenario. `tests/test_eval_seeds.py` keeps
+  every seed valid. Unseeded dry runs tell the agent the described project is absent.
   Make sure no other `ow` is on `PATH` for baseline runs.
 - **Stages.** Scenario evals (23, 24) run each stage as a separate agent process
   over the retained product, so a later session cannot remember the earlier
   prompt. The runner warns if the product gains Git history, which could leak
   deleted plans.
 - **Records.** Each stage directory keeps `prompt.md`, `transcript.txt`,
-  `metrics.json` and a `snapshot/` of the work. Metrics hold wall time and exit
+  `metrics.json`, `ow-calls.log` (every `ow` invocation in the skills arm, counted as
+  `ow_calls`) and a `snapshot/` of the work. Metrics hold wall time and exit
   code, plus token `usage` and `tool_calls` from Codex's JSONL events, or
   `usage`, `total_cost_usd` and `num_turns` from Claude's JSON result.
 - **Agents.** The prompt is appended as the final argument, which fits
@@ -55,7 +61,8 @@ presets when a newer flagship model ships, and do not compare scores across mode
 `grade` writes `results.json` and prints one line per eval, arm and stage:
 
 - **Acceptance.** External checks of the public contract for that stage
-  (`fixtures/*/acceptance_test.py`).
+  (`fixtures/*/acceptance_test.py`). They receive `ARM`, `OW_CALLS` and `OW`, so a
+  scenario can also check the workflow, as 30 does for direct versus managed delivery.
 - **Own suite.** The product's retained tests, run as the product left them.
 - **Mutation.** For 23 and 24, the retained tests are rerun with the target module
   replaced by an evaluator-only reference (`fixtures/*/reference.py`), then once per
@@ -78,7 +85,7 @@ presets when a newer flagship model ships, and do not compare scores across mode
 Compare arms, and compare skill revisions, on identical prompts in fresh sessions.
 Report non-discriminating cases honestly. Useful signals, in rough priority:
 
-1. Acceptance and mutation results of the executable scenarios (15, 23, 24),
+1. Acceptance and mutation results of the executable scenarios (15, 23, 24, 30),
    skills versus baseline.
 2. Lost or invented rules across stages (read the stage responses and needs).
 3. Cost: wall time and tokens per stage, skills versus baseline.
@@ -121,6 +128,7 @@ this checkout.
 | 27 | School timetable open items | Open items do not bind until decided |
 | 28 | Meal-planner printable list | Direct delivery for bounded cross-file work, with intent and review |
 | 29 | Housekeeping badge | Promote direct work to a change when coordination appears |
+| 30 | Garden watering (3 stages) | Direct delivery, then managed work with deferral and delayed acceptance, then continuing that change; mechanically graded (baseline arm) |
 
 Fixtures are evaluation inputs, not OW's implementation. Scenario prompts and the
 skills' worked examples deliberately use different domains so that passing a case

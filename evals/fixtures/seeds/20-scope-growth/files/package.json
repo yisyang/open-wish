@@ -1,0 +1,5 @@
+{
+  "name": "trade-game",
+  "private": true,
+  "scripts": {"build": "tsc -p ."}
+}

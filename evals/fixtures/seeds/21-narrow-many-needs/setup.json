@@ -1,0 +1,30 @@
+[
+  {
+    "args": [
+      "record-review",
+      "C-007",
+      "--summary",
+      "Money parses to exact cents everywhere; the serializer round-trips",
+      "--check",
+      "python -m unittest tests.test_money: 14 passed",
+      "--check",
+      "Round-trip property check: 10,000 amounts passed",
+      "--handoff",
+      "-"
+    ],
+    "stdin": {
+      "handoff": [
+        {
+          "requirement": "Money strings parse to exact cents and round-trip through the serializer",
+          "disposition": "implemented",
+          "destinations": [
+            "money/parse.py",
+            "money/serialize.py",
+            "tests/test_money.py"
+          ],
+          "evidence": "Independent review: fix correct and every applicable current constraint preserved"
+        }
+      ]
+    }
+  }
+]

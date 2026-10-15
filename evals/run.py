@@ -86,7 +86,9 @@ def work_dir(item, directory):
 def shim(workspace):
     path = workspace / "bin/ow"
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(f'#!/bin/sh\nPYTHONPATH="{ROOT / "src"}${{PYTHONPATH:+:$PYTHONPATH}}" '
+    # OW_EVAL_LOG, set per stage, records each invocation so grading can see the workflow an agent used.
+    path.write_text(f'#!/bin/sh\n[ -n "$OW_EVAL_LOG" ] && printf \'%s\\n\' "$*" >> "$OW_EVAL_LOG"\n'
+                    f'PYTHONPATH="{ROOT / "src"}${{PYTHONPATH:+:$PYTHONPATH}}" '
                     f'exec "{sys.executable}" -m openwish "$@"\n', encoding="utf-8")
     path.chmod(0o755)
     return path
@@ -153,7 +155,30 @@ def prepare(workspace, evals, arms, agent):
             if arm == "skills":
                 subprocess.run([str(ow), "init", str(work), "--harness", harness], check=True,
                                capture_output=True, text=True, timeout=60)
+            if "seed" in item:
+                apply_seed(ROOT / item["seed"], work, ow if arm == "skills" else None)
     print(f"Prepared {workspace}")
+
+
+def apply_seed(seed, work, ow):
+    """Materialize the records a scenario describes: copy `files/`, then run `setup.json`'s
+    ow commands so reviews and other derived state are real. Baselines get no OW records."""
+    for source in sorted((seed / "files").rglob("*")):
+        relative = source.relative_to(seed / "files")
+        if source.is_dir() or (ow is None and relative.parts[0] == "openwish"):
+            continue
+        target = work / relative
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(source, target)
+    setup = seed / "setup.json"
+    if ow is None or not setup.exists():
+        return
+    for step in json.loads(setup.read_text(encoding="utf-8")):
+        stdin = json.dumps(step["stdin"]) if "stdin" in step else None
+        result = subprocess.run([str(ow), *step["args"]], cwd=work, input=stdin, capture_output=True,
+                                text=True, timeout=60)
+        if result.returncode:
+            raise SystemExit(f"Seed {seed.name} failed at {step['args'][:2]}: {result.stdout}{result.stderr}")
 
 
 def prompt_for(item, arm, number, stage, directory):
@@ -163,7 +188,10 @@ def prompt_for(item, arm, number, stage, directory):
     role = "the product directory" if "scenario" in item else "the assigned output directory"
     header = (f"Evaluation setup from the coordinator:\n- Your working directory {work} is {role}.\n"
               f"- Supplied read-only inputs: {', '.join(inputs) or 'none'}.\n")
-    if "scenario" not in item and "grading" not in item:
+    if "seed" in item:
+        header += ("- The working directory holds the project's records and representative files. Code, "
+                   "evidence and decisions the task states but the directory lacks are given facts.\n")
+    elif "scenario" not in item and "grading" not in item:
         installed = " beyond the installed OW guidance and empty records" if arm == "skills" else ""
         header += ("- The task describes a project you cannot see. Its stated needs, changes, code, evidence "
                    f"and decisions are given facts; the working directory holds none of them{installed}. "
@@ -215,6 +243,9 @@ def run(workspace, evals, arms, agent, timeout):
                 stage_dir.mkdir(exist_ok=True)
                 prompt = prompt_for(item, arm, number, stage, directory)
                 (stage_dir / "prompt.md").write_text(prompt, encoding="utf-8")
+                calls = stage_dir / "ow-calls.log"
+                if arm == "skills":
+                    environment["OW_EVAL_LOG"] = str(calls)
                 command = [part.replace("{work}", str(work)).replace("{stage_dir}", str(stage_dir))
                            for part in shlex.split(agent["command"])]
                 started = time.monotonic()
@@ -226,6 +257,8 @@ def run(workspace, evals, arms, agent, timeout):
                     code, stdout, stderr = "timeout", error.stdout or "", error.stderr or ""
                     stdout, stderr = (s.decode() if isinstance(s, bytes) else s for s in (stdout, stderr))
                 metrics = {"seconds": round(time.monotonic() - started, 1), "exit_code": code, **usage(stdout)}
+                if calls.exists():
+                    metrics["ow_calls"] = len(calls.read_text(encoding="utf-8").splitlines())
                 if "scenario" in item and (work / ".git").exists():
                     metrics["warning"] = "Product has Git history; later sessions may recover earlier context."
                 (stage_dir / "transcript.txt").write_text(stdout + "\n--- stderr ---\n" + stderr, encoding="utf-8")
@@ -346,7 +379,8 @@ def grade(workspace, evals, arms):
                 project = work / grading.get("project_dir", ".")
                 row = {"id": item["id"], "arm": arm, "stage": number,
                        **json.loads((stage_dir / "metrics.json").read_text(encoding="utf-8"))}
-                environment = {**os.environ, "PROJECT_DIR": str(project), "STAGE": str(number)}
+                environment = {**os.environ, "PROJECT_DIR": str(project), "STAGE": str(number), "ARM": arm,
+                               "OW_CALLS": str(stage_dir / "ow-calls.log"), "OW": str(workspace / "bin/ow")}
                 check = subprocess.run([sys.executable, str(ROOT / grading["acceptance"])], env=environment,
                                        cwd=project, capture_output=True, text=True, timeout=300)
                 row["acceptance"] = "pass" if check.returncode == 0 else "fail"
@@ -378,6 +412,7 @@ def grade(workspace, evals, arms):
                 f"{tokens.get('input_tokens', 0) + tokens.get('output_tokens', 0)} tok" if tokens else "")
         turns = (f"{row['num_turns']} turns" if "num_turns" in row else
                  f"{row['tool_calls']} tool calls" if "tool_calls" in row else "")
+        turns += f", {row['ow_calls']} ow calls" if "ow_calls" in row else ""
         seconds = f"{row['seconds']}s" if "seconds" in row else ""
         print(" ".join(str(part) for part in (f"{row['id']:>2} {row['arm']:<8} stage {row.get('stage', '-')}:",
                                               row.get("acceptance", row.get("status")), own, killed, seconds,

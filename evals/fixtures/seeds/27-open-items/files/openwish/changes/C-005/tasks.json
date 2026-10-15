@@ -1,0 +1,16 @@
+{
+  "tasks": [
+    {
+      "id": "C-005/T-001",
+      "title": "Publish room changes to class channels",
+      "depends_on": [],
+      "kind": "agent",
+      "status": "done",
+      "files": [
+        "timetable/room_changes.py"
+      ],
+      "acceptance": "A room change reaches students of that class.",
+      "evidence": "python -m unittest tests.test_room_changes: 4 passed; staging latency about 2 minutes."
+    }
+  ]
+}
