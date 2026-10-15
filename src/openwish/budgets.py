@@ -62,6 +62,8 @@ def check_budgets(project, *, code=True):
             continue
         if count < 500 and (not hard_limit or count < hard_limit):
             continue
+        if exceptions.get(relative, {}).get("kind") == "generated":
+            continue  # Tool output nobody edits by hand; its size says nothing about maintainability.
         if relative in exceptions:
             warnings.append(f"{relative}: {count} LOC; exception: {exceptions[relative]['reason']}")
         elif hard_limit and count >= hard_limit:

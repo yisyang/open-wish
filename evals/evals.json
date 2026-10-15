@@ -49,7 +49,7 @@
       "name": "routine-alias",
       "skills": ["ow-propose", "ow-plan", "ow-review"],
       "prompt": "Dry-run only. A Python CLI ships ow. Current N-001 covers low-friction CLI adoption. There is no active change. User: Can we make it available through both ow and openwish? Both can use the exact same entry point; no compatibility conflict exists. Give next actions and any question, without claiming execution.",
-      "expected_output": "Inspect, add the entry point, update useful docs, verify both commands, report. Use the routine path with no new needs, changes, tasks, or acceptance prompt.",
+      "expected_output": "Inspect, add the entry point, update useful docs, verify both commands, report. Use direct delivery with no new needs, changes, tasks, or acceptance prompt.",
       "files": [],
       "assertions": [
         "Chooses direct implementation and meaningful alias verification.",
@@ -96,7 +96,7 @@
       "assertions": [
         "Prepares change-local approach/tasks using existing N-001.",
         "Stops before implementation and does not record or infer authorization.",
-        "Requires no separate need/design approval questions or durable spec."
+        "Requires no separate need/design approval questions, confirmation round or durable spec; the stated N-001 is taken as given."
       ]
     },
     {
@@ -253,14 +253,14 @@
       "name": "large-modernization-delivery-boundaries",
       "skills": ["ow-onboard", "ow-propose", "ow-align", "ow-plan"],
       "prompt": "The human asks: Use OW to prepare a resumable modernization plan from the supplied assessment and draft. I want the complete direction visible and a useful next step. Planning only; do not build the game yet. Inspect evals/fixtures/modernization/README.md, then save response.md with your assessment of the draft, proposed working-record actions, delivery sequence, and a concrete task plan for the next executable increment. Do not modify the source fixture or initialize OW in this checkout. You may write only your response in the assigned output directory. Distinguish supplied observations from any checks you perform.",
-      "expected_output": "Identify hidden subsystem-sized tasks despite a short pilot checklist. Preserve the current needs and constraints; propose independently reviewable increments with scoped contributions and exit evidence, integrated representative behavior early, and prerequisite capabilities. Detail the next executable increment and keep future work in lightweight ordinary open changes for resumability. Stop at planning without invented verification.",
+      "expected_output": "Identify hidden subsystem-sized tasks despite a short pilot checklist. Preserve the current needs and constraints; propose independently reviewable increments with scoped contributions and exit evidence, integrated representative behavior early, and prerequisite capabilities. Write tasks only for work that is ready now (prerequisites present, its result not depending on an open material decision or unsettled value unless a labeled placeholder is recorded as open), record the sequence with change-level after predecessors, and keep later work in lightweight open changes with empty task lists for resumability. Stop at planning without invented verification.",
       "files": ["evals/fixtures/modernization/README.md"],
       "assertions": [
         "Explains why the pilot and at least two existing tasks conceal substantial separately reviewable work, rather than judging only the number of needs or tasks.",
         "Proposes multiple increments with observable outcomes and exit evidence that can be accepted while later work is postponed; does not simply rename the original program as a parent implementation change.",
         "Integrates a representative user path early instead of leaving all usable UI and integration until all backend subsystems exist; enabling work proves a concrete capability.",
-        "Details concrete verifiable tasks for the next increment, preserves exact/retry-safe state and isolation when applicable, and explicitly defers later portions of needs without retiring or weakening them.",
-        "Keeps future obligations discoverable in concise ordinary open changes, verifies prerequisite capabilities from delivered code/tests before execution, and avoids cross-change task links or a parent change containing the whole program.",
+        "Details concrete verifiable tasks only for work that is ready now, never tasking work that depends on an unresolved owner value without a labeled placeholder recorded as open, preserves exact/retry-safe state and isolation when applicable, and explicitly defers later portions of needs without retiring or weakening them.",
+        "Keeps future obligations discoverable in concise open changes with empty task lists, links each to the needs it advances rather than every constraining need, uses change-level after predecessors, verifies prerequisite capabilities from delivered code/tests before planning them, and avoids task links across changes or a parent change containing the whole program.",
         "Honors plan-only scope and attributes fixture observations honestly without claiming implementation, checks, or acceptance occurred."
       ]
     },
@@ -275,7 +275,7 @@
         "Separates freight, regional retail, employment/payroll and native distribution from the original single-recipe delivery instead of expanding broad task acceptance to contain them.",
         "Proposes completing T-002 with evidence attributed to the actual supplied timed-completion decision, removes its stale blocking effect, and preserves implementation work as unfinished.",
         "Retains the unperformed T-005 manual observation and T-001 completion evidence; does not mark moved or unverified work done or drop it to achieve closure.",
-        "Reconciles scoped tasks and local dependencies, then resumes T-003/T-004 subject to actual verification under existing authority without redundant decision questions.",
+        "Reconciles scoped tasks and local dependencies, then resumes T-003/T-004 subject to actual verification under existing authority without redundant decision questions; any new clarification holds only the tasks that depend on it, and future additions reuse the already-current needs.",
         "Keeps requested future direction in specific lightweight open changes with prerequisite capabilities and normal review, without inheriting C-001 fast-forward or authorizing later implementation.",
         "Explains how successor obligations and prerequisite descriptions survive C-001 cleanup using retained future changes and delivered code/interfaces/checks, without cross-change task dependencies."
       ]
@@ -337,7 +337,7 @@
       "skills": ["ow-propose", "ow-align", "ow-plan", "ow-implement", "ow-review", "ow-consolidate"],
       "prompt": "Staged scenario: the runner sends each stage of the scenario file to a fresh session over the retained product.",
       "scenario": "evals/fixtures/lending/scenario.json",
-      "expected_output": "Each fresh session recovers prior rules from retained needs, code and tests; preserves the grace exception, caps and renewal limits; revises the book cap in place without duplicating intent; and survives a data-driven rewrite with needs essentially unchanged. Retained tests stay small and kill seeded rule mutants; completed changes are disposed.",
+      "expected_output": "Each fresh session recovers prior rules from retained needs, code and tests; preserves the grace exception, caps and renewal limits; revises the book cap in place without duplicating intent; and survives a data-driven rewrite with needs essentially unchanged. Retained tests stay small and kill seeded rule mutants. Single-session increments may be delivered directly; no completed change records remain. The data-driven structure is protected by code and a test that adds a kind through data, not by a new need, and shared kind rules are stated once.",
       "files": [],
       "grading": {
         "acceptance": "evals/fixtures/lending/acceptance_test.py",
@@ -348,8 +348,85 @@
         "Every stage passes the external acceptance check for its stage, including all earlier behavior.",
         "Retained tests pass on the reference contract and kill most seeded mutants at each stage.",
         "Stage 3 revises the existing fee intent rather than adding a duplicate need, and keeps the grace exception.",
-        "Stage 4 changes structure and adds DVDs without new needs for the restructuring or the item kind, and without losing earlier rules.",
-        "Need count and size stay proportionate across stages; completed changes are disposed and no plan copies accumulate in docs."
+        "Stage 4 changes structure and adds DVDs without new needs for the restructuring or the item kind, states rules shared by kinds once rather than per kind, and loses no earlier rule.",
+        "Need count and size stay proportionate across stages; no completed change records remain and no plan copies accumulate in docs."
+      ]
+    },
+    {
+      "id": 25,
+      "name": "durable-need-rules-not-calibration",
+      "skills": ["ow-propose", "ow-consolidate"],
+      "prompt": "Read-only OW need repair; save response.md only. A bike-share product has confirmed N-004 (confirmed_at set): actor riders; outcome 'Pay fairly for rides'; acceptance ['Ride $1 unlock+$0.25/min, cap $15/day; members 30 free min/ride', 'Late return >24h = $50 fee; no weather refunds', 'Dev: ssh fleet-dev, seed rider/rider123']. The owner says the prices were set for the city pilot and will be retuned after it, and that the member free-minute benefit was only proposed. A rules document docs/pricing.md exists but is empty. Propose the revised need and say where every removed fact goes. Do not claim edits, confirmations or checks occurred.",
+      "expected_output": "Acceptance keeps the structural pricing rules (unlock plus per-minute pricing, a daily cap, a late-return fee with its boundary, no weather refunds) as readable sentences that defer amounts to a referenced rules file, which receives the pilot numbers once. The development host and test account move to development docs. The unconfirmed member benefit goes to the need's open list rather than acceptance, and confirmation is not extended to it. No condition or exception is lost.",
+      "files": [],
+      "assertions": [
+        "Writes acceptance as full sentences, one criterion each, without slash-lists or shorthand.",
+        "Keeps structural rules (unlock plus per-minute charge, daily cap, late fee after a stated boundary, no weather refunds) in acceptance while moving the tunable amounts to the referenced rules file once, not in both places.",
+        "Moves the development host and seeded account out of the need into development docs and does not present the credential as durable intent.",
+        "Puts the proposed member free-minute benefit in open (or an equivalent unconfirmed list), not acceptance, so confirmed_at covers only confirmed criteria.",
+        "Preserves the late-return boundary meaning (whether exactly 24 hours is late) as a rule or asks about it, rather than dropping it.",
+        "Makes no claim that edits, confirmations or checks happened."
+      ]
+    },
+    {
+      "id": 26,
+      "name": "sequence-continues-on-reviewed-predecessor",
+      "skills": ["ow-plan", "ow-implement", "ow-review", "ow-consolidate"],
+      "prompt": "Dry-run only; save response.md. An event-ticketing product uses OW with the default successors_wait_for = review. C-001 (seat map) has a passing review and awaits the human's acceptance. C-002 (checkout) has after = [C-001] and no tasks; its approach was written before C-001 existed and assumes a seat-hold API named reserveSeats. C-003 (refunds) has after = [C-002] and no tasks. The delivered C-001 code exposes holdSeats with a ten-minute expiry instead. The human authorized implementing C-001 through C-003. Give the next actions in order, including what happens when the human later accepts or rejects C-001.",
+      "expected_output": "C-002 is plannable now: verify its prerequisites against the delivered C-001 code, update its approach to the actual holdSeats interface and expiry (asking only if that changes intent), write tasks and continue within the authorization. Do not plan C-003 until C-002 passes review. C-001 still needs the human's acceptance; because C-002 edits product files, C-001's review will likely be stale, so rerun its checks and record again before closing it, closing C-001 before or with C-002. If the human rejects or revises C-001, reconcile C-002 against the revised code.",
+      "files": [],
+      "assertions": [
+        "Plans C-002 now against the delivered C-001 code rather than its stale reserveSeats assumption, and treats a passing predecessor as a reason to inspect, not proof the prerequisite exists.",
+        "Does not write tasks for C-003 until C-002 passes review.",
+        "Keeps asking for actual human acceptance of C-001 and does not close it on the implementation authorization alone.",
+        "Explains that C-001's review will likely go stale from C-002's edits and must be refreshed before closing, and that C-001 closes before or together with C-002.",
+        "Describes reconciling C-002 if C-001 is rejected or revised.",
+        "Makes no claim that planning, implementation, checks or acceptance already happened."
+      ]
+    },
+    {
+      "id": 27,
+      "name": "open-items-stay-unbinding-until-decided",
+      "skills": ["ow-propose", "ow-review"],
+      "prompt": "Dry-run only; save response.md. A school timetable product has confirmed N-003: teachers publish timetables and students see their current timetable; acceptance ['Students see the published timetable for their own classes only.']; open ['Proposed: students see room changes within five minutes.', 'Should substitute teachers see full class lists?']. C-005 implemented live room-change updates; its checks show updates reach students in about two minutes, and its review passed. The human asks you to present C-005 for acceptance. Give your presentation and any questions.",
+      "expected_output": "Present C-005 against N-003's acceptance and the other current needs, with evidence. Treat the open items as unbinding: do not report C-005 as failing or fulfilling them as requirements. Point out that the room-change proposal is now decidable and ask whether to confirm it, with the timing in acceptance or a rule as the human chooses; leave the substitute-teacher question open. Do not promote the proposal or extend confirmation to it without the human's answer.",
+      "files": [],
+      "assertions": [
+        "Assesses C-005 against N-003's acceptance and states how other current needs were ruled out, using the supplied evidence and asking about review coverage rather than presuming it missing.",
+        "Does not treat the open items as binding acceptance criteria or as already delivered requirements.",
+        "Raises the room-change proposal as now decidable and asks the human whether to confirm it, with a recommendation.",
+        "Leaves the substitute-teacher question open rather than inventing an answer.",
+        "Does not claim the need was edited, confirmed or accepted."
+      ]
+    },
+    {
+      "id": 28,
+      "name": "direct-delivery-bounded-cross-file",
+      "skills": ["ow-propose", "ow-align", "ow-plan", "ow-implement", "ow-review"],
+      "prompt": "Dry-run only; save response.md. A meal-planning web app uses OW. Current N-001: households plan a week of meals. Current N-002: households get a shopping list of everything their planned meals need, merged by ingredient and unit. There is no active change. The list is shown on screen only. The owner says: 'Add a printable shopping list grouped by store aisle. Implementation and acceptance are yours; ship it today.' Each ingredient's aisle already exists in ingredients.json. The work touches the list builder, a print template and its route. Give your actions, the records you would create or edit, and any questions, without claiming execution.",
+      "expected_output": "Recover current intent first. Printing is another mechanism for N-002's outcome; the owner's aisle grouping is a new criterion recorded faithfully in N-002 without an approval round. The work is one result finished in the session with nothing deferred, so deliver directly: design a pure aisle-grouping step over the existing merged list, implement, verify grouping and merging outcomes, review against N-002 and explain why N-001 is unaffected, and report. Create no change, tasks, review record or acceptance prompt.",
+      "files": [],
+      "assertions": [
+        "Reuses N-002 for the printable list (recording the owner's aisle grouping there if anything) rather than creating a need for the print mechanism.",
+        "Chooses direct delivery despite several files: no change, tasks, review record or acceptance prompt.",
+        "Plans a pure grouping step over the existing merged list and checks grouping and merging outcomes, not incidental template layout.",
+        "Reviews the planned result against N-002 and says why other current needs, such as N-001, are unaffected.",
+        "Asks no redundant approval or confirmation question and does not claim execution."
+      ]
+    },
+    {
+      "id": 29,
+      "name": "promote-direct-work-when-coordination-appears",
+      "skills": ["ow-propose", "ow-plan", "ow-implement", "ow-review"],
+      "prompt": "Dry-run only; save response.md. A hotel housekeeping app uses OW. Current N-004: supervisors see which rooms are ready for inspection. You are delivering directly, without a change, a 'ready for inspection' badge the owner authorized. Midway you find that rooms cleaned during a guest's do-not-disturb hold need a rule the owner has not decided, and the owner now says they will check the badge on the floor tablets next week before accepting it. Badge logic for all other rooms is done and its checks pass. What do you do now, which records do you create or edit, and what do you ask?",
+      "expected_output": "Promote the work to a managed change for N-004: delayed acceptance and an undecided rule now need durable coordination. Record the delivered scope and its passing checks as evidence, the do-not-disturb question in N-004's open list (or a blocked task) without inventing the rule, and the tablet check as an unperformed manual task. Continue work that does not depend on the decision. Ask one concise question about do-not-disturb rooms with a recommendation; acceptance waits for the human after the tablet check.",
+      "files": [],
+      "assertions": [
+        "Promotes the direct work into a change referencing N-004 because an undecided rule and delayed acceptance appeared.",
+        "Records the do-not-disturb question as open or blocked without inventing the rule, and continues work that does not depend on it.",
+        "Records the tablet check as an unperformed manual task and keeps acceptance with the human after it.",
+        "Keeps the completed badge logic and its passing checks as evidence rather than discarding or redoing them.",
+        "Asks one concise do-not-disturb question with a recommendation and does not claim execution."
       ]
     }
   ]

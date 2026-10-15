@@ -14,10 +14,11 @@ per repository.
    rather than judging from the file tree.
 2. **Propose a small set of needs** using Right-size intent in `ow-propose`: actors,
    independently valuable outcomes, observable acceptance, genuine constraints and
-   open questions. Code shows behavior, not confirmed intent; label inference. On
-   repeat onboarding, reuse existing IDs by comparing actor, outcome and acceptance.
-3. **Confirm intent** in one batch decision (numbered A/B/C, `(Recommended)`) in
-   default mode; set `confirmed_at` only for what the human actually confirms.
+   open questions (in `open`). Code shows behavior, not confirmed intent; label
+   inference. On repeat onboarding, reuse existing IDs by comparing actor, outcome
+   and acceptance.
+3. **Confirm intent** in one batch decision (A/B/C) in default
+   mode; set `confirmed_at` only for what the human actually confirms.
    Under explicit fast-forward, leave inference unconfirmed.
 4. **Assess architecture** with the rubric in `ow-align`: each finding as
    observation (with file references) → consequence → whether improving it is
@@ -29,9 +30,9 @@ per repository.
    improvements, cost and risk, verification and rollback per step. Refactoring
    needs one explicit human decision before any product edit; onboarding alone
    authorizes none.
-6. **Preserve operational knowledge** in ordinary docs. Reference secrets; never
-   record their values.
+6. **Preserve operational knowledge** (environments, hosts, accounts, setup) in
+   ordinary docs rather than needs, following One home per fact in the policy.
 7. **Present** the needs, assessment and proposal in conversation. Create changes
    only when planning, implementation or verification was requested; for broad
-   requested plans, detail the next increment and keep later ones as concise open
-   changes. End with the next useful action.
+   requested plans, task only ready increments (Right-size delivery in `ow-propose`)
+   and keep the rest as concise open changes. End with the next useful action.

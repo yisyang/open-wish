@@ -1,3 +1,4 @@
+import json
 from unittest.mock import Mock, patch
 
 from openwish import __version__
@@ -12,8 +13,9 @@ from tests.support import ProjectCase
 
 class IntegrationTests(ProjectCase):
     def seed_version(self, harnesses, version):
+        # The shared artifact reference was installed by setUp; seeding may move it either way.
         with patch("openwish.integrations.__version__", version):
-            return install_skills(self.root, harnesses)
+            return install_skills(self.root, harnesses, confirm_downgrade=lambda _: True)
 
     def snapshot(self):
         return {str(path.relative_to(self.root)): (path.read_bytes(), path.stat().st_mtime_ns)
@@ -22,7 +24,7 @@ class IntegrationTests(ProjectCase):
     def test_multiple_harnesses_deduplicate_shared_skills(self):
         report = install_skills(self.root, HARNESSES)
         self.assertEqual(report["installed"], 28)
-        self.assertEqual(report["unchanged"], 9)  # generic from setUp, shared with Codex
+        self.assertEqual(report["unchanged"], 10)  # generic and the reference from setUp
         self.assertEqual(installed_harnesses(self.root), list(HARNESSES))
         for relative in integration_files(HARNESSES, __version__):
             self.assertEqual(declared_version((self.root / relative).read_text()), __version__)
@@ -36,7 +38,7 @@ class IntegrationTests(ProjectCase):
             report = install_skills(self.root, HARNESSES)
             write.assert_not_called()
             manifest.assert_not_called()
-        self.assertEqual(report["unchanged"], 37)
+        self.assertEqual(report["unchanged"], 38)
         self.assertEqual(self.snapshot(), before)
 
     def test_upgrade_overwrites_older_skills_and_adapters_even_with_local_edits(self):
@@ -45,9 +47,21 @@ class IntegrationTests(ProjectCase):
         path.write_text(path.read_text() + "\nOld customized content\n", encoding="utf-8")
         callback = Mock(side_effect=AssertionError("Upgrades must not prompt"))
         report = install_skills(self.root, ["opencode", "claude"], confirm_downgrade=callback)
-        self.assertEqual(report["upgraded"], 28)
+        self.assertEqual(report["upgraded"], 29)
         for relative, text in integration_files(["opencode", "claude"], __version__).items():
             self.assertEqual((self.root / relative).read_text(), text)
+
+    def test_unstamped_artifact_reference_is_refused_with_guidance(self):
+        reference = self.root / "openwish/artifacts.md"
+        reference.write_text("# OW artifact reference from an older release\n", encoding="utf-8")
+        manifest = load_manifest(self.root)
+        manifest["files"].pop("openwish/artifacts.md")
+        (self.root / "openwish/installation.json").write_text(json.dumps(manifest), encoding="utf-8")
+        with self.assertRaisesRegex(WishError, "delete it and rerun 'ow init'"):
+            install_skills(self.root, "generic")
+        reference.unlink()
+        self.assertEqual(install_skills(self.root, "generic")["installed"], 1)
+        self.assertEqual(declared_version(reference.read_text()), __version__)
 
     def test_downgrade_requires_explicit_confirmation_before_any_writes(self):
         self.seed_version("opencode", "1.0.0")
@@ -62,8 +76,8 @@ class IntegrationTests(ProjectCase):
         callback = Mock(return_value=False)
         report = install_skills(self.root, ["opencode", "claude"], confirm_downgrade=callback)
         callback.assert_called_once()
-        self.assertEqual(len(callback.call_args.args[0]), 18)
-        self.assertEqual(report["kept_newer"], 18)
+        self.assertEqual(len(callback.call_args.args[0]), 19)
+        self.assertEqual(report["kept_newer"], 19)
         self.assertEqual(report["installed"], 10)
         after = {key: value for key, value in self.snapshot().items() if key.startswith(".opencode/")}
         self.assertEqual(after, before)
@@ -73,7 +87,7 @@ class IntegrationTests(ProjectCase):
         self.seed_version("opencode", "1.0.0")
         callback = Mock(return_value=True)
         report = install_skills(self.root, "opencode", confirm_downgrade=callback)
-        self.assertEqual(report["downgraded"], 18)
+        self.assertEqual(report["downgraded"], 19)
         for relative, text in integration_files(["opencode"], __version__).items():
             self.assertEqual((self.root / relative).read_text(), text)
             self.assertEqual(load_manifest(self.root)["files"][relative], __version__)
@@ -88,7 +102,7 @@ class IntegrationTests(ProjectCase):
                     if key.startswith(".opencode/") and key != str(old.relative_to(self.root))}
         callback = Mock(return_value=False)
         report = install_skills(self.root, "opencode", confirm_downgrade=callback)
-        self.assertEqual((report["upgraded"], report["unchanged"], report["kept_newer"]), (1, 16, 1))
+        self.assertEqual((report["upgraded"], report["unchanged"], report["kept_newer"]), (1, 17, 1))
         self.assertEqual(callback.call_args.args[0], [{"path": str(new.relative_to(self.root)),
                                                       "installed": "1.0.0", "available": __version__}])
         self.assertEqual({key: value for key, value in self.snapshot().items() if key in retained}, retained)

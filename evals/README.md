@@ -10,10 +10,29 @@ skills behave well, and whether OW beats working without it.
 agent command for every stage, and grades what it can mechanically:
 
 ```sh
-python3 evals/run.py run --workspace /tmp/ow-evals --ids 15 23 24 \
-  --agent "claude -p --output-format json --permission-mode acceptEdits"
+python3 evals/run.py run --workspace /tmp/ow-evals --ids 15 23 24
 python3 evals/run.py grade --workspace /tmp/ow-evals --ids 15 23 24
 ```
+
+OW is meant to be judged against the most popular coding agents, each pinned to
+its current flagship model at a reasoning level suited to planning. `--agent`
+selects a preset, and OW is installed for its harness:
+
+| Preset | Agent | Model | Reasoning |
+| --- | --- | --- | --- |
+| `codex` (default) | Codex CLI, `codex exec` | `gpt-6.1-sol` | `high` |
+| `claude` | Claude Code, `claude -p` | `claude-opus-5-5` | `high` |
+
+```sh
+python3 evals/run.py run --workspace /tmp/ow-evals-claude --agent claude --ids 15 23 24
+```
+
+Presets run in an isolated agent home (`CODEX_HOME` or `CLAUDE_CONFIG_DIR` under
+`WORKSPACE/agent-home/`) that links only your existing sign-in credentials, so your
+global instructions, memories, plugins, MCP servers and settings cannot change the
+results. Sign in to each agent once beforehand. A custom command is also accepted
+(`--agent "COMMAND" --harness H`); it runs with your own configuration. Update the
+presets when a newer flagship model ships, and do not compare scores across models.
 
 - **Arms.** `skills` installs this checkout's skills into the working directory
   and puts an `ow` shim for this checkout on `PATH`. `baseline` runs the same task
@@ -24,26 +43,35 @@ python3 evals/run.py grade --workspace /tmp/ow-evals --ids 15 23 24
   prompt. The runner warns if the product gains Git history, which could leak
   deleted plans.
 - **Records.** Each stage directory keeps `prompt.md`, `transcript.txt`,
-  `metrics.json` (wall time, exit code, and `usage`/`total_cost_usd`/`num_turns`
-  when the agent prints them as JSON), and a `snapshot/` of the work.
+  `metrics.json` and a `snapshot/` of the work. Metrics hold wall time and exit
+  code, plus token `usage` and `tool_calls` from Codex's JSONL events, or
+  `usage`, `total_cost_usd` and `num_turns` from Claude's JSON result.
 - **Agents.** The prompt is appended as the final argument, which fits
-  `claude -p`, `codex exec` and `opencode run`. Grant whatever edit permissions
-  the scenario needs.
+  `codex exec`, `claude -p` and `opencode run`. `{work}` and `{stage_dir}` in the
+  command are replaced per stage; the agent must be able to write both (the
+  response goes in the stage directory). Stdin is closed. A workspace records its
+  agent in `agent.json` and refuses another, because arms and stages are reused.
 
 `grade` writes `results.json` and prints one line per eval, arm and stage:
 
 - **Acceptance.** External checks of the public contract for that stage
   (`fixtures/*/acceptance_test.py`).
-- **Mutation.** For 23 and 24, the product's own retained tests are rerun twice:
-  once with the target module replaced by an evaluator-only reference
-  (`fixtures/*/reference.py`), which they must pass, and once per seeded mutant,
-  which they should fail. Tests that fail on the reference are reported as
-  inconclusive: they depend on internals rather than the contract.
+- **Own suite.** The product's retained tests, run as the product left them.
+- **Mutation.** For 23 and 24, the retained tests are rerun with the target module
+  replaced by an evaluator-only reference (`fixtures/*/reference.py`), then once per
+  seeded mutant. Only tests that pass on the reference grade the mutants; the rest
+  check choices the contract leaves open (input validation, extension APIs,
+  internals) and are listed with their failures. A mutant is killed only when a test
+  fails an assertion; errors and timeouts count as `errored`, not as protection.
+  Read the compatible fraction alongside the kill count. Mutation is graded only when
+  the product's own suite passes.
 - **Intent.** Need count and size per stage, needs changed since the previous
   stage, and change directories left behind.
 - **Dry-run evals** get a `grading.md` checklist of their assertions for a
   human or model grader. Grade actual responses and edits, not claims of
-  compliance.
+  compliance. Their prompts describe a project the agent cannot see; the
+  coordinator header says so, so an empty working directory is not evidence
+  against the described state.
 
 ## What to compare
 
@@ -56,7 +84,8 @@ Report non-discriminating cases honestly. Useful signals, in rough priority:
 3. Cost: wall time and tokens per stage, skills versus baseline.
 4. Checklist grades of the dry-run scenarios.
 
-Small samples do not prove reliability across models or harnesses. Do not reuse
+Small samples do not prove reliability across models or harnesses; run cases
+whose guidance changed several times before claiming an improvement. Do not reuse
 scores from earlier prompt versions. Keep workspaces, transcripts and scores out of
 this checkout.
 
@@ -72,7 +101,7 @@ this checkout.
 | 6 | New format vs. accountability | Mechanism reuses a need; independent outcome may be new |
 | 7 | Plan-only | Prepare change and tasks, then stop |
 | 8 | Explicit opt-out | Installed skills do not impose adoption |
-| 9 | Fast-forward routine work | Finish without structured records |
+| 9 | Fast-forward routine work | Finish directly without change records |
 | 10 | Disposal with unique knowledge and blockers | Preserve facts in docs; keep unfinished work; handle unknown files |
 | 12 | Default result review | Keep the change until actual human acceptance |
 | 13 | Brownfield shop-a | Find real architectural friction; propose incremental refactoring; seek approval |
@@ -87,6 +116,11 @@ this checkout.
 | 22 | Material policy and handoff | Resolve missing policy; retain deferred detail; size is not a reason to lose meaning |
 | 23 | Fresh-session handoff (2 stages) | Recover approved future rules after disposal; mutation-graded (baseline arm) |
 | 24 | Long-horizon lending (4 stages) | Rules survive sessions, a revision and a rewrite; intent stays proportionate (baseline arm) |
+| 25 | Bike-share need | Structural rules in needs, calibration in its home |
+| 26 | Event-ticketing sequence | Plan a successor on a reviewed predecessor's delivered code |
+| 27 | School timetable open items | Open items do not bind until decided |
+| 28 | Meal-planner printable list | Direct delivery for bounded cross-file work, with intent and review |
+| 29 | Housekeeping badge | Promote direct work to a change when coordination appears |
 
 Fixtures are evaluation inputs, not OW's implementation. Scenario prompts and the
 skills' worked examples deliberately use different domains so that passing a case

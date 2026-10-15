@@ -11,6 +11,8 @@ SKILLS = ("propose", "align", "plan", "implement", "review", "consolidate", "fas
 HARNESSES = ("opencode", "claude", "codex", "generic")
 DIRECTORIES = {"generic": ".agents", "codex": ".agents", "claude": ".claude", "opencode": ".opencode"}
 MANIFEST = "openwish/installation.json"
+# The artifact reference documents this CLI, so it upgrades with it; policy stays project-owned.
+REFERENCE = "openwish/artifacts.md"
 
 
 def asset(name):
@@ -53,7 +55,7 @@ def installed_harnesses(root):
 
 
 def integration_files(harnesses, version):
-    outputs = {}
+    outputs = {REFERENCE: stamp(asset("artifacts.md"), version)}
     for harness in normalize_harnesses(harnesses):
         directory = DIRECTORIES[harness]
         for skill in SKILLS:
@@ -93,6 +95,9 @@ def install_skills(root, harnesses, *, confirm_downgrade=None):
             plan.append((relative, content, "installed", __version__))
             continue
         installed = declared_version(current) or manifest["files"].get(relative)
+        if installed is None and relative == REFERENCE:
+            raise WishError(f"{REFERENCE} predates version stamps; delete it and rerun 'ow init' "
+                            "to install the current reference (project knowledge lives elsewhere).")
         if installed is None:
             raise WishError(f"Integration file has no version or installation record; preserved: {relative}")
         existing = version_key(installed)

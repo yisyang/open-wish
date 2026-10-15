@@ -60,6 +60,14 @@ class BudgetTests(ProjectCase):
         (self.root / "openwish/routes.json").write_text("{}\n" * 500, encoding="utf-8")
         self.assertFalse(check_budgets(self.project())[0])
 
+    def test_generated_files_are_silent_even_under_a_hard_limit_until_they_disappear(self):
+        (self.root / ".pnp.cjs").write_text("x = 1\n" * 1200, encoding="utf-8")
+        self.config(source_hard_limit=1000, code_exceptions=[
+            {"path": ".pnp.cjs", "kind": "generated", "reason": "Yarn Plug'n'Play loader"}])
+        self.assertEqual(check_budgets(self.project()), ([], []))
+        (self.root / ".pnp.cjs").unlink()
+        self.assertEqual(check_budgets(self.project())[1], ["Stale code-size exception: .pnp.cjs"])
+
     def test_data_files_are_exempt_but_source_cannot_claim_to_be_data(self):
         (self.root / "data.json").write_text("{}\n" * 1100, encoding="utf-8")
         self.assertEqual(check_budgets(self.project()), ([], []))

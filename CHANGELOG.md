@@ -2,6 +2,102 @@
 
 Release notes for OpenWish, newest first. Update this file for every release.
 
+## v0.8.0
+
+### Changed
+
+- **Direct or managed delivery replaces routine or structured work.** Every product
+  change recovers intent, clarifies only what matters, designs, verifies and reviews in
+  proportion. Direct delivery (one result finished in one session, nothing deferred or
+  undecided, no covering change) keeps no change records; managed delivery uses
+  changes and is promoted to as soon as coordination needs appear. Single-session
+  increments no longer pay for changes, tasks, reviews and cleanup.
+- Confirmation is provenance, never a gate: faithful recording of explicit
+  instructions needs no approval round, and moving unapproved items to `open` keeps
+  `confirmed_at`. Open questions and unsettled values block only dependent work; an
+  unsettled value gets a labeled placeholder in its home.
+- Architecture and maintainability mechanisms are engineering duties, not needs; a
+  requested extension property is protected by a test. Project-wide engineering
+  requirements (setup, checks, releases) get a home in an ordinary doc linked from
+  the policy's knowledge table, and alignment and review check them.
+- Changes link the needs whose outcomes they advance, not every need they must
+  respect; constraining needs still bind through review. Rules shared by several kinds
+  are stated once, with per-kind values in their table.
+- Each skill states its direct and managed paths explicitly (`ow context` without a
+  change ID, no task, review-record, close or clean commands for direct work). A skill
+  entered before intake first reconciles needs and chooses delivery, and `ow-plan`
+  defines how to promote direct work: one change for the whole result, completed work
+  as evidence-backed done tasks, the remainder as open, blocked or manual tasks.
+- A placeholder for an unsettled value may back schemas, interfaces and test fixtures,
+  never shipped behavior that depends on the value.
+- Skills load when their step begins, and agents read the artifact reference only when
+  writing or repairing records.
+- Needs separate structural rules from calibration: tunable values (prices, rates,
+  thresholds) live once in referenced rule docs or data, and acceptance says behavior
+  follows them, so tuning does not rewrite intent.
+- Acceptance is written as readable sentences, one criterion each. Hosts, tools, sibling
+  repositories and test accounts belong in ordinary docs, not needs.
+- `confirmed_at` means every acceptance criterion is confirmed; undecided questions
+  and proposed criteria go in a need's new optional `open` list, which `ow status`
+  counts until they are decided.
+- One home per fact: changes link to retained rules instead of restating them, plans
+  state current decisions without supersession notes, and READMEs and architecture
+  docs orient instead of copying rule values. The change template's Approach follows suit.
+- Task guidance: one checkable result per task, specific `files`, and no final task
+  that repeats earlier checks. Compaction may expand shorthand into sentences.
+- Tasks are written for **ready** increments (prerequisites in the repository, no open
+  material decision), not just the next one in sequence. A new *Plan a candidate*
+  procedure verifies prerequisites in code and refreshes the approach before tasking;
+  `ow-consolidate` continues the sequence by planning what a disposed change unblocked,
+  and fast-forward does the same across named changes.
+
+- Guidance keeps one owner per rule: sequencing, open items and one-home rules are
+  stated once and referenced elsewhere, the artifact reference holds formats and CLI
+  behavior only, and skills cite the policy's A/B/C question format.
+
+### Added
+
+- `code_exceptions` accepts `kind: "generated"` for tool output such as lockfile
+  loaders and vendored releases; those files stay silent, even under a hard limit,
+  until they disappear.
+- `ow check` warns when a current need cites a path Git ignores, and when a change
+  links to another change's files.
+- `ow context` also returns work state (changes with review freshness, ready and
+  waiting tasks, unplanned changes, repository, budget and knowledge warnings), so one
+  call starts a session.
+- `ow ready` lists active changes without tasks as unplanned (`PLAN`), so the next
+  increments stay visible after their predecessor is disposed.
+- Change sequences: optional `after = ["C-001"]` (`ow new change --after`). Successors
+  become plannable once predecessors pass review, or once accepted when config sets
+  `successors_wait_for = "acceptance"`; tasks of a waiting change are never ready.
+  `ow close` accepts a change only after or with its predecessors, `ow clean` removes
+  disposed IDs from successors, and review freshness ignores `after`.
+
+- Skill evaluations 25–27 cover needs that keep rules but not calibration or setup,
+  sequences that continue on a reviewed predecessor, and open items staying
+  non-binding until decided; 28–29 cover direct delivery of bounded cross-file work and
+  promotion to a change. Evaluation 19 expects tasks only for ready work, 24 accepts
+  direct delivery and expects no architecture needs, and dry-run prompts state that
+  the described project is given rather than present in the working directory.
+- Evaluation grading runs each retained test separately: mutants are graded only by
+  tests that pass on the reference, a mutant counts as killed only by an assertion
+  failure, per-mutant diagnostics are kept, and the product's own suite is always run;
+  mutation is graded only when that suite passes.
+- Evaluations use agent presets pinned to a flagship model at planning-level
+  reasoning: `codex` (default; Codex CLI, `gpt-6.1-sol`, high) and `claude` (Claude
+  Code, `claude-opus-5-5`, high). Presets run in an isolated agent home that links only
+  the user's credentials, so personal instructions and settings cannot leak into
+  results, and a workspace refuses a second agent. Codex JSONL token usage is recorded.
+
+### Fixed
+
+- `ow init` now upgrades `openwish/artifacts.md` with the skills; it was previously
+  written once and went stale. **Breaking:** an existing unstamped reference is refused
+  with guidance; delete it and rerun `ow init`. Project policy is still preserved.
+- Recording a need's `open` items no longer stales pending reviews; they do not bind.
+- Evaluation acceptance checks import the product as its own modules would, so sibling
+  imports and dataclasses no longer fail spuriously; lending checks now cover DVD holds.
+
 ## v0.7.0
 
 ### Added

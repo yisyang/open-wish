@@ -190,10 +190,16 @@ For each candidate, identify:
 | Prerequisites | Which delivered capabilities must be checked before execution? |
 | Exit evidence | What would let someone accept this result independently? |
 
-For a requested resumable plan, retain later candidates as concise open changes
-with empty task lists and say that their planning is incomplete. On selection,
-inspect delivered code and tests, resolve relevant uncertainty, and plan concrete
-tasks. Assessment-only sequences can stay in conversation.
+Write tasks only for ready increments: their prerequisite capabilities exist in the
+repository and no material decision is open. For a requested resumable plan, retain
+the others as concise open changes with empty task lists and say that their planning
+is incomplete. Name each change's predecessors in `after`. Once they pass review (or
+acceptance, if configured), `ow ready` shows the change as `PLAN`; apply
+[Plan a candidate](../src/openwish/assets/skills/ow-plan/SKILL.md#plan-a-candidate):
+verify prerequisites in the code, refresh the approach against delivered interfaces,
+then write tasks. Acceptance follows the sequence, and a predecessor's review usually
+needs refreshing before it closes because successors have since edited files.
+Assessment-only sequences can stay in conversation.
 
 For example, a clinic scheduling product could progress through one clinician's
 bookable calendar that a patient books end to end, then reminders, then multi-site
@@ -219,16 +225,26 @@ improvements, and later product asks. Start by reading current intent and the
 affected code/tests. Reuse an existing need when the ask introduces another
 mechanism for the same outcome; revise or add needs when intent genuinely changes.
 
-### Choose the proportionate path
+### Choose direct or managed delivery
 
-**Routine work** is clear, localized, reversible, and within existing intent:
-inspect → implement → verify → report. It needs no change file, new need, or final
-acceptance ceremony. Honor plan-only requests here too. Work already tracked in an
-active change must be reconciled before moving it, including unresolved manual checks.
+Every product change recovers current intent, reconciles the ask, clarifies only
+consequential uncertainty, designs with the architecture rubric, verifies and
+reviews, in proportion to the ask. The delivery choice changes only what is recorded.
 
-**Structured work** is substantive, involves consequential choices, or needs
-resumable coordination. Scope one or more reviewable changes referencing motivating
-needs, then follow this flow for each selected increment:
+**Direct delivery** fits one coherent result that can be finished and verified in the
+session, with no material open decision, nothing deferred, and no active change
+covering it. It needs no change file, tasks or final acceptance ceremony, but still
+revises needs when intent changes. Honor plan-only requests here too. Work already
+tracked in an active change continues there, including unresolved manual checks.
+Promote direct work to a change when coordination needs appear: one change for the
+whole result, completed work as done tasks with direct evidence, and the remainder
+as open, blocked or manual tasks. A skill entered before this intake reconciles
+needs and chooses delivery first.
+
+**Managed delivery** serves work needing several increments, resumption, deferred
+obligations, sequencing, manual blockers or delayed acceptance. Scope one or more
+reviewable changes referencing motivating needs, then follow this flow for each
+selected increment:
 
 ```mermaid
 flowchart TD

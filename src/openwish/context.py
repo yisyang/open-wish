@@ -1,6 +1,22 @@
-"""Complete intent with an explicit, sized retrieval manifest for selected work."""
+"""Complete intent with an explicit, sized retrieval manifest and the state of selected work."""
 
-from .model import estimate_tokens, needs_context, review_needs, select_changes
+from .budgets import check_budgets
+from .model import estimate_tokens, needs_context, ready_tasks, review_needs, select_changes, unplanned_changes
+from .validation import knowledge_warnings
+from .views import change_rows, lazy_snapshot
+
+
+def work_data(project, keys=()):
+    """Changes, readiness and repository warnings in one call; readiness is not permission."""
+    snapshot = lazy_snapshot(project)
+    ready, waiting = ready_tasks(project, keys)
+    warnings = list(snapshot()["warnings"]) + check_budgets(project, code=False)[1]
+    if not snapshot()["warnings"]:
+        warnings.extend(knowledge_warnings(project, snapshot()["files"]))
+    return {"changes": change_rows(project, select_changes(project, keys), snapshot),
+            "ready": [{"id": task["id"], "title": task["title"]} for task in ready],
+            "waiting": [{"id": task["id"], "title": task["title"], "blocker": task["blocker"]} for task in waiting],
+            "unplanned": unplanned_changes(project, keys), "warnings": warnings}
 
 
 def context_data(project, keys=()):
@@ -27,8 +43,9 @@ def context_data(project, keys=()):
     for item in retrieve.values():
         category = item["category"]
         estimates[category] = estimates.get(category, 0) + item["estimated_tokens"]
-    return {"needs": needs, "changes": [{"id": cid, "needs": project["changes"][cid]["meta"]["needs"],
-                                        "review_needs": review_needs(project, cid)} for cid in selected],
+    return {"needs": needs, "work": work_data(project, keys),
+            "changes": [{"id": cid, "needs": project["changes"][cid]["meta"]["needs"],
+                         "review_needs": review_needs(project, cid)} for cid in selected],
             "retrieve": list(retrieve.values()), "estimated_tokens": estimates,
             "estimated_loaded_and_retrievable_tokens": sum(estimates.values()),
             "note": "All current needs are included. Retrieve listed files for relevant rules and work; "

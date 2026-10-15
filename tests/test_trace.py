@@ -1,4 +1,5 @@
 import json
+import subprocess
 
 from openwish.repository import project_files
 from openwish.trace import is_check, trace_data
@@ -46,6 +47,29 @@ class TraceTests(ProjectCase):
         close_changes(self.project(), ["C-001"], "human")
         report = clean_changes(self.project(), ["C-001"], dry_run=True)
         self.assertIn("app.py", " ".join(report["warnings"]))
+
+    def test_check_warns_when_a_need_cites_ignored_paths(self):
+        subprocess.run(["git", "init", "-q"], cwd=self.root, check=True)
+        (self.root / ".gitignore").write_text("tmp\n")
+        (self.root / "tmp").mkdir()
+        (self.root / "tmp/positions.json").write_text("[]\n")
+        (self.root / "docs").mkdir()
+        (self.root / "docs/rules.md").write_text("Source: [positions](../tmp/positions.json); see app.py.\n")
+        need = self.root / "openwish/needs/N-001.md"
+        need.write_text(need.read_text() + "Positions come from tmp/positions.json, not docs/rules.md.\n")
+        self.edit_document("needs/N-001.md", references=["docs/rules.md"])
+        output = self.cli("check").stdout
+        self.assertIn("N-001 cites tmp/positions.json, which is ignored", output)
+        self.assertNotIn("cites docs/rules.md", output)
+        self.assertEqual(output.count("cites"), 1)  # the referenced doc may explain how to obtain it
+
+    def test_check_warns_when_a_change_links_another_changes_files(self):
+        self.add_change()
+        change = self.root / "openwish/changes/C-002/change.md"
+        change.write_text(change.read_text() + "Builds on [C-001](../C-001/change.md); see C-001 too.\n")
+        output = self.cli("check").stdout
+        self.assertIn("C-002: links to C-001's files", output)
+        self.assertNotIn("C-001: links", output)
 
     def test_conventional_test_locations(self):
         for path in ("tests/x.py", "pkg/test_x.py", "x_test.go", "a/b.spec.ts", "src/__tests__/x.js"):

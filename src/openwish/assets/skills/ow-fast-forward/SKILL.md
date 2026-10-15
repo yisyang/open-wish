@@ -9,19 +9,20 @@ disable-model-invocation: true
 Use only after explicit delegation; loading this skill grants nothing. Read
 `openwish/policy.md`. Respect opt-outs and plan-only requests.
 
-1. **Routine work** stays routine: inspect, implement, verify, report. No records,
-   no mode, no acceptance question.
-2. **Structured work** follows `ow-propose` → `ow-align` → `ow-plan` →
+1. **Direct work** stays direct (policy): no records, no mode, no acceptance
+   question.
+2. **Managed work** follows `ow-propose` → `ow-align` → `ow-plan` →
    `ow-implement` → `ow-review` → `ow-consolidate`, reading each skill on entry and
    skipping only confirmations the delegation already answers.
 3. **Delegation covers named changes only.** Create them with
    `ow new change C-001 --title "..." --need N-001 --fast-forward`, or run
    `ow mode fast-forward C-001` for an active change this request covers. Delegation
    does not justify one oversized change, and split or later changes start in
-   default mode.
+   default mode. Across several named changes, follow `ow ready` and close in
+   sequence order.
 4. **Decide routine choices** from current intent. Finish independent work first,
    then present only genuine blockers (conflicting intent, missing access, manual
-   observations) as numbered A/B/C questions with `(Recommended)`.
+   observations) as A/B/C questions.
 5. **Stay honest.** Never invent checks, mark manual work done, or set
    `confirmed_at` on inferred needs. After a fresh passing review:
    `ow close C-001 --by fast-forward`, then dispose via `ow-consolidate`.

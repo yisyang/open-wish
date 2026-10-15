@@ -5,17 +5,20 @@ description: Establish or reassess architecture for substantive OW work, from a 
 
 # Align
 
-Read `openwish/policy.md`, `ow context C-001`, the change, and the affected code
-and tests. Routine work needs no design record.
+Read `openwish/policy.md` and the affected code and tests.
 
-1. **Know the constraints.** Every current need binds, including delivered ones.
-   Inspect affected modules, interfaces, consumers, tests and operational limits.
+- **Direct:** run `ow context`; apply steps 1–3, 5 and 6 in the session. Write no
+  Approach.
+- **Managed:** run `ow context C-001` and read the change; apply every step.
+
+1. **Know the constraints.** Every current need binds, including delivered ones,
+   as do the engineering requirements the policy links. Inspect affected modules, interfaces, consumers, tests and operational limits.
    Use `ow graph N-001 --json` and `ow trace N-001` to find related intent and the
    checks protecting it; neither proves that unlinked needs are unaffected.
 2. **Separate conflict from difficulty.** Distinguish intent that truly conflicts
    from an implementation that cannot yet satisfy compatible needs. Adapt the
-   solution; never quietly weaken acceptance. Ask for a decision (numbered A/B/C,
-   `(Recommended)`) only for a real conflict.
+   solution; never quietly weaken acceptance. Ask for a decision (A/B/C) only for a
+   real conflict.
 3. **Assess** the affected paths with the Architecture rubric below. Compare keeping
    the current structure with the smallest useful improvement, citing actual code,
    tests or operational constraints.
@@ -39,7 +42,7 @@ finding connects **observation → consequence → improvement → verification*
 | Question | Good signs | Friction to investigate |
 | --- | --- | --- |
 | Can a maintainer find behavior? | Domain names, clear entry points, a one-line responsibility header per module, a README at major boundaries | Generic helpers, hidden dispatch, headers that no longer match the code |
-| Does each rule have one owner? | Changing a rule stays local | Duplicated decisions; one responsibility spread across modules |
+| Does each rule have one owner? | Changing a rule stays local, in code and in docs | Duplicated decisions; one responsibility spread across modules; docs restating rule values |
 | Are dependencies explicit? | Clear direction, data ownership and contracts | Cycles, hidden globals, leaking internals |
 | Can decisions run without effects? | Pure calculations and transitions with explicit inputs | Business rules that need network, database, clock or environment |
 | Do tests check intent? | Small, fast checks of outcomes and invariants | Snapshots of incidental output, private-call assertions |

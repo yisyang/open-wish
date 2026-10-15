@@ -10,6 +10,8 @@ CHANGE_STATES = ("open", "in-progress", "review", "closed")
 TASK_STATES = ("open", "in-progress", "blocked", "done")
 MODES = ("default", "fast-forward")
 RELATIONS = ("requires", "constrains")
+# What lets a change's `after` successors start: a passing review, or human/delegated closure.
+SEQUENCE_GATES = ("review", "acceptance")
 
 
 def need_graph(project, keys=()):
@@ -123,12 +125,38 @@ def topological_order(nodes):
     return ordered
 
 
+def change_sequence(project):
+    """Changes in `after` order; independent changes keep ID order."""
+    return topological_order({key: change["meta"].get("after", [])
+                              for key, change in project["changes"].items()})
+
+
+def waiting_on(project, key):
+    """Predecessors that do not yet satisfy the project's sequence gate."""
+    gate = project["config"].get("successors_wait_for", "review")
+    satisfied = ("closed",) if gate == "acceptance" else ("review", "closed")
+    return [f"{dep} ({project['changes'][dep]['meta']['status']})"
+            for dep in project["changes"][key]["meta"].get("after", [])
+            if project["changes"][dep]["meta"]["status"] not in satisfied]
+
+
+def unplanned_changes(project, keys=()):
+    """Active changes without tasks. Whether their prerequisites exist is still a code question."""
+    selected = set(select_changes(project, keys))
+    return [{"id": key, "title": project["changes"][key]["meta"]["title"],
+             "needs": project["changes"][key]["meta"]["needs"], "waiting_on": waiting_on(project, key)}
+            for key in change_sequence(project)
+            if key in selected and project["changes"][key]["meta"]["status"] in ("open", "in-progress")
+            and not change_tasks(project, key)]
+
+
 def ready_tasks(project, keys=()):
     """List readiness, not permission. Conversation authority belongs to the harness."""
     selected = set(select_changes(project, keys))
     tasks = {task["id"]: task for task in project["tasks"]}
+    position = {key: index for index, key in enumerate(change_sequence(project))}
     ready, waiting = [], []
-    for task in project["tasks"]:
+    for task in sorted(project["tasks"], key=lambda task: position[task["change"]]):
         change = project["changes"][task["change"]]["meta"]
         if task["change"] not in selected or change["status"] == "closed" or task["status"] == "done":
             continue
@@ -136,7 +164,10 @@ def ready_tasks(project, keys=()):
                   "outcome": project["needs"][nid]["meta"]["outcome"]} for nid in change["needs"]]
         item = {**task, "needs": needs}
         unfinished = [dep for dep in task.get("depends_on", []) if tasks[dep]["status"] != "done"]
-        if unfinished:
+        predecessors = waiting_on(project, task["change"])
+        if predecessors:
+            item["blocker"] = "Change waits for " + ", ".join(predecessors)
+        elif unfinished:
             item["blocker"] = "Unfinished prerequisites: " + ", ".join(unfinished)
         elif task.get("kind", "agent") == "manual":
             item["blocker"] = "Manual observation required"

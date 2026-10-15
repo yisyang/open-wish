@@ -50,9 +50,13 @@ def review_inputs(project, key, *, snapshot=None, handoff=()):
     change = project["changes"][key]
     policy = contained(project["root"], "openwish/policy.md")
     return {
+        # Lifecycle and sequencing metadata do not change what was reviewed.
         "change": digest({"meta": {k: v for k, v in change["meta"].items()
-                                   if k not in ("status", "closed_at", "closed_by")}, "body": change["body"]}),
-        "needs": {nid: digest({"meta": project["needs"][nid]["meta"], "body": project["needs"][nid]["body"]})
+                                   if k not in ("status", "closed_at", "closed_by", "after")},
+                          "body": change["body"]}),
+        # Open items do not bind, so recording a question leaves pending reviews fresh.
+        "needs": {nid: digest({"meta": {k: v for k, v in project["needs"][nid]["meta"].items() if k != "open"},
+                               "body": project["needs"][nid]["body"]})
                   for nid in review_needs(project, key)},
         "tasks": digest(change_tasks(project, key)),
         "handoff": digest(handoff),
@@ -207,8 +211,14 @@ def close_changes(project, keys, by):
         raise WishError("Closure must be attributed to human or explicit fast-forward.")
     pending = []
     snapshot = None
-    for key in dict.fromkeys(keys):
+    keys = list(dict.fromkeys(keys))
+    for key in keys:
         change = require_change(project, key)
+        # Acceptance follows the sequence, so nothing is accepted on top of unaccepted work.
+        unaccepted = [dep for dep in change["meta"].get("after", [])
+                      if project["changes"][dep]["meta"]["status"] != "closed" and dep not in keys]
+        if unaccepted:
+            raise WishError(f"{key}: close its predecessors first, or in the same batch: {', '.join(unaccepted)}")
         if by == "fast-forward" and change["meta"]["mode"] != "fast-forward":
             raise WishError(f"{key}: fast-forward closure requires explicitly enabling this change's mode.")
         snapshot = snapshot or repository_snapshot(project["root"])
@@ -255,16 +265,22 @@ def cleanup_plan(project, keys):
             for relative in item["destinations"]:
                 if any(relative.startswith(f"openwish/changes/{target}/") for target in keys):
                     raise WishError(f"Retained handoff in {path.relative_to(project['root'])} depends on {relative}; reconcile before cleanup")
+    successors = {key: [dep for dep in change["meta"].get("after", []) if dep in keys]
+                  for key, change in project["changes"].items() if key not in keys}
+    successors = {key: deps for key, deps in successors.items() if deps}
     warnings = []
     for relative, text in text_files(project, project_files(project["root"], snapshot), managed=True):
         if any(relative.startswith(f"openwish/changes/{key}/") for key in keys):
             continue
+        owner = relative.removeprefix("openwish/changes/").removesuffix("/change.md")
+        if owner in successors and relative == f"openwish/changes/{owner}/change.md":
+            text = project["changes"][owner]["body"]  # its `after` entries are rewritten below
         mentioned = sorted(set(keys).intersection(CHANGE_ID.findall(text)))
         if mentioned:
             warnings.append(f"Retained reference to {', '.join(mentioned)} in {relative}; reconcile if needed")
     return pending, {"changes": keys, "remove": [p.relative_to(project["root"]).as_posix()
                                                for _, _, paths in pending for p in paths],
-                     "handoff": handoffs, "warnings": warnings}
+                     "handoff": handoffs, "successors": successors, "warnings": warnings}
 
 
 def clean_changes(project, keys, *, dry_run=False):
@@ -272,6 +288,13 @@ def clean_changes(project, keys, *, dry_run=False):
     pending, report = cleanup_plan(project, keys)
     if dry_run:
         return report
+    for key, removed in report["successors"].items():
+        change = project["changes"][key]
+        meta = {k: v for k, v in change["meta"].items() if k != "after"}
+        remaining = [dep for dep in change["meta"]["after"] if dep not in removed]
+        meta |= {"after": remaining} if remaining else {}
+        write_text(change["path"], document(meta, change["body"]))
+        change["meta"] = meta
     for key, directory, paths in pending:
         for path in paths:
             path.unlink()

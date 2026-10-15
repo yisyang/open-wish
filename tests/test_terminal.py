@@ -59,7 +59,7 @@ class TerminalTests(ProjectCase):
         self.start("init", str(root))
         self.read_until("Select one or more harnesses.")
         self.send(" \x1b[B \r")
-        self.read_until("28 installed")
+        self.read_until("29 installed")
         self.finish()
         for directory in (".opencode", ".claude"):
             self.assertTrue((root / directory / "skills/ow-propose/SKILL.md").is_file())
@@ -84,7 +84,7 @@ class TerminalTests(ProjectCase):
         self.start("init")
         self.read_until("[x] Generic Agent Skills")
         self.send("\r")
-        self.read_until("9 unchanged")
+        self.read_until("10 unchanged")
         self.finish()
         self.assertEqual((path.read_bytes(), path.stat().st_mtime_ns), before)
 
@@ -103,7 +103,7 @@ class TerminalTests(ProjectCase):
         self.start("init", str(root), term="dumb")
         self.read_until("Harnesses:")
         self.send("1, 3\n")
-        self.read_until("27 installed")
+        self.read_until("28 installed")
         self.finish()
         self.assertTrue((root / ".opencode/commands/onboard.md").exists())
         self.assertTrue((root / ".agents/skills/ow-propose/SKILL.md").exists())
@@ -117,7 +117,7 @@ class TerminalTests(ProjectCase):
         self.start("init", "--harness", "opencode")
         self.read_until("Choice [A]:")
         self.send("\n")
-        self.read_until("18 kept newer")
+        self.read_until("19 kept newer")
         self.finish()
         self.assertEqual((path.read_bytes(), path.stat().st_mtime_ns), before)
 
@@ -130,6 +130,6 @@ class TerminalTests(ProjectCase):
         self.read_until("Enter A or B.")
         self.assertIn("9.0.0", (self.root / ".opencode/skills/ow-propose/SKILL.md").read_text())
         self.send("B\n")
-        self.read_until("18 downgraded")
+        self.read_until("19 downgraded")
         self.finish()
         self.assertIn(__version__, (self.root / ".opencode/skills/ow-propose/SKILL.md").read_text())

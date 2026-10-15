@@ -9,13 +9,13 @@ from . import __version__
 from .budgets import check_budgets
 from .context import context_data
 from .integrations import HARNESSES, install_skills, installed_harnesses
-from .model import TASK_STATES, need_graph, ready_tasks
+from .model import TASK_STATES, need_graph, ready_tasks, unplanned_changes
 from .repository import project_files
 from .scaffold import initialize, new_artifact
 from .storage import WishError, load_project, project_config, project_root, read_json
 from .terminal import confirm_downgrade, select_harnesses
 from .trace import mentions, reference_warnings, trace_data
-from .validation import validate
+from .validation import knowledge_warnings, validate
 from .views import status_data, summary
 from .workflow import clean_changes, close_changes, record_review, set_mode, set_task
 
@@ -37,14 +37,15 @@ def parser():
     new.add_argument("--title", required=True)
     new.add_argument("--need", action="append", default=[], dest="needs", help="Need addressed by a change; repeatable")
     new.add_argument("--fast-forward", action="store_true", help="Explicitly delegate final acceptance for this change")
+    new.add_argument("--after", action="append", default=[], help="Change whose result this one builds on; repeatable")
     check = commands.add_parser("check", help="Validate artifacts, references, task dependencies, and budgets")
     check.add_argument("--json", action="store_true")
     check.add_argument("--artifacts-only", action="store_true")
     status = commands.add_parser("status", help="Show durable needs and disposable work")
     status.add_argument("--json", action="store_true")
-    context = commands.add_parser("context", help="Print all current needs, optionally with relevant changes")
+    context = commands.add_parser("context", help="Print all current needs, work state, and a retrieval manifest")
     context.add_argument("selection", nargs="*", help="Need or change IDs")
-    context.add_argument("--json", action="store_true", help="Complete needs and sized retrieval manifest")
+    context.add_argument("--json", action="store_true", help="Complete needs, work state and sized retrieval manifest")
     graph = commands.add_parser("graph", help="Derive reasoned need relationships; selections show incident links")
     graph.add_argument("selection", nargs="*", help="Need IDs; default all retained needs")
     graph.add_argument("--json", action="store_true")
@@ -93,6 +94,33 @@ def checked_project(root, *, code=False):
     return project
 
 
+def change_line(change):
+    after = f"; after {', '.join(change['after'])}" if change.get("after") else ""
+    return (f"{change['id']} [{change['status']}] {change['title']} — "
+            f"{change['done']}/{change['tasks']} tasks; review: {change['review']}{after}")
+
+
+def readiness_lines(ready, waiting, unplanned):
+    lines = []
+    for label, tasks in (("READY", ready), ("WAIT", waiting)):
+        for task in tasks:
+            needs = "; ".join(f"{need['id']} — {need['outcome']}" for need in task.get("needs", []))
+            lines.append(f"{label} {task['id']} {task['title']}" + (f" — {needs}" if needs else ""))
+            if task.get("blocker"):
+                lines.append(f"  {task['blocker']}")
+    plannable = [change for change in unplanned if not change["waiting_on"]]
+    for change in plannable:
+        lines.append(f"PLAN {change['id']} {change['title']} — {', '.join(change['needs'])}")
+    if plannable:
+        lines.append("  Unplanned: verify prerequisites in the repository, then plan (ow-plan); "
+                     "review a verification-only change directly.")
+    later = [change for change in unplanned if change["waiting_on"]]
+    if later:
+        lines.append(f"LATER {len(later)} unplanned changes wait for predecessors: "
+                     + ", ".join(change["id"] for change in later))
+    return lines
+
+
 def print_installation(report):
     print("Harnesses: " + ", ".join(report["harnesses"]))
     counts = (f"{report[key]} {key.replace('_', ' ')}" for key in
@@ -133,7 +161,8 @@ def run(args):
         print_installation(install_skills(root, args.harness, confirm_downgrade=confirm_downgrade))
         return 0
     if args.command == "new":
-        print(new_artifact(root, args.kind, args.id, args.title, needs=args.needs, fast_forward=args.fast_forward))
+        print(new_artifact(root, args.kind, args.id, args.title, needs=args.needs,
+                           fast_forward=args.fast_forward, after=args.after))
         return 0
     if args.command == "check":
         project = load_project(root)
@@ -141,7 +170,9 @@ def run(args):
         if not errors:
             errors, warnings = check_budgets(project, code=not args.artifacts_only)
             if not args.artifacts_only and not errors:
-                warnings.extend(reference_warnings(project, mentions(project, project_files(root))))
+                files = project_files(root)
+                warnings.extend(reference_warnings(project, mentions(project, files)))
+                warnings.extend(knowledge_warnings(project, files))
         if args.json:
             print(json.dumps({"errors": errors, "warnings": warnings}, indent=2))
         else:
@@ -160,11 +191,11 @@ def run(args):
         else:
             print(f"{data['product']} — {len(data['needs'])} needs; ~{data['needs_tokens_estimate']} context tokens")
             for need in data["needs"]:
+                unresolved = f"; {len(need['open'])} open" if need.get("open") else ""
                 print(f"{need['id']} [{need['currency']}] {need['title']} — active changes: "
-                      + (", ".join(need["changes"]) or "none"))
+                      + (", ".join(need["changes"]) or "none") + unresolved)
             for change in data["changes"]:
-                print(f"{change['id']} [{change['status']}] {change['title']} — "
-                      f"{change['done']}/{change['tasks']} tasks; review: {change['review']}")
+                print(change_line(change))
             for label, keys in data["retention"].items():
                 if keys:
                     print(f"{label.replace('_', ' ').capitalize()}: {', '.join(keys)}")
@@ -186,18 +217,20 @@ def run(args):
             print(json.dumps(data, indent=2, ensure_ascii=False))
         else:
             print(data.pop("needs"))
+            work = data.pop("work")
+            lines = [change_line(change) for change in work["changes"]]
+            lines += readiness_lines(work["ready"], work["waiting"], work["unplanned"])
+            lines += ["WARN " + warning for warning in work["warnings"]]
+            print("\n# Work (readiness is not permission)\n" + ("\n".join(lines) or "No changes."))
             print("\n# Retrieval manifest and estimated size\n" + json.dumps(data, indent=2, ensure_ascii=False))
     elif args.command == "ready":
         ready, waiting = ready_tasks(project, args.selection)
+        unplanned = unplanned_changes(project, args.selection)
         if args.json:
-            print(json.dumps({"ready": ready, "waiting": waiting}, indent=2))
+            print(json.dumps({"ready": ready, "waiting": waiting, "unplanned": unplanned}, indent=2))
         else:
-            for label, tasks in (("READY", ready), ("WAIT", waiting)):
-                for task in tasks:
-                    context = "; ".join(f"{need['id']} — {need['outcome']}" for need in task["needs"])
-                    print(f"{label} {task['id']} {task['title']} — {context}")
-                    if task.get("blocker"):
-                        print(f"  {task['blocker']}")
+            for line in readiness_lines(ready, waiting, unplanned):
+                print(line)
             if not ready:
                 print("No agent-ready tasks. Inspect change scope and evidence before planning work or reviewing results.")
     elif args.command == "task":
@@ -236,6 +269,8 @@ def run(args):
         else:
             for warning in report["warnings"]:
                 print("WARN " + warning)
+            for key, removed in report["successors"].items():
+                print(f"{key}: no longer waits for {', '.join(removed)}")
             print("Disposed " + ", ".join(report["changes"]) + "; needs, code, and tests retained.")
     return 0
 

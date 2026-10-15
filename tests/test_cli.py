@@ -1,9 +1,27 @@
 import json
 
+from openwish.workflow import clean_changes, close_changes
+
 from tests.support import ProjectCase
 
 
 class CliTests(ProjectCase):
+    def test_ready_surfaces_unplanned_changes_before_and_after_predecessor_disposal(self):
+        self.fixture()
+        self.add_change("C-002")
+        data = json.loads(self.cli("ready", "--json").stdout)
+        self.assertEqual([task["id"] for task in data["ready"]], ["C-001/T-001"])
+        self.assertEqual([change["id"] for change in data["unplanned"]], ["C-002"])
+        self.finish_tasks()
+        self.review()
+        close_changes(self.project(), ["C-001"], "human")
+        clean_changes(self.project(), ["C-001"])
+        output = self.cli("ready").stdout
+        self.assertIn("PLAN C-002", output)
+        self.assertNotIn("C-001", output)
+        self.write_tasks([self.task("C-002/T-001")], "C-002")
+        self.assertFalse(json.loads(self.cli("ready", "--json").stdout)["unplanned"])
+
     def test_graph_exposes_reasoned_intent_and_preserves_all_current_context(self):
         self.fixture()
         self.add_need()
@@ -175,7 +193,7 @@ class CliTests(ProjectCase):
         self.assertIn("Harnesses: opencode, claude, codex", output)
         for directory in (".opencode", ".claude", ".agents"):
             self.assertTrue((self.root / directory / "skills/ow-propose/SKILL.md").is_file())
-        self.assertIn("37 unchanged", self.cli("init", "--harness", "opencode", "claude", "codex").stdout)
+        self.assertIn("38 unchanged", self.cli("init", "--harness", "opencode", "claude", "codex").stdout)
 
     def test_init_without_tty_requires_explicit_harnesses_and_writes_nothing(self):
         root = self.root / "new-project"

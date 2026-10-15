@@ -1,4 +1,4 @@
-# OpenWish framework design — 0.7
+# OpenWish framework design — 0.8
 
 ## Core invariant
 
@@ -32,7 +32,8 @@ or persistent derived model; every command reads current files.
 
 ## Needs
 
-`needs/N-001.md` holds title, actor, outcome, acceptance, currency, `confirmed_at`, an
+`needs/N-001.md` holds title, actor, outcome, acceptance, optional `open` (undecided
+questions and proposed criteria, never binding), currency, `confirmed_at`, an
 optional body, optional `references` (existing, non-ignored repository files; no
 symlinks, `..` or change paths) and optional `relations` (`requires | constrains`
 inline tables with a reason). Validation rejects missing targets, self-links,
@@ -42,12 +43,18 @@ duplicates, empty reasons and current-to-retired links; semantic cycles are vali
 ## Changes and tasks
 
 `changes/C-001/change.md` has `needs`, `status` (`open | in-progress | review | closed`),
-`mode` (`default | fast-forward`) and a prose body whose headings are conventions.
+`mode` (`default | fast-forward`), optional `after` (predecessor changes, acyclic) and a
+prose body whose headings are conventions. `after` is the only cross-change link and
+is scheduling only: `model.waiting_on` applies the configured gate (`review` or
+`acceptance`), `close` refuses to accept a change before its predecessors, review
+freshness ignores the field, and `clean` removes disposed IDs from successors so no
+reference dangles. Whether prerequisites truly exist remains a code inspection.
 `tasks.json` lists tasks with `id`, `title`, `status`, `acceptance` and optional
 `depends_on`, `kind`, `files`, `evidence`. `done` needs evidence; dependencies are
 local and acyclic. `ow task` updates one task atomically, checks evidence and
 prerequisites, and moves an open or reviewed change to `in-progress`.
-`ready` reports readiness, never permission.
+`ready` reports readiness, never permission, and lists active changes without tasks
+as unplanned; whether their prerequisites exist is judged from the code.
 
 ## Review and freshness
 
@@ -57,8 +64,9 @@ Each change has one `review.json`, replaced on every review:
 - `affected`: linked needs plus `--affected` additions. `unaffected`: every other
   current need, recorded as assessed. The agent is responsible for that judgment;
   the record makes it explicit and the summary shows it.
-- `inputs` (passing reviews): short digests of the change, tasks, each current and
-  linked need, the handoff and each destination, config, policy, each product file
+- `inputs` (passing reviews): short digests of the change (without lifecycle fields
+  or `after`), tasks, each current and linked need (without its non-binding `open`
+  items), the handoff and each destination, config, policy, each product file
   outside `openwish/` (content plus executable bits), and submodule revisions.
 
 Freshness compares recorded and current inputs. Any difference is stale, and the
@@ -101,15 +109,23 @@ and other files mention it, plus current needs with no traced check. `ow check` 
 about mentions of unknown or retired needs. The link is derived from the repository
 on demand; nothing is stored, and absence of a trace is never treated as proof.
 
+`validation.knowledge_warnings` adds two `ow check` warnings: a current need citing an
+existing path that repository inspection excludes (ignored, so a fresh clone lacks it),
+and a change body linking to another change's files. Referenced docs are not scanned,
+because explaining how to obtain an ignored input is their job.
+
 ## Context and bounds
 
-`ow context` includes all current need content without truncation. `--json` adds review
-scope and sized retrieval entries (`included: false`) for selected changes, tasks,
+`ow context` includes all current need content without truncation, plus work state for
+the selection (changes with review freshness, ready and waiting tasks, unplanned
+changes, and repository, budget and knowledge warnings), so one call starts a session.
+`--json` adds review scope and sized retrieval entries (`included: false`) for selected changes, tasks,
 linked retired needs and need references. Estimates use UTF-8 bytes/3 and exclude
 other source and conversation. `needs_token_budget` (default 24,000) warns at 80%;
 OW artifacts warn at 8,000 estimated tokens, except machine-written `review.json` and
 `installation.json`; source warns at 500 nonblank lines and fails only under an opt-in
-`source_hard_limit`. Status derives retention groups for closed, awaiting-acceptance
+`source_hard_limit`. Configured exceptions keep warning with their reason, except
+`generated` files, which are tool output and stay silent until they disappear. Status derives retention groups for closed, awaiting-acceptance
 and blocked changes and retired needs.
 
 ## Agent guidance
@@ -117,7 +133,7 @@ and blocked changes and retired needs.
 Policy and skills are product assets in `src/openwish/assets/`. Each rule has one
 owner: the policy holds principles and authority; each skill holds one procedure
 and the shared sections it owns (Right-size intent and delivery in `ow-propose`, the
-Architecture rubric in `ow-align`, Task sizing, Reconcile the plan and Strategic
+Architecture rubric in `ow-align`, Task sizing, Plan a candidate, Reconcile the plan and Strategic
 verification in `ow-plan`, Safe to forget in `ow-review`). Other skills refer to these
 sections by name instead of restating them. Worked examples use domains that do not
 appear in the evaluation scenarios.
@@ -125,7 +141,8 @@ appear in the evaluation scenarios.
 ## Integration and compatibility
 
 Eight canonical skills are packaged once, with thin adapters for OpenCode, Claude Code,
-Codex and generic Agent Skills. The installer offers interactive multi-select and
+Codex and generic Agent Skills. `openwish/artifacts.md` documents the CLI, so the
+installer manages it like the skills; `policy.md` is project-owned. The installer offers interactive multi-select and
 repeatable flags, deduplicates shared paths, stamps each file with the OW version,
 records ownership in `installation.json`, upgrades older files, leaves equal versions
 alone, asks before downgrades, preserves unversioned unrecorded files, and preflights

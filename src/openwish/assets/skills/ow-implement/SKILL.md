@@ -1,17 +1,23 @@
 ---
 name: ow-implement
-description: Execute or resume an authorized OW change using its tasks, continuing independent work through verification and review. Honor OW opt-outs and keep routine changes lightweight.
+description: Implement authorized OW work, directly or by executing or resuming a change's tasks, continuing independent work through verification and review. Honor OW opt-outs.
 ---
 
 # Implement
 
-Read `openwish/policy.md`, `ow context C-001`, the change's approach and
-`ow ready C-001`. Confirm the conversation authorizes implementation; readiness
-does not. Routine work: implement, verify, report.
+Read `openwish/policy.md`. Confirm the conversation authorizes implementation;
+readiness does not, and an empty `confirmed_at` does not withhold it. Use an active
+change that covers the ask.
 
-1. **Resume safely.** On resumption or changed scope, apply Reconcile the plan in
-   `ow-plan` first. Verify prerequisite capabilities from earlier increments in
-   the repository. Plan an unplanned candidate's tasks before executing it.
+- **Direct:** run `ow context`; apply steps 3, 4, 6, 7 and 8 without `ow task`
+  commands or change notes. If coordination needs appear, apply Promote direct
+  work in `ow-plan`.
+- **Managed:** run `ow context C-001` (needs, readiness, warnings), read the
+  change's approach, and apply every step.
+
+1. **Resume safely.** Verify prerequisite capabilities in the repository. On
+   resumption, changed scope or a revised predecessor, apply Reconcile the plan in
+   `ow-plan`; plan a change without tasks first (Plan a candidate).
 2. **Pick ready work** in list order. Read its acceptance and motivating needs,
    retrieve rule files listed by `ow context` (they are not loaded automatically),
    and inspect the code. If finishing would require inventing product policy,
@@ -35,7 +41,7 @@ does not. Routine work: implement, verify, report.
    approved unfinished detail in its retained home now. Note in the change where
    each material rule landed; the review's handoff will reuse it.
 7. **Ask only when blocked.** When only human blockers remain, explain the need and
-   outcome, then ask numbered A/B/C questions with `(Recommended)`. Never discard
+   outcome, then ask A/B/C questions. Never discard
    unfinished work to look complete.
 8. **Review.** When work is complete, continue into `ow-review` without asking.
 

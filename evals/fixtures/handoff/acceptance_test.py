@@ -1,15 +1,15 @@
 """External checks: PROJECT_DIR=... STAGE=1|2 python acceptance_test.py -v."""
 
-import importlib.util
+import importlib
 import os
 from pathlib import Path
+import sys
 import unittest
 
-ROOT = Path(os.environ["PROJECT_DIR"])
+ROOT = Path(os.environ["PROJECT_DIR"]).resolve()
 STAGE = int(os.environ.get("STAGE", "2"))
-spec = importlib.util.spec_from_file_location("evaluated_rules", ROOT / "rules.py")
-rules = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(rules)
+sys.path.insert(0, str(ROOT))  # import the product as its own modules would
+rules = importlib.import_module("rules")
 
 
 class PublicContract(unittest.TestCase):

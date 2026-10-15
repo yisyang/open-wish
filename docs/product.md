@@ -12,20 +12,34 @@ contributors; architecture is in [design.md](design.md).
   lives in code, tests or the disposable change.
 - Current needs bind all later work after delivery. Currency is `current | retired`;
   needs carry no execution state, and closing a change never retires or completes one.
-- Inferred intent stays distinguishable from human confirmation, at statement level.
+- Inferred intent stays distinguishable from human confirmation, at statement level:
+  `confirmed_at` covers every acceptance criterion; undecided questions and proposals
+  wait in a need's `open` list, which status surfaces until they are decided.
   Translation preserves material conditions, exceptions, units and consequences.
+- Needs stay true while the product is tuned and rebuilt: acceptance holds structural
+  rules in readable sentences; calibration lives in referenced rules and setup in
+  ordinary docs. Each fact has one home that other artifacts link to, and needs never
+  depend on files a fresh clone lacks.
 - Needs are sized by outcome independence, not effort; mechanisms reuse existing
-  needs; duplicates merge and bundles split with stable IDs where possible.
+  needs; duplicates merge and bundles split with stable IDs where possible. How the
+  product is built is not a need: project-wide engineering requirements (setup,
+  checks, releases) live in an ordinary doc the policy links, and reviews check them.
 - Optional need references point to retained files with detailed rules or data.
   Optional reasoned relations (`requires`, `constrains`) live on needs; the graph is
   derived on demand. Unlinked current needs still bind.
 
 ## Disposable execution
 
-- Changes reference needs many-to-many and hold one reviewable increment's purpose,
+- Changes reference the needs whose outcomes they advance, many-to-many; needs they
+  only respect still bind through review. A change holds one reviewable increment's purpose,
   scope (delivers now, preserves, defers), approach, exit evidence and tasks.
 - Changes are bounded by results that stay useful if later work is postponed. Broad
-  asks become sequences; future candidates can be open changes with empty task lists.
+  asks become sequences; only ready increments (prerequisites delivered, decisions
+  made) get tasks, and the rest stay open changes with empty task lists that are
+  planned against delivered code once unblocked. Changes name predecessors in
+  `after`; successors may start once predecessors pass review (configurable to wait
+  for acceptance), acceptance follows the sequence, and `ow ready` surfaces what
+  can be planned next.
 - Tasks have checkable acceptance and direct completion evidence; dependencies stay
   within their change. Independent work continues around manual blockers.
 - Executable tasks do not require inventing product policy; consequential unknowns
@@ -40,10 +54,14 @@ contributors; architecture is in [design.md](design.md).
 ## Proportionate collaboration
 
 - Adoption is explicit; installed skills do not mandate use and opt-outs win.
-- Routine work goes inspect → implement → verify → report, with no records.
+- Every product change recovers and reconciles intent, designs, verifies and reviews
+  in proportion. Direct delivery (one result finished in one session, nothing deferred
+  or undecided) keeps no execution records; managed delivery uses changes.
+- Confirmation of written intent is provenance, not a gate; open questions block only
+  the work that depends on them.
 - Conversation instructions authorize scope; only material questions are asked;
   plan-only requests stop at the plan; technical repairs need no new permission.
-- Humans accept structured results by default. Explicit fast-forward delegates
+- Humans accept managed results by default. Explicit fast-forward delegates
   acceptance for one change only and never invents confirmation, observations or checks.
 - Workflow guidance is concise, with one owner per rule, so agents spend their context
   on the product rather than on the framework.

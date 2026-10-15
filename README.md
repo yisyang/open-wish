@@ -20,7 +20,7 @@ needs stay binding after delivery, so the next feature does not quietly undo the
 last one.
 
 OW takes inspiration from [Spec Kit](https://github.com/github/spec-kit) and
-[OpenSpec](https://github.com/Fission-AI/OpenSpec). OpenWish **0.7.0** uses
+[OpenSpec](https://github.com/Fission-AI/OpenSpec). OpenWish **0.8.0** uses
 **artifact schema 4**.
 
 ## Get started
@@ -60,11 +60,15 @@ blocking questions, missing access and manual observations.
 
 OW is opt-in; installed skills never force it on an edit.
 
-- **Routine work** (clear, localized, reversible, within existing intent):
-  inspect → implement → verify → report. No records.
-- **Structured work**: propose → align → plan → implement ↔ review → human acceptance
-  → dispose. A clear instruction to implement authorizes its scope; plan-only requests
-  stop at the plan; only material intent or scope decisions go back to the human.
+- **Every product change** recovers current intent, clarifies only what matters,
+  designs, verifies and reviews, in proportion to the ask.
+- **Direct delivery** (one result, finished and verified in one session, nothing
+  deferred or undecided): no change records, though needs are revised when intent changes.
+- **Managed delivery** (several increments, resumption, deferred work, sequencing,
+  manual blockers or delayed acceptance): propose → align → plan → implement ↔ review
+  → human acceptance → dispose. A clear instruction to implement authorizes its scope;
+  plan-only requests stop at the plan; only material intent or scope decisions go back
+  to the human. Confirming a need's wording is never a gate.
 - **Large work** becomes a sequence of independently reviewable changes, with the
   next one planned in detail.
 
@@ -85,15 +89,23 @@ See [Workflows](docs/workflows.md) for onboarding, large work and the change lif
 
 | Knowledge | Home |
 | --- | --- |
-| Actors, outcomes, acceptance, constraints | `openwish/needs/N-001.md` (durable) |
+| Actors, outcomes, acceptance, structural rules | `openwish/needs/N-001.md` (durable) |
+| Detailed rules and tunable values | Rule docs or data that needs reference |
 | Implemented behavior | Source code |
 | Checks of intent | Tests that mention the need ID they protect (`ow trace`) |
 | Module responsibilities | A short header per module; a README at major boundaries |
-| Non-obvious rationale | Nearby comments or ordinary docs |
+| Non-obvious rationale, environments and setup | Nearby comments or ordinary docs |
 | Working design, tasks, latest review | `openwish/changes/C-001/` (deleted after acceptance) |
 
 Needs have no execution status; closing a change does not retire a need or claim it
-is complete. `confirmed_at` records actual human confirmation only.
+is complete. `confirmed_at` records that a human confirmed every acceptance criterion;
+undecided questions and proposals wait in the need's `open` list. Each fact has one
+home, and other files link to it.
+
+**Sequences.** A change can name predecessors with `after`. Successors become
+plannable once predecessors pass review (set `successors_wait_for` to `acceptance` to
+wait for acceptance instead); acceptance follows the sequence, and `ow ready` lists
+what to plan next.
 
 **Safe to forget.** Before a change passes review, every material rule it introduced
 has a retained home: product files with independent checks, a need or doc, or another
@@ -108,8 +120,9 @@ the harness does the reasoning. OW makes no model API calls.
 ```sh
 ow new need N-001 --title "Monthly reconciliation"
 ow new change C-001 --title "Local export" --need N-001
-ow context C-001                     # all current needs + sized retrieval manifest
-ow ready C-001                       # ready tasks and blockers
+ow new change C-002 --title "Scheduled export" --need N-001 --after C-001
+ow context C-001                     # all current needs, work state, sized retrieval manifest
+ow ready C-001                       # ready tasks, blockers, unplanned changes
 ow task C-001/T-001 done --evidence "tests/test_export.py: 4 passed"
 ow trace N-001                       # tests and files that mention N-001
 ow record-review C-001 --summary "Reconciliation no longer needs row copying" \
@@ -143,8 +156,9 @@ ow init
 ```
 
 Upgrades older integration files, keeps equal versions and local edits, and asks
-before downgrades. Project policy, needs and work are preserved. Before v1.0.0 only
-the current schema is supported, with no migration tooling.
+before downgrades. The artifact reference upgrades with the skills; project policy,
+needs and work are preserved. Before v1.0.0 only the current schema is supported,
+with no migration tooling.
 
 ## Design and contribution
 

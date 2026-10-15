@@ -1,15 +1,15 @@
 """External checks: PROJECT_DIR=... STAGE=1|2|3|4 python acceptance_test.py -v."""
 
-import importlib.util
+import importlib
 import os
 from pathlib import Path
+import sys
 import unittest
 
-ROOT = Path(os.environ["PROJECT_DIR"])
+ROOT = Path(os.environ["PROJECT_DIR"]).resolve()
 STAGE = int(os.environ.get("STAGE", "4"))
-spec = importlib.util.spec_from_file_location("evaluated_lending", ROOT / "lending.py")
-lending = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(lending)
+sys.path.insert(0, str(ROOT))  # import the product as its own modules would
+lending = importlib.import_module("lending")
 BOOK_CAP = 1500 if STAGE >= 3 else 1000
 
 
@@ -59,6 +59,7 @@ class Renewals(unittest.TestCase):
     def test_dvds_renew_once(self):
         self.assertTrue(lending.can_renew("dvd", 0, 0))
         self.assertFalse(lending.can_renew("dvd", 1, 0))
+        self.assertFalse(lending.can_renew("dvd", 0, 1))
 
 
 class Disposal(unittest.TestCase):

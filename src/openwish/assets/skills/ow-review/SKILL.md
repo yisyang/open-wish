@@ -1,12 +1,17 @@
 ---
 name: ow-review
-description: Review an OW change against all current needs, code, tests and regressions; record the result, present it, and close accepted work. Routine changes get concise verified results without a closure step. Honor OW opt-outs.
+description: Review OW work against all current needs, code, tests and regressions; for a change, record the result, present it, and close accepted work. Direct work gets the same review without records. Honor OW opt-outs.
 ---
 
 # Review
 
-Read `openwish/policy.md`, `ow context C-001`, the change and its tasks, and the
-actual diff. Routine work: verify, fix, report, stop.
+Read `openwish/policy.md` and the actual diff.
+
+- **Direct:** run `ow context`; apply steps 1–4, preserve lasting knowledge (every
+  material decision of the session has a retained home), then report as in
+  step 7. Run no record, close or clean commands.
+- **Managed:** run `ow context C-001`, read the change and its tasks, and apply
+  every step.
 
 1. **Assess the needs.** Run `ow trace` and compare the traced checks and files
    with the diff.
@@ -14,9 +19,9 @@ actual diff. Routine work: verify, fix, report, stop.
      Check each with direct evidence.
    - **Unaffected needs:** every other current need. Confirm briefly why the change
      cannot violate it. If you cannot, treat it as affected.
-   Compare results with the change's delivers-now scope and exit evidence, not just
-   ticked tasks. Explain partial contributions and deferrals; an empty task list in
-   a candidate change is not completion.
+   - **Engineering requirements** the policy links: check the diff against them.
+   Compare results with delivers-now scope and exit evidence, not ticked tasks.
+   Explain partial contributions and deferrals; an empty task list is not completion.
 2. **Judge the checks** (Strategic verification in `ow-plan`): would they catch a
    need violation, survive a harmless refactor, and test intent rather than repeat
    the code's own logic? Ask what plausible wrong implementation would still pass.
@@ -29,17 +34,18 @@ actual diff. Routine work: verify, fix, report, stop.
    `ow record-review C-001 --summary "user-visible outcome" --check "command: result"
    [--affected N-003] --handoff FILE` (or `--handoff -` with JSON on stdin; format
    in `openwish/artifacts.md`). Unresolved findings use `--verdict blocked`.
-   Passing needs every task done. If anything changes afterwards, `ow summary C-001`
-   names what made the review stale; refresh the affected verification and record
-   again.
-7. **Present need → outcome → evidence**, plus limitations.
-   - Default mode: ask once for human acceptance (numbered A/B/C, `(Recommended)`),
+   Passing needs every task done. If anything changes afterwards (successor work
+   often does), `ow summary C-001` names what made the review stale: rerun the
+   affected checks, confirm the outcome still holds, and record again.
+7. **Present need → outcome → evidence**, how other current needs were ruled
+   out, limitations, and any `open` items this result makes decidable.
+   - Default mode: ask once for human acceptance (A/B/C),
      after all available work is done. Only after actual acceptance:
      `ow close C-001 --by human`.
    - Explicit fast-forward: `ow close C-001 --by fast-forward` after the same checks,
      attributed to delegation, never to a human.
-8. **Dispose** via `ow-consolidate`. Needs stay current; further work uses a new
-   change in default mode unless delegated again.
+8. **Dispose and continue** via `ow-consolidate`. Needs stay current; further work
+   uses a new change in default mode unless delegated again.
 
 ## Safe to forget
 
@@ -57,7 +63,9 @@ per-function matrix.
 - `unresolved`: anything missing; the review stays blocked.
 
 Read both directions: requirements → code and checks, and consequential code
-choices → the intent that justifies them. Could a maintainer find, explain, verify
-and safely change this behavior with only the repository? The CLI checks that
+choices → the intent that justifies them. Copies of a rule the change added to
+needs, READMEs or other changes become links (One home per fact in the policy).
+Could a maintainer find, explain, verify and safely change this behavior with only
+the repository? The CLI checks that
 destinations exist and are fresh, not that they say the right thing. In submodule
 projects, inspect component diffs too.

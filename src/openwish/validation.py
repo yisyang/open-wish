@@ -1,11 +1,14 @@
-"""Structural checks; product alignment and evidence quality require reasoning."""
+"""Structural checks and citation warnings; product alignment and evidence quality require reasoning."""
 
 from datetime import date, datetime
 import re
 
-from .model import CHANGE_STATES, CURRENCY, MODES, RELATIONS, TASK_STATES, topological_order
+from .model import CHANGE_STATES, CURRENCY, MODES, RELATIONS, SEQUENCE_GATES, TASK_STATES, topological_order
 from .repository import repository_snapshot
 from .storage import SCHEMA_VERSION, WishError, contained, repository_file
+
+PATH_TOKEN = re.compile(r"(?<![\w/.:@-])(?:\.\.?/)*[\w.-]+(?:/[\w.-]+)+/?")
+CHANGE_LINK = re.compile(r"(?:\.\./|openwish/changes/)(C-[0-9]{3,})/")
 
 
 def string_list(value):
@@ -70,13 +73,15 @@ def validate(project):
              "config: needs_token_budget must be a positive integer")
     require(type(config.get("source_hard_limit", 0)) is int and config.get("source_hard_limit", 0) >= 0,
             "config: source_hard_limit must be a nonnegative integer (0 disables enforcement)")
+    require(config.get("successors_wait_for", "review") in SEQUENCE_GATES,
+            "config: successors_wait_for must be review or acceptance")
     exceptions = config.get("code_exceptions")
     require(isinstance(exceptions, list), "config: code_exceptions must be an array")
     for exception in exceptions if isinstance(exceptions, list) else []:
         require(isinstance(exception, dict) and nonempty(exception.get("path"))
                 and nonempty(exception.get("reason"))
-                and exception.get("kind") in ("data", "low-complexity"),
-                "config: each code exception needs path, reason, and kind (data or low-complexity)")
+                and exception.get("kind") in ("data", "low-complexity", "generated"),
+                "config: each code exception needs path, reason, and kind (data, low-complexity or generated)")
 
     base = project["root"] / "openwish"
     for path in (base / "needs").glob("*"):
@@ -116,6 +121,8 @@ def validate(project):
         require("ask" not in meta, f"{key}: persist the need, not an ask field")
         require(string_list(meta.get("acceptance")) and bool(meta.get("acceptance")),
                 f"{key}: acceptance must contain observable satisfaction conditions")
+        require(string_list(meta.get("open", [])),
+                f"{key}: open must be an array of undecided questions or proposed criteria")
         confirmed = meta.get("confirmed_at", "")
         try:
             if not isinstance(confirmed, str):
@@ -130,6 +137,9 @@ def validate(project):
         require(nonempty(meta.get("title")), f"{key}: title is required")
         links(meta, "needs", project["needs"], key)
         require(bool(meta.get("needs")), f"{key}: link at least one need")
+        links(meta, "after", project["changes"], key, optional=True)
+        if string_list(meta.get("after", [])):
+            require(key not in meta.get("after", []), f"{key}: a change cannot come after itself")
         require(meta.get("status") in CHANGE_STATES, f"{key}: invalid change status")
         require(meta.get("mode") in MODES, f"{key}: invalid mode")
         require(nonempty(record["body"]), f"{key}: purpose, approach, and verification are required")
@@ -170,6 +180,10 @@ def validate(project):
         topological_order({key: task.get("depends_on", []) for key, task in tasks.items()})
     except WishError as error:
         errors.append(str(error))
+    try:
+        topological_order({key: change["meta"].get("after", []) for key, change in project["changes"].items()})
+    except WishError as error:
+        errors.append("Change sequence (after): " + str(error))
     for task in tasks.values():
         for dep in task.get("depends_on", []):
             prerequisite = tasks[dep]
@@ -178,3 +192,38 @@ def validate(project):
             if task["status"] == "done":
                 require(prerequisite["status"] == "done", f"{task['id']}: prerequisite {dep} is unfinished")
     return errors
+
+
+def cited_paths(root, text, base):
+    """Existing in-repository paths a text cites, resolved from its own directory first."""
+    found = set()
+    for token in PATH_TOKEN.findall(text):
+        token = token.rstrip(".")
+        for start in (base, root):
+            path = (start / token).resolve()
+            if path.is_relative_to(root) and path != root and path.exists():
+                found.add(path)
+                break
+    return found
+
+
+def knowledge_warnings(project, files):
+    """Needs must survive a fresh clone; change files must not depend on each other.
+    Referenced docs may legitimately explain how to obtain ignored inputs."""
+    root = project["root"].resolve()
+    visible = {path.resolve() for path in files}
+    folders = {parent for path in visible for parent in path.parents}
+    warnings = []
+    for key, record in sorted(project["needs"].items()):
+        if record["meta"].get("currency") != "current":
+            continue
+        source = record["path"].resolve()
+        for path in sorted(cited_paths(root, source.read_text(encoding="utf-8"), source.parent)):
+            if path not in visible and path not in folders:
+                warnings.append(f"{key} cites {path.relative_to(root).as_posix()}, which is ignored or "
+                                "excluded; commit it or cite a doc that says how to obtain it")
+    for key, record in sorted(project["changes"].items()):
+        for target in sorted(set(CHANGE_LINK.findall(record["body"])) - {key}):
+            warnings.append(f"{key}: links to {target}'s files, which are deleted on disposal; "
+                            "cite needs, retained docs or delivered code instead")
+    return warnings
