@@ -22,7 +22,10 @@ change that covers the ask.
    retrieve rule files listed by `ow context` (they are not loaded automatically),
    and inspect the code. If finishing would require inventing product policy,
    resolve that first (Task sizing in `ow-plan`). Run `ow task C-001/T-001
-   in-progress`.
+   in-progress`. Ready investigations in other changes are planning (policy):
+   take them too, within the in-flight limit of Discover ahead of delivery in
+   `ow-plan`. Each ends with findings in their retained home, or `blocked` with
+   its question for the next batch.
 3. **Implement** the smallest coherent solution that preserves current needs and
    existing user work. Follow the repository's structure and the Architecture
    rubric in `ow-align`: pure decisions, effects at the edges, no speculative

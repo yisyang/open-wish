@@ -102,13 +102,23 @@ guidance, not a required schema. Scope states **delivers now**, **preserves**,
 ```
 
 Required: `id` (qualified by its change), `title`, `status`, `acceptance`. Optional
-with defaults: `depends_on = []`, `kind = "agent"` (or `manual`), `files = []`,
-`evidence = ""`. Status is `open | in-progress | blocked | done`; `done` requires
-evidence and finished prerequisites. Dependencies stay within the change and form an
-acyclic graph; list order is the scheduling preference. An empty list is valid for
-verification-only work or a future candidate not yet planned; `ow ready` lists such
-active changes as `unplanned` in `after` order, with what each is `waiting_on`
-(`PLAN` when nothing, `LATER` otherwise).
+with defaults: `depends_on = []`, `kind = "agent"`, `files = []`, `evidence = ""`.
+Status is `open | in-progress | blocked | done`; `done` requires evidence and
+finished prerequisites. Dependencies stay within the change and form an acyclic
+graph; list order is the scheduling preference.
+
+`kind` is `agent`, `manual` (an observation only a human can make) or `investigate`
+(findings and a decision or proposal, never delivered behavior). Investigations
+ignore the change's `after` gate, so a candidate's consequential unknowns can be
+settled before its predecessors pass; starting one leaves an `open` change open, and
+delivery tasks may depend on it. A question awaiting a human is an investigation
+marked `blocked` with the question as its evidence; `ow ready` lists it as `ASK`
+(`"ask": true` in JSON) and counts investigations in flight (in progress or `ASK`).
+
+An empty list is valid for verification-only work or a future candidate not yet
+planned. `ow ready` lists active changes without delivery (`agent` or `manual`)
+tasks as `unplanned` in `after` order, with what each is `waiting_on` (`PLAN` when
+nothing, `LATER` otherwise), and marks ready investigations `[investigate]`.
 
 ```sh
 ow task C-001/T-001 in-progress

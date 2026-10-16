@@ -70,12 +70,20 @@ instruction faithfully needs no second approval round.
 
 - A clear instruction to implement authorizes that scope. Plan-only and
   discussion-only requests stop before implementation.
+- Investigations are planning and need no implementation authority: reading,
+  worked examples, and throwaway probes kept outside product files. Experiments
+  that edit product files, use shared environments or have outward effects need
+  the same authority as implementation.
 - Technical repairs within authorized intent need no new permission. Material
   intent or scope changes need a real human decision.
 - `ow context` and `ow ready` report scheduling, not permission. Loading a skill
   grants nothing.
 - An open question or unsettled value blocks only the work whose result depends
   on it; continue the rest.
+- **Commit progressively.** Settle uncertainty before the commitment it could
+  disrupt, not before all work: investigate early what would be costly to learn
+  late, hold hard-to-reverse commitments for their decisions, and let reversible
+  choices proceed on a recorded assumption (Commit progressively in `ow-plan`).
 - Ask only questions that can materially change the work. Use numbered questions
   with two or three A/B/C options, put `(Recommended)` before the preferred option,
   and state each option's effect.
@@ -98,12 +106,13 @@ read the owning section when a step calls for it.
 | Guidance | Owner |
 | --- | --- |
 | Right-size intent, Right-size delivery, relationships | `ow-propose` |
-| Architecture rubric | `ow-align` |
-| Task sizing, Plan a candidate, Promote direct work, Reconcile the plan, Strategic verification | `ow-plan` |
+| Architecture rubric, Future constraints | `ow-align` |
+| Task sizing, Commit progressively, Discover ahead of delivery, Plan a candidate, Promote direct work, Reconcile the plan, Strategic verification | `ow-plan` |
 | Need assessment, Safe to forget | `ow-review` |
 | Disposal, compaction, size targets | `ow-consolidate` |
 | Delegated acceptance | `ow-fast-forward` |
 | Adoption for an existing or new product | `ow-onboard` |
+| Readiness of a sequence: horizon, pre-mortem, discovery queue | `ow-assess` |
 
 `openwish/artifacts.md` documents file formats and commands; read it when writing
 or repairing a record.

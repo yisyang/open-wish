@@ -50,11 +50,15 @@ is scheduling only: `model.waiting_on` applies the configured gate (`review` or
 freshness ignores the field, and `clean` removes disposed IDs from successors so no
 reference dangles. Whether prerequisites truly exist remains a code inspection.
 `tasks.json` lists tasks with `id`, `title`, `status`, `acceptance` and optional
-`depends_on`, `kind`, `files`, `evidence`. `done` needs evidence; dependencies are
-local and acyclic. `ow task` updates one task atomically, checks evidence and
-prerequisites, and moves an open or reviewed change to `in-progress`.
-`ready` reports readiness, never permission, and lists active changes without tasks
-as unplanned; whether their prerequisites exist is judged from the code.
+`depends_on`, `kind` (`agent | manual | investigate`), `files`, `evidence`. `done`
+needs evidence; dependencies are local and acyclic. `ow task` updates one task
+atomically, checks evidence and prerequisites, and moves a reviewed change, or an
+open one starting delivery, to `in-progress`. `ready` reports readiness, never
+permission. Investigations are exempt from the `after` gate, because they produce
+findings rather than behavior and learning late is the cost sequencing would
+otherwise impose; a blocked investigation is a question for a human and is listed
+as `ASK`; a change with only investigations is still listed as unplanned,
+and whether its prerequisites exist is judged from the code.
 
 ## Review and freshness
 
@@ -140,7 +144,7 @@ appear in the evaluation scenarios.
 
 ## Integration and compatibility
 
-Eight canonical skills are packaged once, with thin adapters for OpenCode, Claude Code,
+Nine canonical skills are packaged once, with thin adapters for OpenCode, Claude Code,
 Codex and generic Agent Skills. `openwish/artifacts.md` documents the CLI, so the
 installer manages it like the skills; `policy.md` is project-owned. The installer offers interactive multi-select and
 repeatable flags, deduplicates shared paths, stamps each file with the OW version,

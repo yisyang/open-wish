@@ -410,6 +410,101 @@
         "Stage 3 continues the same change, moves the decided hardy rule out of the open list into N-001, implements it, and keeps the tablet task open.",
         "Need count stays one (no architecture or mechanism needs), and retained tests stay small and check intent."
       ]
+    },
+    {
+      "id": 31,
+      "name": "future-constraint-shapes-foundational-schema",
+      "skills": ["ow-propose", "ow-align", "ow-plan"],
+      "prompt": "Dry-run only; save response.md. A tool-library product (neighbors borrow tools and pay deposits) uses OW. Current needs: N-001 a member borrows and returns tools; N-002 deposits are held and refunded exactly; N-004 households share one membership, and any adult in it may borrow against the shared deposit balance; N-005 a membership can be transferred to another household member when the holder moves out. Only N-001 and N-002 have changes: C-001 (member accounts and sign-in) and C-002 (deposit ledger, after C-001), both open without tasks. N-004 and N-005 have no changes yet; the human says they come 'after the pilot'. The human asks you to align and plan C-001 and C-002 so implementation can start. Give your working design for both and the tasks you would write.",
+      "expected_output": "Before committing the account and ledger schemas, check them against N-004 and N-005: ask what would change when shared households and transfers arrive and what happens to existing deposit balances. Choose per constraint: preserve it now where cheap (membership as its own entity with a member list, ledger entries owned by the membership rather than by a single user account), resolve it first if the answer changes the shape (for example whether a transferred membership keeps its deposit history), or record an affordable evolution path. Do not build households or transfers now. Plan C-001 and C-002 tasks, with any genuinely open shaping question asked once with a recommendation, holding only the schema work that depends on it.",
+      "files": [],
+      "assertions": [
+        "Checks the C-001 and C-002 data designs against N-004 and N-005 even though those needs have no changes, asking what would have to change and what happens to existing balances or records.",
+        "Preserves the cheap constraints now (for example a membership that can hold several members, or ledger entries keyed to the membership rather than one user) or explains why an evolution path is affordable instead, and says which choice applies to each constraint.",
+        "Does not implement or task shared-household borrowing or transfers themselves.",
+        "Treats the persisted schema as the commitment point: asks a shaping question it cannot settle with a recommended option, holds only the dependent schema work, and continues the rest.",
+        "Makes no claim that design review, implementation or checks already happened."
+      ]
+    },
+    {
+      "id": 32,
+      "name": "capability-gap-despite-valid-sequence",
+      "skills": ["ow-propose", "ow-plan"],
+      "prompt": "Dry-run only; save response.md. A courier-dispatch product uses OW. Changes, all open without tasks: C-003 (route assignment), C-004 (driver payout statements, after C-003), C-005 (customer delivery tracking, after C-003), C-006 (proof-of-delivery capture with photo and signature, after C-005). C-004's scope says payouts are computed per delivery 'confirmed by proof of delivery'. ow check passes with no warnings. The human asks you to confirm the sequence is ready to plan and to plan C-004 once it is next.",
+      "expected_output": "Detect that C-004 depends on proof-of-delivery records that only C-006 delivers, and C-006 is not a predecessor of C-004, so the valid after graph hides a capability gap that ow check cannot see. Repair it: either move C-004 after C-006 (with C-005 transitively) or move minimal delivery confirmation into an earlier change, and state the prerequisite as a capability with its provider and how its presence will be verified. Do not plan C-004 tasks that would invent a confirmation mechanism.",
+      "files": [],
+      "assertions": [
+        "Identifies that C-004 needs proof-of-delivery records that no predecessor provides, despite ow check passing.",
+        "Repairs the sequence (adds the provider to after, or moves the needed capability into an earlier change's delivers now) rather than only noting the risk.",
+        "States C-004's prerequisite as the behavior required, its provider and how its presence will be verified in code or tests.",
+        "Does not write C-004 tasks that invent their own confirmation rule or quietly compute payouts on unconfirmed deliveries.",
+        "Does not claim the sequence was edited or checks were run unless it shows the edit."
+      ]
+    },
+    {
+      "id": 33,
+      "name": "investigation-runs-ahead-of-blocked-delivery",
+      "skills": ["ow-propose", "ow-plan", "ow-implement"],
+      "prompt": "Dry-run only; save response.md. A self-storage product uses OW with successors_wait_for = review. C-003 (unit rentals) is in progress; C-004 (move-in and access codes, after C-003) and C-005 (monthly storage billing, after C-004) are open without tasks. N-006, which C-005 serves, has open = ['Does the first storage fee accrue on move-in day or the next day, and is a partial first month prorated?']. The rule doc has no worked example for move-in on the 31st. The human authorized implementing C-003 through C-005 and answers questions once a week. Give your next actions in order, including any task records you would write.",
+      "expected_output": "Continue C-003 now. Add an investigate task to C-005 now (it runs before C-004 passes; kind investigate) that works boundary cases (move-in on the 1st, the 31st, the last day of February, a same-day move-out) under each option, and send one batched question with a recommended option and each option's effect. The charge calculation is a commitment point (money), so the C-005 billing tasks depend on the decision; C-003 and C-004 are not held. Fold the answer into the rule doc or need, remove it from open, then plan C-005 once C-004 passes. Do not mark C-005 in progress or ship billing on an assumed answer.",
+      "files": [],
+      "assertions": [
+        "Continues C-003 and plans C-004 normally; the billing question holds neither.",
+        "Records the question as an investigate task (or equivalent investigation) in C-005 that can run before C-004 passes review, rather than waiting until C-005 becomes plannable.",
+        "Clarifies through concrete boundary cases with the outcome each option produces, in one batched question set with a recommended option.",
+        "Treats the fee calculation as a commitment point: billing behavior waits for the decision and does not ship on an assumed default.",
+        "Describes folding the answer into its retained home and removing it from open before C-005's delivery tasks proceed.",
+        "Makes no claim that the human answered or that tasks were completed."
+      ]
+    },
+    {
+      "id": 34,
+      "name": "answer-invalidates-planned-work",
+      "skills": ["ow-plan", "ow-implement", "ow-review"],
+      "prompt": "Dry-run only; save response.md. A meal-subscription product uses OW. C-007 (pause and skip deliveries) is in progress with tasks T-001 (pause API, done; tests pass), T-002 (skip a single week, done; tests pass), T-003 (refund credit for skipped weeks, open) and T-004 (pause reminder email, open). While the question was open, the team proceeded on the labeled assumption that skipped weeks earn account credit. The human now answers the batched questions: skipped weeks are never charged, so no credit exists, and a pause longer than eight weeks cancels the subscription. Give your next actions and any record changes.",
+      "expected_output": "Fold the answers into their retained homes (need acceptance or rule doc) and remove them from open. Reconcile the plan: T-003 no longer matches intent and is replaced by work that prevents the charge for skipped weeks; check whether T-002's done evidence still holds under 'never charged' rather than redoing it blindly; add the eight-week cancellation as new work, assessing whether it is a separately acceptable change; remove the labeled assumption and any code or tests built on it. Keep T-001 evidence. Recheck the sequence for affected successors. Continue under existing authority unless the cancellation materially expands scope.",
+      "files": [],
+      "assertions": [
+        "Moves each answer into its retained home and out of the need's open list.",
+        "Replaces or rewrites T-003 rather than completing work the answer invalidated, and removes the credit assumption wherever it was labeled or built on.",
+        "Rechecks T-002 against the answer instead of either trusting its old evidence blindly or redoing verified work without reason.",
+        "Adds the eight-week cancellation as planned work and judges whether it belongs in C-007 or a separate change.",
+        "Keeps T-001's evidence and does not claim the reconciliation already happened."
+      ]
+    },
+    {
+      "id": 35,
+      "name": "disposed-change-still-covers-need",
+      "skills": ["ow-propose", "ow-plan"],
+      "prompt": "Dry-run only; save response.md. A clinic-inventory product uses OW. N-002 (expiry alerts) was delivered by C-002, which was accepted and disposed; src/alerts/expiry.py implements it and tests/test_expiry.py mentions N-002, so ow trace lists it. Open changes: C-008 (reorder suggestions, prerequisites: 'expiry data from C-002's alert schedule') and C-009 (supplier portal, after C-008). No open change references N-002. The human asks you to check the sequence's coverage and prepare C-008 for planning.",
+      "expected_output": "N-002 is covered by delivered code with retained, traced checks; it is not an omission and needs no new change. C-008's prerequisite cites a disposed change and must be rewritten as the delivered capability (src/alerts/expiry.py and its interface) with its check (tests/test_expiry.py), verified in the repository before planning. Continue the coverage check for the remaining needs.",
+      "files": [],
+      "assertions": [
+        "Does not report N-002 as uncovered just because no open change references it, citing the delivered code and traced check instead.",
+        "Rewrites C-008's prerequisite from the disposed change to the delivered code and the check that verifies it.",
+        "Verifies, or says it would verify, that the delivered capability actually provides what C-008 needs before planning.",
+        "Makes no claim that edits or checks occurred without showing them."
+      ]
+    },
+    {
+      "id": 36,
+      "name": "assess-readiness-finds-planted-defects",
+      "seed": "evals/fixtures/seeds/36-assess-readiness",
+      "skills": ["ow-assess", "ow-propose", "ow-align", "ow-plan"],
+      "prompt": "The co-op's organizer asks: How ready is our plan for the spring pilot, and what would you change? Assessment only; do not change any files yet. Save your assessment as response.md in the assigned output directory.",
+      "expected_output": "Fix the horizon as the spring pilot (N-001 to N-003) and keep N-004 and N-005 out of coverage while using them to test C-001's design. Rate the plan with cited evidence. Find the planted defects: C-003 needs metered production that only C-004 provides although C-003 does not come after C-004 (ow check passes); C-001's single-holder account schema conflicts with known joint memberships and resale, which should be preserved cheaply now or resolved before the schema is committed; the retail or wholesale credit rate is an open money decision on the pilot's path that holds the credit calculation, not C-001; N-003's yearly statement criterion has no change; docs/credits.md example 1 is wrong ($28.80, not $26.80); hosting access is not set up and C-004 assumes a daily export nobody has seen. Give a pre-mortem, a ranked discovery queue, a stated confidence and ranked recommendations, separating agent work from human decisions, and change nothing.",
+      "files": [],
+      "assertions": [
+        "States the horizon as the spring pilot and does not count missing changes for N-004 or N-005 as coverage gaps, yet uses them to test C-001's account design.",
+        "Identifies that C-003 needs metered production from C-004 although C-003 does not come after C-004, despite a valid sequence.",
+        "Identifies C-001's single-holder account schema as rework risk against joint memberships and resale, and recommends preserving the constraint now or deciding before the schema is committed, considering what happens to existing credits.",
+        "Treats the retail or wholesale rate as an open money decision on the pilot's path, holding the credit calculation but not C-001, and proposes asking it early through worked cases or an investigation.",
+        "Finds that N-003's yearly statement criterion has no change delivering it.",
+        "Recomputes docs/credits.md and reports that example 1 should be $28.80.",
+        "Flags unverified execution prerequisites: no SSH access to the pilot host and a daily inverter export format nobody has seen, contrary to C-004's approach.",
+        "Gives evidence-cited ratings, a pre-mortem, a stated confidence and recommendations ranked by leverage, separating agent work from human decisions.",
+        "Changes no project files and claims no edits, checks or decisions that did not happen."
+      ]
     }
   ]
 }

@@ -1,0 +1,8 @@
+{"tasks": [
+  {"id": "C-001/T-001", "title": "Accounts and shares schema with capacity check", "status": "open",
+   "acceptance": "Migrations create accounts and shares; the capacity check rejects a purchase one watt over capacity.",
+   "depends_on": [], "kind": "agent", "files": [], "evidence": ""},
+  {"id": "C-001/T-002", "title": "Sign-up through account page", "status": "open",
+   "acceptance": "A new member signs up, buys a 2 kW share and sees it on the account page.",
+   "depends_on": ["C-001/T-001"], "kind": "agent", "files": [], "evidence": ""}
+]}

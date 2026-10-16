@@ -4,7 +4,7 @@ import subprocess
 from openwish.model import ready_tasks, unplanned_changes
 from openwish.storage import WishError, read_json, write_json
 from openwish.validation import validate
-from openwish.workflow import clean_changes, close_changes, validate_review
+from openwish.workflow import clean_changes, close_changes, set_task, validate_review
 
 from tests.support import ProjectCase
 
@@ -42,6 +42,60 @@ class SequenceTests(ProjectCase):
         ready, waiting = ready_tasks(self.project())
         self.assertEqual([task["id"] for task in ready], ["C-001/T-001"])
         self.assertEqual(waiting[0]["blocker"], "Change waits for C-001 (open)")
+
+    def test_investigations_run_ahead_of_predecessors_without_planning_the_change(self):
+        decide = self.task("C-002/T-001", kind="investigate", title="Decide storage billing timing")
+        build = self.task("C-002/T-002", depends_on=["C-002/T-001"])
+        self.write_tasks([decide, build], "C-002")
+        self.write_tasks([self.task("C-003/T-001", kind="investigate")], "C-003")
+        ready, waiting = ready_tasks(self.project())
+        self.assertEqual([task["id"] for task in ready], ["C-001/T-001", "C-002/T-001", "C-003/T-001"])
+        self.assertEqual([(task["id"], task["blocker"]) for task in waiting],
+                         [("C-002/T-002", "Change waits for C-001 (open)")])
+        # A change holding only investigations still needs delivery planning once its turn comes.
+        self.assertEqual(self.waiting(), {"C-003": ["C-002 (open)"]})
+        self.assertIn("READY C-002/T-001 [investigate] Decide storage billing timing", self.cli("ready").stdout)
+        # Investigating does not start delivery; the change stays open.
+        set_task(self.project(), "C-002/T-001", "done", "Billing starts at the first full day; see docs/billing.md")
+        self.assertEqual(self.project()["changes"]["C-002"]["meta"]["status"], "open")
+        ready, waiting = ready_tasks(self.project())
+        self.assertEqual(waiting[0]["blocker"], "Change waits for C-001 (open)")
+        self.finish_tasks()
+        self.review()
+        self.assertIn("C-002/T-002", [task["id"] for task in ready_tasks(self.project())[0]])
+        set_task(self.project(), "C-002/T-002", "in-progress")
+        self.assertEqual(self.project()["changes"]["C-002"]["meta"]["status"], "in-progress")
+
+    def test_questions_awaiting_a_human_are_listed_for_one_batch(self):
+        question = self.task("C-002/T-001", kind="investigate", status="blocked",
+                             evidence="Awaiting decision: charge on move-in day (Recommended) or the next day?")
+        probing = self.task("C-003/T-001", kind="investigate", status="in-progress")
+        stuck = self.task("C-001/T-002", status="blocked", evidence="Vendor sandbox is down")
+        self.write_tasks([self.task(), stuck])
+        self.write_tasks([question], "C-002")
+        self.write_tasks([probing], "C-003")
+        ready, waiting = ready_tasks(self.project())
+        self.assertEqual([task["id"] for task in waiting if task.get("ask")], ["C-002/T-001"])
+        output = self.cli("ready").stdout
+        self.assertIn("ASK C-002/T-001 [investigate]", output)
+        self.assertIn("WAIT C-001/T-002", output)
+        self.assertIn("Investigations in flight: 2, 1 awaiting a human.", output)
+        work = json.loads(self.cli("context", "--json").stdout)["work"]
+        self.assertEqual([task["id"] for task in work["waiting"] if task.get("ask")], ["C-002/T-001"])
+        self.assertIn("ASK C-002/T-001", self.cli("context").stdout)
+
+    def test_investigations_still_hold_a_review(self):
+        self.finish_tasks()
+        self.review()
+        self.assertEqual(self.project()["changes"]["C-001"]["meta"]["status"], "review")
+        self.write_tasks([self.task(status="done", evidence="Representative export check passed"),
+                          self.task("C-001/T-002", kind="investigate")])
+        set_task(self.project(), "C-001/T-002", "in-progress")
+        self.assertEqual(self.project()["changes"]["C-001"]["meta"]["status"], "in-progress")
+
+    def test_unknown_task_kinds_are_rejected(self):
+        self.write_tasks([self.task(kind="decide")])
+        self.assertIn("C-001/T-001: kind must be agent, manual or investigate", validate(self.project()))
 
     def test_successors_close_after_or_with_their_predecessors(self):
         self.finish_tasks()
@@ -136,7 +190,8 @@ class ReadinessTests(ProjectCase):
         self.assertIn("Reconcile without retyping", data["needs"])
         work = data["work"]
         self.assertEqual([change["id"] for change in work["changes"]], ["C-001", "C-002"])
-        self.assertEqual(work["ready"], [{"id": "C-001/T-001", "title": "Export records"}])
+        self.assertEqual(work["ready"], [{"id": "C-001/T-001", "title": "Export records", "kind": "agent",
+                                          "status": "open"}])
         self.assertEqual(work["unplanned"][0]["waiting_on"], ["C-001 (open)"])
         self.assertTrue(any("tmp/rates.json" in warning for warning in work["warnings"]))
         text = self.cli("context", "C-001").stdout

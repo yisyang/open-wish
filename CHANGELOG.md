@@ -2,6 +2,52 @@
 
 Release notes for OpenWish, newest first. Update this file for every release.
 
+## Unreleased
+
+### Added
+
+- Tasks may have `kind = "investigate"`: findings and a decision or proposal,
+  never delivered behavior. Investigations ignore their change's `after` gate, so a
+  decision a later change depends on can be settled while earlier changes are
+  built. Starting one leaves an open change open, a change holding only
+  investigations is still listed as unplanned, and `ow ready` marks them
+  `[investigate]`. A blocked investigation is a question awaiting a human: `ow ready`
+  and `ow context` list it as `ASK` (`"ask": true` in JSON) and count investigations
+  in flight. `ow context --json` reports each task's `kind` and `status`.
+- The policy treats investigations as planning: reading, worked examples and
+  throwaway probes outside product files need no implementation authority.
+  `ow-implement` takes ready investigations from other changes within the in-flight
+  limit, and `ow-consolidate` surfaces them and `ASK` batches when continuing a
+  sequence.
+- New `ow-assess` skill: against a declared horizon, rate intent, coverage, rule
+  consistency, sequence, decisions, execution readiness and verification with
+  evidence; run a pre-mortem; rank unknowns by the cost of learning late; state a
+  confidence; recommend in order of leverage; and, when planning is authorized,
+  record investigations and one question batch. `ow-propose` runs it before
+  presenting a long sequence.
+
+### Changed
+
+- Progressive commitment organizes planning. The policy and `ow-plan` add **Commit
+  progressively** (commitment points wait for their decisions; reversible choices
+  proceed on a labeled assumption; questions through cases, in batches,
+  hardest-to-reverse first; self-directed loops stop once a pass adds no evidence)
+  and **Discover ahead of delivery** (unknowns across the whole sequence, ranked by
+  the cost of learning late, investigated early with a small work-in-progress
+  limit). `ow-plan` adds a challenge step before stopping.
+- `ow-align` adds **Future constraints**: foundational designs are checked against
+  already-known later needs and either preserve the constraint, resolve it first, or
+  record an affordable evolution path. Its rubric asks whether dense rules run as
+  pure functions that replay the rule doc's worked examples.
+- `ow-propose` prerequisites state the behavior, provider and how it is verified,
+  and resolve to delivered code once the provider is disposed; coverage counts
+  retained checks for delivered work; a new **Pressure** check sends foundational
+  changes to Future constraints. `ow-review` presents assumptions the result
+  proceeded on, challenges the result with its strongest plausible failure, and
+  names plan misses with their causes, proposing recurring lessons for the
+  project's policy. `ow-plan` states that an assumption only stands in for an
+  undecided product rule as a labeled placeholder and never decides it.
+
 ## v0.8.2
 
 ### Fixed

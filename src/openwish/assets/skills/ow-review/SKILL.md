@@ -24,7 +24,9 @@ Read `openwish/policy.md` and the actual diff.
    Explain partial contributions and deferrals; an empty task list is not completion.
 2. **Judge the checks** (Strategic verification in `ow-plan`): would they catch a
    need violation, survive a harmless refactor, and test intent rather than repeat
-   the code's own logic? Ask what plausible wrong implementation would still pass.
+   the code's own logic? Ask what plausible wrong implementation would still pass,
+   and what is the strongest plausible reason the result would fail in real use;
+   check it, or report it as a limitation.
 3. **Judge the structure** with the Architecture rubric in `ow-align` on the changed
    paths, including whether module headers and boundary READMEs still describe them.
 4. **Fix** within authorized intent and rerun affected checks. Keep unresolved
@@ -38,7 +40,14 @@ Read `openwish/policy.md` and the actual diff.
    often does), `ow summary C-001` names what made the review stale: rerun the
    affected checks, confirm the outcome still holds, and record again.
 7. **Present need → outcome → evidence**, how other current needs were ruled
-   out, limitations, and any `open` items this result makes decidable.
+   out, limitations, any `open` items this result makes decidable, and any
+   assumptions it proceeded on (Commit progressively in `ow-plan`). Name plan
+   misses: gaps that surfaced during implementation or review but planning should
+   have caught (a missing provider, a late decision, a foundational design
+   reworked), each with its cause. Propose recording a lesson that will recur in
+   this product, such as "verify host access before planning deploys", in the
+   project's policy, for the human to accept. Report one that shows a gap in
+   OW's own guidance to OW's maintainers.
    - Default mode: ask once for human acceptance (A/B/C),
      after all available work is done. Only after actual acceptance:
      `ow close C-001 --by human`.

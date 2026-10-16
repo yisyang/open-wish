@@ -44,6 +44,19 @@ contributors; architecture is in [design.md](design.md).
   code or predecessors, each deferral has a destination change, and each acceptance
   criterion of the needs the ask covers is met, planned or held by an unplanned
   change. Uncovered intent is surfaced as an omission, never left implicit.
+- Commitment is progressive: uncertainty is settled before the commitment it could
+  disrupt (persisted data shapes, money and permission rules, public interfaces,
+  deploys), not before all work. Investigations run ahead of their change's
+  predecessors, ranked by the cost of learning late; reversible choices proceed on
+  a labeled assumption that stays open; questions reach humans in bounded batches.
+- Foundational designs are tested against already-known later needs: the
+  constraint is preserved now, resolved first, or given an affordable evolution
+  path. Prerequisites name their provider and how they are verified, and resolve to
+  retained code and checks once the providing change is disposed.
+- Long sequences get a readiness assessment against a declared horizon: rated
+  evidence, a pre-mortem, a discovery queue, a stated confidence and ranked
+  recommendations. Reviews name plan misses; a lesson that will recur in the
+  product is proposed for the project's policy, which later planning reads.
 - Tasks have checkable acceptance and direct completion evidence; dependencies stay
   within their change. Independent work continues around manual blockers.
 - Executable tasks do not require inventing product policy; consequential unknowns
@@ -104,7 +117,7 @@ contributors; architecture is in [design.md](design.md).
 - Python 3.11+, no third-party runtime dependencies, no model API calls.
 - Published as `openwish` with identical `ow` and `openwish` commands; package, module
   and bundled skill versions advance together.
-- Eight canonical skills with thin OpenCode, Claude Code, Codex and generic adapters;
+- Nine canonical skills with thin OpenCode, Claude Code, Codex and generic adapters;
   interactive and explicit harness selection; preserving, version-aware reinstall.
 - Only the current schema is supported before v1.0.0, rejected before any write.
   A CLI older than a project's installed integrations refuses to use it and asks for

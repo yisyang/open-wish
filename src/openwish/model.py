@@ -12,6 +12,9 @@ MODES = ("default", "fast-forward")
 RELATIONS = ("requires", "constrains")
 # What lets a change's `after` successors start: a passing review, or human/delegated closure.
 SEQUENCE_GATES = ("review", "acceptance")
+# Investigation ends in findings and a decision or proposal, never delivered behavior, so it may
+# run before its change's predecessors pass: learning late is what sequencing would otherwise cost.
+TASK_KINDS = ("agent", "manual", "investigate")
 
 
 def need_graph(project, keys=()):
@@ -140,14 +143,19 @@ def waiting_on(project, key):
             if project["changes"][dep]["meta"]["status"] not in satisfied]
 
 
+def delivery_tasks(project, key):
+    return [task for task in change_tasks(project, key) if task.get("kind", "agent") != "investigate"]
+
+
 def unplanned_changes(project, keys=()):
-    """Active changes without tasks. Whether their prerequisites exist is still a code question."""
+    """Active changes without delivery tasks; investigations alone do not plan a change.
+    Whether their prerequisites exist is still a code question."""
     selected = set(select_changes(project, keys))
     return [{"id": key, "title": project["changes"][key]["meta"]["title"],
              "needs": project["changes"][key]["meta"]["needs"], "waiting_on": waiting_on(project, key)}
             for key in change_sequence(project)
             if key in selected and project["changes"][key]["meta"]["status"] in ("open", "in-progress")
-            and not change_tasks(project, key)]
+            and not delivery_tasks(project, key)]
 
 
 def ready_tasks(project, keys=()):
@@ -164,14 +172,17 @@ def ready_tasks(project, keys=()):
                   "outcome": project["needs"][nid]["meta"]["outcome"]} for nid in change["needs"]]
         item = {**task, "needs": needs}
         unfinished = [dep for dep in task.get("depends_on", []) if tasks[dep]["status"] != "done"]
-        predecessors = waiting_on(project, task["change"])
+        kind = task.get("kind", "agent")
+        predecessors = [] if kind == "investigate" else waiting_on(project, task["change"])
         if predecessors:
             item["blocker"] = "Change waits for " + ", ".join(predecessors)
         elif unfinished:
             item["blocker"] = "Unfinished prerequisites: " + ", ".join(unfinished)
-        elif task.get("kind", "agent") == "manual":
+        elif kind == "manual":
             item["blocker"] = "Manual observation required"
         elif task["status"] == "blocked":
             item["blocker"] = task.get("evidence") or "Resolve the task's blocker"
+            if kind == "investigate":
+                item["ask"] = True  # a question awaiting a human, batched with the others
         (waiting if "blocker" in item else ready).append(item)
     return ready, waiting

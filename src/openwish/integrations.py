@@ -7,7 +7,7 @@ from . import __version__
 from .storage import WishError, contained, read_json, write_json, write_text
 from .versions import declared_version, stamp, version_key
 
-SKILLS = ("propose", "align", "plan", "implement", "review", "consolidate", "fast-forward", "onboard")
+SKILLS = ("propose", "align", "plan", "implement", "review", "consolidate", "fast-forward", "onboard", "assess")
 HARNESSES = ("opencode", "claude", "codex", "generic")
 DIRECTORIES = {"generic": ".agents", "codex": ".agents", "claude": ".claude", "opencode": ".opencode"}
 MANIFEST = "openwish/installation.json"

@@ -187,13 +187,16 @@ For each candidate, identify:
 | Delivers now | Which observable results does this increment contribute to its needs? |
 | Preserves | Which existing behavior and applicable constraints must hold? |
 | Defers | Which remaining outcomes belong to later work, and which change takes each? |
-| Prerequisites | Which delivered capabilities must be checked before execution, and which existing code or predecessor provides each? |
+| Prerequisites | Which capabilities must exist before execution, which existing code or predecessor provides each, and how is its presence verified? |
 | Exit evidence | What would let someone accept this result independently? |
 
 Write tasks only for ready increments: their prerequisite capabilities exist in the
 repository and no material decision is open. For a requested resumable plan, retain
 the others as concise open changes with empty task lists and say that their planning
-is incomplete. Name each change's predecessors in `after`. Once they pass review (or
+is incomplete, but give their consequential unknowns `investigate` tasks now: an
+investigation ignores its change's `after` gate, so a decision the fifth change
+depends on can be settled while the first is built. Name each change's predecessors
+in `after`. Once they pass review (or
 acceptance, if configured), `ow ready` shows the change as `PLAN`; apply
 [Plan a candidate](../src/openwish/assets/skills/ow-plan/SKILL.md#plan-a-candidate):
 verify prerequisites in the code, refresh the approach against delivered interfaces,
@@ -203,6 +206,21 @@ Assessment-only sequences can stay in conversation. Before presenting a sequence
 [check it](../src/openwish/assets/skills/ow-propose/SKILL.md#right-size-delivery):
 every prerequisite has a provider among existing code or predecessors, every
 deferral has a destination, and every covered acceptance criterion has an owner.
+For a long sequence, [assess its readiness](../src/openwish/assets/skills/ow-assess/SKILL.md)
+against a declared horizon first: rate the evidence, run a pre-mortem, rank the
+unknowns by the cost of learning them late, and state a confidence.
+Foundational changes come first and carry every later need, so
+[test them against future constraints](../src/openwish/assets/skills/ow-align/SKILL.md#future-constraints):
+preserve a later need's constraint now when cheap, resolve it before the commitment
+when it changes the shape, or record an affordable evolution path.
+
+**Progressive commitment.** Uncertainty is settled before the commitment it could
+disrupt, not before all work. Persisted data shapes, money and permission rules,
+public interfaces and deploys wait for the decisions their result depends on;
+reversible choices proceed on a recommended, labeled assumption that stays in the
+need's `open` list until a human decides. Questions go to the human in batches,
+through concrete cases, hardest-to-reverse first; see
+[Commit progressively](../src/openwish/assets/skills/ow-plan/SKILL.md#commit-progressively).
 
 For example, a clinic scheduling product could progress through one clinician's
 bookable calendar that a patient books end to end, then reminders, then multi-site

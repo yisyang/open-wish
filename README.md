@@ -84,6 +84,7 @@ See [Workflows](docs/workflows.md) for onboarding, large work and the change lif
 | `ow-consolidate` | Dispose closed changes; compact needs |
 | `ow-fast-forward` | Run through review and disposal under explicit delegation |
 | `ow-onboard` | Infer needs, assess architecture, propose worthwhile refactoring |
+| `ow-assess` | Rate a sequence's readiness, pre-mortem it, queue discovery and questions |
 
 ## What persists
 

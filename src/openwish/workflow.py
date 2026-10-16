@@ -118,7 +118,7 @@ def set_mode(project, key, mode):
 
 
 def set_task(project, task_id, status, evidence=None):
-    """Update one task in place; starting or reopening work marks the change in progress."""
+    """Update one task in place; starting or reopening delivery marks the change in progress."""
     key = task_id.split("/", 1)[0]
     change = require_change(project, key)
     if status not in TASK_STATES:
@@ -139,7 +139,9 @@ def set_task(project, task_id, status, evidence=None):
         if unfinished:
             raise WishError(f"{task_id}: prerequisites are unfinished: " + ", ".join(unfinished))
     write_json(path, data)
-    if change["meta"]["status"] in ("open", "review"):
+    # Investigating ahead of predecessors does not start delivery; any task edit stales a review.
+    status = change["meta"]["status"]
+    if status == "review" or (status == "open" and task.get("kind", "agent") != "investigate"):
         save_change(change, status="in-progress")
 
 

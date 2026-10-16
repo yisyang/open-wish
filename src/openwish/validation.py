@@ -3,7 +3,8 @@
 from datetime import date, datetime
 import re
 
-from .model import CHANGE_STATES, CURRENCY, MODES, RELATIONS, SEQUENCE_GATES, TASK_STATES, topological_order
+from .model import (CHANGE_STATES, CURRENCY, MODES, RELATIONS, SEQUENCE_GATES, TASK_KINDS, TASK_STATES,
+                    topological_order)
 from .repository import repository_snapshot
 from .storage import SCHEMA_VERSION, WishError, contained, repository_file
 
@@ -161,7 +162,7 @@ def validate(project):
             require(key not in task_ids, f"Duplicate task ID: {key}")
             task_ids.add(key)
         require(task.get("status") in TASK_STATES, f"{key}: invalid task status")
-        require(task.get("kind", "agent") in ("agent", "manual"), f"{key}: kind must be agent or manual")
+        require(task.get("kind", "agent") in TASK_KINDS, f"{key}: kind must be agent, manual or investigate")
         for field in ("title", "acceptance"):
             require(nonempty(task.get(field)), f"{key}: {field} is required")
         require(string_list(task.get("files", [])), f"{key}: files must be an array of paths")

@@ -14,8 +14,11 @@ def work_data(project, keys=()):
     if not snapshot()["warnings"]:
         warnings.extend(knowledge_warnings(project, snapshot()["files"]))
     return {"changes": change_rows(project, select_changes(project, keys), snapshot),
-            "ready": [{"id": task["id"], "title": task["title"]} for task in ready],
-            "waiting": [{"id": task["id"], "title": task["title"], "blocker": task["blocker"]} for task in waiting],
+            "ready": [{"id": task["id"], "title": task["title"], "kind": task.get("kind", "agent"),
+                       "status": task["status"]} for task in ready],
+            "waiting": [{"id": task["id"], "title": task["title"], "kind": task.get("kind", "agent"),
+                         "status": task["status"], "blocker": task["blocker"],
+                         **({"ask": True} if task.get("ask") else {})} for task in waiting],
             "unplanned": unplanned_changes(project, keys), "warnings": warnings}
 
 

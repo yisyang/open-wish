@@ -98,7 +98,8 @@ outcome the change advances. Needs it only has to respect, such as consistency o
 interface conventions, bind through review anyway; linking them adds noise. Deferral
 never excuses violating a current constraint or dropping an agreed result.
 
-For a broad build, propose a sequence. For example, a clinic scheduling product might
+For a broad build, propose a sequence, and assess its readiness (`ow-assess`) before
+presenting one longer than a few changes. For example, a clinic scheduling product might
 start with one clinician's bookable calendar that a patient can book end to end, then
 reminders, then multi-site staffing.
 
@@ -106,7 +107,8 @@ Write tasks only for **ready** increments expected to start soon: their prerequi
 capabilities exist in the repository and no material decision is open. For a
 resumable plan, record the rest as open changes with scope, prerequisites,
 uncertainties, exit evidence and empty task lists, and say their planning is
-incomplete; plan or split out investigations that can run now. Name each change's
+incomplete. Give consequential unknowns `investigate` tasks now, even in changes
+that wait (Discover ahead of delivery in `ow-plan`). Name each change's
 predecessors with `--after`: the changes whose delivered results it builds on, not
 merely earlier ones. It is planned once they pass (Plan a candidate in `ow-plan`).
 Prerequisites describe capabilities to verify in code and tests, never another
@@ -116,17 +118,24 @@ blocked ones will need re-planning, then comply.
 **Check the sequence** before presenting or revising one, walking it in `after`
 order. Structure checks cannot see these gaps:
 
-- **Providers.** Each prerequisite names its provider: existing code, or a change
-  this one comes after, directly or transitively. A capability that no predecessor
-  delivers, or that a predecessor defers, is a gap: add it to a change's delivers
-  now and repair `after`.
+- **Providers.** Each prerequisite states the behavior needed, its provider
+  (existing code, or a change this one comes after, directly or transitively) and
+  how its presence is verified. A capability that no predecessor delivers, or that
+  a predecessor defers, is a gap even when `after` is valid: add it to a change's
+  delivers now and repair `after`. Once a provider is disposed, the prerequisite
+  names the delivered code and checks instead.
 - **Destinations.** Each deferral names where the work goes: a change that lists it
   in delivers now, or an unplanned open change. A deferral without a destination
   drops the result.
 - **Coverage.** Every acceptance criterion of the needs the ask covers is already
-  met in code, delivered by a change, or held by an unplanned open change that says
-  why it waits. A need or criterion with none of these is an omission, not a
+  met in code (with retained checks, though its change is gone), delivered by a
+  change, or held by an unplanned open change that says why it waits. A need or
+  criterion with none of these is an omission, not a
   deferral: give it a change, or ask whether it should wait or be retired.
+
+- **Pressure.** Foundational changes (data models, identities, money and permission
+  rules, public interfaces) come early, so check each against the later needs it
+  will have to carry (Future constraints in `ow-align`).
 
 When new requirements arrive, ask these questions again. Repair tasks within the
 current boundary; scope separately acceptable additions as new changes (Reconcile

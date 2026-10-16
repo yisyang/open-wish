@@ -102,10 +102,12 @@ def change_line(change):
 
 def readiness_lines(ready, waiting, unplanned):
     lines = []
-    for label, tasks in (("READY", ready), ("WAIT", waiting)):
+    for default, tasks in (("READY", ready), ("WAIT", waiting)):
         for task in tasks:
+            label = "ASK" if task.get("ask") else default
             needs = "; ".join(f"{need['id']} — {need['outcome']}" for need in task.get("needs", []))
-            lines.append(f"{label} {task['id']} {task['title']}" + (f" — {needs}" if needs else ""))
+            kind = " [investigate]" if task.get("kind") == "investigate" else ""
+            lines.append(f"{label} {task['id']}{kind} {task['title']}" + (f" — {needs}" if needs else ""))
             if task.get("blocker"):
                 lines.append(f"  {task['blocker']}")
     plannable = [change for change in unplanned if not change["waiting_on"]]
@@ -118,6 +120,11 @@ def readiness_lines(ready, waiting, unplanned):
     if later:
         lines.append(f"LATER {len(later)} unplanned changes wait for predecessors: "
                      + ", ".join(change["id"] for change in later))
+    asks = sum(bool(task.get("ask")) for task in waiting)
+    flight = asks + sum(task.get("kind") == "investigate" and task.get("status") == "in-progress" for task in ready)
+    if flight:
+        lines.append(f"Investigations in flight: {flight}, {asks} awaiting a human. Keep two or three; "
+                     "send ASK questions as one batch (ow-plan).")
     return lines
 
 

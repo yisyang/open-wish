@@ -140,6 +140,12 @@ this checkout.
 | 25 | Bike-share need (core) | Structural rules in needs, calibration in its home |
 | 26 | Event-ticketing sequence (core) | Plan a successor on a reviewed predecessor's delivered code |
 | 27 | School timetable open items | Open items do not bind until decided |
+| 31 | Tool library, shared households later | Test a foundational schema against known later needs; preserve, resolve or record an evolution path |
+| 32 | Courier payouts before proof of delivery | Find a capability gap a valid `after` graph hides; state provider and verification |
+| 33 | Self-storage billing decision | Investigate ahead of blocked delivery; ask through cases; money waits, other work continues |
+| 34 | Meal subscription answers arrive | Fold answers, retire an assumption, reconcile done and open tasks |
+| 35 | Clinic inventory after disposal | Coverage counts retained code and checks; prerequisites resolve to delivered code |
+| 36 | Solar co-op pilot readiness (seeded) | Whole-product assessment finds planted gaps: capability, schema pressure, money decision, coverage, arithmetic, access |
 | 30 | Garden watering (3 stages) (core) | Direct delivery, then managed work with deferral and delayed acceptance, then continuing that change; mechanically graded (baseline arm) |
 
 Fixtures are evaluation inputs, not OW's implementation. Scenario prompts and the

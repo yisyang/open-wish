@@ -27,8 +27,9 @@ Read `openwish/policy.md` and run `ow status` and `ow context`. Size warnings me
    review. After closure, new implementation is a new change.
 5. Run `ow check` and report what was disposed and where knowledge now lives.
 6. **Continue the sequence.** For each `PLAN` change in `ow ready`, apply Plan a
-   candidate in `ow-plan`; planning needs no approval. Implement only within
-   authorized scope; otherwise present them as the next step.
+   candidate in `ow-plan`, and take ready investigations (Discover ahead of
+   delivery); planning needs no approval. Present `ASK` questions as one batch.
+   Implement only within authorized scope; otherwise present them as the next step.
 
 ## Compact needs
 
