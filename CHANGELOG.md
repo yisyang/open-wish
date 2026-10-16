@@ -2,7 +2,10 @@
 
 Release notes for OpenWish, newest first. Update this file for every release.
 
-## Unreleased
+## v0.9.1
+
+The `v0.9.0` tag was never published: its release check failed because the package
+version had not been bumped. This release contains everything intended for 0.9.0.
 
 ### Added
 
@@ -47,6 +50,12 @@ Release notes for OpenWish, newest first. Update this file for every release.
   names plan misses with their causes, proposing recurring lessons for the
   project's policy. `ow-plan` states that an assumption only stands in for an
   undecided product rule as a labeled placeholder and never decides it.
+- `ow-propose`'s Clarify step restates the policy's question format: one numbered
+  A/B/C set with `(Recommended)` before the preferred option.
+- Evaluations 31–35 (dry runs) cover future constraints on a foundational schema, a
+  capability gap behind a valid `after` order, investigation ahead of blocked
+  delivery, an answer that invalidates planned work, and coverage after disposal.
+  Seeded evaluation 36 checks that `ow-assess` finds planted planning defects.
 
 ## v0.8.2
 

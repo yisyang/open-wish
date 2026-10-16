@@ -22,8 +22,8 @@ relevant code and tests.
 4. **Scope changes** for managed work using Right-size delivery below. For each increment:
    `ow new change C-001 --title "..." --need N-001`, then fill in purpose, scope,
    approach and verification (formats in `openwish/artifacts.md`).
-5. **Clarify** only consequential uncertainty or conflict, in one A/B/C question
-   set. Keep current constraints until a human decides.
+5. **Clarify** only consequential uncertainty or conflict, in one numbered A/B/C
+   question set with `(Recommended)` before the preferred option (policy). Keep current constraints until a human decides.
 6. **Continue** to `ow-align` and `ow-plan`. Preparing a plan needs no approval;
    plan-only requests stop after planning.
 
