@@ -2,6 +2,14 @@
 
 Release notes for OpenWish, newest first. Update this file for every release.
 
+## v1.0.0rc2
+
+Second release candidate for v1.0.0; its CLI and skills report `1.0.0-rc.2`. It narrows
+rc1's plan-only rule in Direct delivery (`ow-core`, v1.0.0 below): only a request for a
+plan that says not to implement yet becomes managed. With rc1's wording, evaluations
+of a routine change described its steps and wrongly recorded a change; plan-only
+requests still record their plan.
+
 ## v1.0.0rc1
 
 Release candidate for v1.0.0, with the changes listed there. Its CLI and installed
@@ -25,8 +33,9 @@ everything under `openwish/` belongs to the project; `ow init` migrates schema 4
   check that reads the doc, runs only when its inputs change and carries no need
   IDs. Once product tests replay an example, only its cheap quote check remains.
   Assessments cite a current passing run instead of recomputing by hand.
-- Direct delivery (`ow-core`): a plan-only request is never direct, since its result
-  is finished in a later session; the plan is recorded as a change with its tasks.
+- Direct delivery (`ow-core`): when the human asks for a plan and says not to
+  implement yet, delivery is managed and the plan is recorded as a change with its
+  tasks; describing the steps of requested work does not make it plan-only.
   Evaluations showed agents sometimes planned such requests in the session only.
 - One home per fact (policy): large tables live in domain data; a doc may show a
   generated view that a check keeps current. The Architecture rubric's friction is

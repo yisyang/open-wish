@@ -36,8 +36,9 @@ Direct or managed delivery changes what is recorded, not the care taken.
 **Direct delivery** fits one coherent result finished and verified in this session,
 with no material open decision, nothing deferred, and no active change covering
 it. It records no change, tasks or acceptance step, though it may create or revise
-a need. A plan-only request is never direct: its result is finished in a later
-session, so the plan is recorded as a change with its tasks.
+a need. When the human asks for a plan and says not to implement yet, the result is
+finished in a later session, so delivery is managed: record the plan as a change with
+its tasks. Describing the steps of work you were asked to do does not make it plan-only.
 
 **Managed delivery** uses changes when work needs several acceptable increments,
 resumption across sessions, deferred obligations, sequencing, manual blockers or
