@@ -35,7 +35,7 @@ class ReleaseTests(unittest.TestCase):
 
     def test_mismatched_cli_version_is_rejected(self):
         self.module.write_text('__version__ = "0.3.0"\n', encoding="utf-8")
-        with self.assertRaisesRegex(ValueError, "does not match"):
+        with self.assertRaisesRegex(ValueError, "requires the CLI __version__ 0.3.1"):
             check_version(self.root, "v0.3.1")
 
     def test_unexpected_distribution_name_is_rejected(self):
@@ -43,9 +43,21 @@ class ReleaseTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "must be openwish"):
             check_version(self.root)
 
-    def test_nonstable_or_ambiguous_versions_are_rejected(self):
-        for version in ("0.3.1rc1", "0.3.1-rc.1", "03.1.0", "latest"):
+    def test_release_candidate_pairs_pep440_package_with_semver_cli(self):
+        # The CLI stamps installed skills; SemVer orders 0.3.1-rc.1 below 0.3.1, so final upgrades it.
+        self.metadata.write_text('[project]\nname = "openwish"\nversion = "0.3.1rc1"\n', encoding="utf-8")
+        self.module.write_text('__version__ = "0.3.1-rc.1"\n', encoding="utf-8")
+        self.assertEqual(check_version(self.root, "v0.3.1rc1"), "0.3.1rc1")
+        for tag in ("v0.3.1", "v0.3.1-rc.1"):
+            with self.subTest(tag=tag), self.assertRaisesRegex(ValueError, "must be v0.3.1rc1"):
+                check_version(self.root, tag)
+        self.module.write_text('__version__ = "0.3.1rc1"\n', encoding="utf-8")
+        with self.assertRaisesRegex(ValueError, "requires the CLI __version__ 0.3.1-rc.1"):
+            check_version(self.root)
+
+    def test_other_prerelease_or_ambiguous_versions_are_rejected(self):
+        for version in ("0.3.1-rc.1", "0.3.1rc0", "0.3.1a1", "0.3.1.dev1", "03.1.0", "latest"):
             with self.subTest(version=version):
                 self.metadata.write_text(f'[project]\nname = "openwish"\nversion = "{version}"\n', encoding="utf-8")
-                with self.assertRaisesRegex(ValueError, "stable MAJOR.MINOR.PATCH"):
+                with self.assertRaisesRegex(ValueError, "MAJOR.MINOR.PATCHrcN"):
                     check_version(self.root)

@@ -179,12 +179,12 @@ class CliTests(ProjectCase):
 
     def test_unsupported_schema_fails_without_touching_files(self):
         path = self.root / "openwish/config.json"
-        original = path.read_text().replace('"version": 4', '"version": 999')
+        original = path.read_text().replace('"version": 5', '"version": 999')
         path.write_text(original, encoding="utf-8")
         before = {p: p.read_bytes() for p in self.root.rglob("*") if p.is_file()}
         for args in (("check",), ("init", "--harness", "opencode"),
                      ("skills", "--harness", "opencode"), ("new", "need", "N-001", "--title", "Need")):
-            self.assertIn("expected 4", self.cli(*args, success=False).stderr)
+            self.assertIn("expected 5", self.cli(*args, success=False).stderr)
         self.assertEqual(before, {p: p.read_bytes() for p in self.root.rglob("*") if p.is_file()})
         self.assertEqual(path.read_text(), original)
 
@@ -193,7 +193,7 @@ class CliTests(ProjectCase):
         self.assertIn("Harnesses: opencode, claude, codex", output)
         for directory in (".opencode", ".claude", ".agents"):
             self.assertTrue((self.root / directory / "skills/ow-propose/SKILL.md").is_file())
-        self.assertIn("42 unchanged", self.cli("init", "--harness", "opencode", "claude", "codex").stdout)
+        self.assertIn("47 unchanged", self.cli("init", "--harness", "opencode", "claude", "codex").stdout)
 
     def test_init_without_tty_requires_explicit_harnesses_and_writes_nothing(self):
         root = self.root / "new-project"

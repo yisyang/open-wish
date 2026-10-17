@@ -5,7 +5,7 @@ description: Dispose closed OW changes while preserving needs and useful reposit
 
 # Consolidate
 
-Read `openwish/policy.md` and run `ow status` and `ow context`. Size warnings mean
+Load `ow-core`, read `openwish/policy.md` and run `ow status` and `ow context`. Size warnings mean
 "inspect relevance and duplication", never "delete meaning".
 
 ## Dispose closed changes

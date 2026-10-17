@@ -5,7 +5,7 @@ description: Assess whether an OW product's needs and change sequence are ready 
 
 # Assess
 
-Read `openwish/policy.md` and run `ow context`, `ow ready` and `ow trace`; use
+Load `ow-core`, read `openwish/policy.md` and run `ow context`, `ow ready` and `ow trace`; use
 `ow graph --json` to find related needs. Read the referenced rule docs and the
 code, checks and setup that already exist. A passing `ow check` is structure, not
 readiness. Scale the pass to the plan: a three-change sequence needs minutes.
@@ -20,9 +20,9 @@ readiness. Scale the pass to the plan: a three-change sequence needs minutes.
 
    | Item | Question |
    | --- | --- |
-   | Intent | Are actors, outcomes and acceptance clear, with undecided rules in `open`? |
+   | Intent | Are actors, outcomes and acceptance clear, with undecided rules in `open` and rule docs marked (Rule status in `ow-propose`)? |
    | Coverage | Is every criterion in the horizon met, planned or held with a reason (Check the sequence in `ow-propose`)? |
-   | Rules | Do rule docs agree with needs and each other, and do their worked examples recompute? |
+   | Rules | Do rule docs agree with needs and each other, and do their worked examples recompute? A passing recompute check at this revision is the evidence (Strategic verification in `ow-plan`). |
    | Sequence | Does each prerequisite have a provider and a check, and do early foundational designs survive later needs? |
    | Decisions | Which open items sit on the path to the horizon, and which commitment points do they hold? |
    | Execution | Do the toolchain, environments and access the next changes need actually work? Check what is cheap to check. |

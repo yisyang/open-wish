@@ -1,14 +1,15 @@
-# OW artifact reference — schema 4
+# OW artifact reference — schema 5
 
-Formats and commands. Workflow guidance lives in `openwish/policy.md` and the skills.
+Formats and commands. Workflow guidance lives in the skills, starting with `ow-core`;
+project rules live in `openwish/policy.md`. Everything under `openwish/` is the
+project's: OW writes there only through its commands and schema migrations.
 Markdown files use TOML frontmatter between `+++` lines.
 
 ```text
 openwish/
-  config.json                 # schema 4, product name, size targets
+  config.json                 # schema 5, product name, size targets
   installation.json           # installer bookkeeping
-  policy.md                   # project-owned workflow policy
-  artifacts.md                # this reference, upgraded with the CLI
+  policy.md                   # project policy, adding to or overriding ow-core
   needs/N-001.md              # durable intent
   changes/C-001/change.md     # disposable purpose, scope, approach, verification
   changes/C-001/tasks.json    # disposable task list
@@ -162,7 +163,7 @@ ow clean C-001
 
 **Freshness.** A passing review records digests of its inputs: the change (except
 status, closure fields and `after`), its tasks, every current and linked need (except
-`open`), the handoff and its destinations, config, policy, each product file outside
+`open`), the handoff and its destinations, config, project policy, each product file outside
 `openwish/` (Git tracked and unignored files, recursively including submodules;
 filesystem walk without Git) and submodule revisions. Any difference makes the
 review stale; `ow summary` and `ow close` name what changed. Missing or conflicted
@@ -200,7 +201,7 @@ change's files.
 
 ## Configuration and installation
 
-`config.json`: `version: 4`, `product`, `needs_token_budget` (default 24000, a soft
+`config.json`: `version: 5`, `product`, `needs_token_budget` (default 24000, a soft
 target that warns at 80%), `source_hard_limit` (default 0 = off),
 `successors_wait_for` (`review`, the default, or `acceptance`), and
 `code_exceptions` (each with exact `path`, `kind` of `data`, `low-complexity` or
@@ -210,6 +211,11 @@ reason, except `generated` ones (tool output such as lockfile loaders or vendore
 releases), which are silent; every exception warns once its file is gone. Only a configured `source_hard_limit` makes size an error.
 
 `ow init` offers a harness multi-select, or use `ow init --harness opencode claude`.
-Reinitializing preserves project knowledge and policy, upgrades older integration
-files and this reference, leaves equal versions untouched and asks before downgrades.
-`ow skills --harness NAME` uses the same installer. Only schema 4 is supported.
+Reinitializing preserves project knowledge and policy, upgrades older skills (this
+reference ships in `ow-core`), leaves equal versions untouched and asks before
+downgrades. `ow skills --harness NAME` uses the same installer.
+
+`ow init` migrates a schema-4 project to schema 5 after preflighting it: OW-shipped
+text leaves `openwish/policy.md` and an unedited `openwish/artifacts.md` is removed,
+since both now ship in `ow-core`. Edited text is kept as the project's and reported.
+Other commands on an older schema ask you to run `ow init`.

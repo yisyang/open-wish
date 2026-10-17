@@ -334,7 +334,7 @@ Run the relevant checks and `ow check`, then record the result with
 always recorded as affected; every other current need is recorded as assessed and
 unaffected, so the reviewer must actually judge it. The handoff maps each material
 requirement to retained files and evidence
-([format](../src/openwish/assets/artifacts.md#review-closure-and-disposal)) and lives
+([format](../src/openwish/assets/skills/ow-core/artifacts.md#review-closure-and-disposal)) and lives
 only in the disposable review. Unresolved findings use `--verdict blocked`.
 
 Present **need → outcome → evidence**, with remaining limitations. In default
@@ -393,5 +393,5 @@ disappear once their findings are preserved. Git holds history. Keep historical 
 as product data only when a need requires it.
 
 For details, see the [product requirements](product.md),
-[framework design](design.md), [workflow policy](../src/openwish/assets/policy.md),
-and [artifact reference](../src/openwish/assets/artifacts.md).
+[framework design](design.md), [OW policy](../src/openwish/assets/skills/ow-core/SKILL.md),
+and [artifact reference](../src/openwish/assets/skills/ow-core/artifacts.md).

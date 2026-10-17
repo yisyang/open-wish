@@ -14,16 +14,19 @@ contributors; architecture is in [design.md](design.md).
   needs carry no execution state, and closing a change never retires or completes one.
 - Inferred intent stays distinguishable from human confirmation, at statement level:
   `confirmed_at` covers every acceptance criterion; undecided questions and proposals
-  wait in a need's `open` list, which status surfaces until they are decided.
+  wait in a need's `open` list, which status surfaces until they are decided. Rule
+  docs tag each rule confirmed, approved-initial, inferred, engineering, proposed or
+  open.
   Translation preserves material conditions, exceptions, units and consequences.
 - Needs stay true while the product is tuned and rebuilt: acceptance holds structural
   rules in readable sentences; calibration lives in referenced rules and setup in
-  ordinary docs. Each fact has one home that other artifacts link to, and needs never
-  depend on files a fresh clone lacks.
+  ordinary docs. Each fact has one home that other artifacts link to; a doc view
+  generated from domain data and kept current by a check is not a second home. Needs
+  never depend on files a fresh clone lacks.
 - Needs are sized by outcome independence, not effort; mechanisms reuse existing
   needs; duplicates merge and bundles split with stable IDs where possible. How the
   product is built is not a need: project-wide engineering requirements (setup,
-  checks, releases) live in an ordinary doc the policy links, and reviews check them.
+  checks, releases) live in an ordinary doc the project policy links, and reviews check them.
 - Optional need references point to retained files with detailed rules or data.
   Optional reasoned relations (`requires`, `constrains`) live on needs; the graph is
   derived on demand. Unlinked current needs still bind.
@@ -73,7 +76,8 @@ contributors; architecture is in [design.md](design.md).
 - Adoption is explicit; installed skills do not mandate use and opt-outs win.
 - Every product change recovers and reconciles intent, designs, verifies and reviews
   in proportion. Direct delivery (one result finished in one session, nothing deferred
-  or undecided) keeps no execution records; managed delivery uses changes.
+  or undecided) keeps no execution records; managed delivery uses changes, including
+  for plan-only requests whose result is finished later.
 - Confirmation of written intent is provenance, not a gate; open questions block only
   the work that depends on them.
 - Conversation instructions authorize scope; only material questions are asked;
@@ -89,6 +93,10 @@ contributors; architecture is in [design.md](design.md).
 - Use the smallest set of fast, independent checks that protects affected needs and
   costly failures. Avoid incidental snapshots, private-call assertions and speculative
   matrices; honor explicit coverage requirements without equating them with correctness.
+- A rule doc's worked examples are recomputed by one retained check that reads the
+  doc and runs when its inputs change. Once product tests replay an example, only a
+  text check that the doc still states their values remains; agents cite a current
+  passing run rather than recomputing by hand.
 - The code-to-intent link is derived from the code: tests mention the need IDs they
   protect, and `ow trace` reports them. No separate traceability record is kept.
 - Modules carry short responsibility headers and major boundaries a README; neither
@@ -117,9 +125,15 @@ contributors; architecture is in [design.md](design.md).
 - Python 3.11+, no third-party runtime dependencies, no model API calls.
 - Published as `openwish` with identical `ow` and `openwish` commands; package, module
   and bundled skill versions advance together.
-- Nine canonical skills with thin OpenCode, Claude Code, Codex and generic adapters;
+- Ten canonical skills with thin OpenCode, Claude Code, Codex and generic adapters;
   interactive and explicit harness selection; preserving, version-aware reinstall.
-- Only the current schema is supported before v1.0.0, rejected before any write.
+- Ownership is by location: OW owns what it installs as skills, including its policy
+  and artifact reference in `ow-core`; everything under `openwish/` is the project's.
+  Project policy adds to OW's rules and overrides one only by naming it.
+- Upgrades keep existing projects working: artifact format changes ship with a
+  migration that `ow init` applies after preflighting the whole project. Projects on
+  an older schema are told to run `ow init`; unknown schemas are rejected before any
+  write.
   A CLI older than a project's installed integrations refuses to use it and asks for
   an upgrade instead of misreporting newer records as invalid.
 - Skill evaluations compare OW against a no-OW baseline on executable, multi-session

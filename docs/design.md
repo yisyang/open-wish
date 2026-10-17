@@ -70,7 +70,7 @@ Each change has one `review.json`, replaced on every review:
   the record makes it explicit and the summary shows it.
 - `inputs` (passing reviews): short digests of the change (without lifecycle fields
   or `after`), tasks, each current and linked need (without its non-binding `open`
-  items), the handoff and each destination, config, policy, each product file
+  items), the handoff and each destination, config, project policy, each product file
   outside `openwish/` (content plus executable bits), and submodule revisions.
 
 Freshness compares recorded and current inputs. Any difference is stale, and the
@@ -134,8 +134,8 @@ and blocked changes and retired needs.
 
 ## Agent guidance
 
-Policy and skills are product assets in `src/openwish/assets/`. Each rule has one
-owner: the policy holds principles and authority; each skill holds one procedure
+Skills are product assets in `src/openwish/assets/skills/`. Each rule has one
+owner: `ow-core` holds OW's principles and authority; each other skill holds one procedure
 and the shared sections it owns (Right-size intent and delivery in `ow-propose`, the
 Architecture rubric in `ow-align`, Task sizing, Plan a candidate, Reconcile the plan and Strategic
 verification in `ow-plan`, Safe to forget in `ow-review`). Other skills refer to these
@@ -144,14 +144,21 @@ appear in the evaluation scenarios.
 
 ## Integration and compatibility
 
-Nine canonical skills are packaged once, with thin adapters for OpenCode, Claude Code,
-Codex and generic Agent Skills. `openwish/artifacts.md` documents the CLI, so the
-installer manages it like the skills; `policy.md` is project-owned. The installer offers interactive multi-select and
+Ten canonical skills are packaged once, with thin adapters for OpenCode, Claude Code,
+Codex and generic Agent Skills. OW owns only what it installs as skills; everything
+under `openwish/` is the project's, including `policy.md`, which `ow init` writes once
+from a short starter. `ow-core` carries OW's policy and the artifact reference, which
+documents the CLI and so upgrades with it. `migrations.py` moves schema-4 projects to
+this split: it drops policy blocks and references whose digests match text OW shipped
+under schema 4 (`assets/migrations/schema-4.json`), keeps and reports everything
+else, and writes the schema version last. The installer offers interactive multi-select and
 repeatable flags, deduplicates shared paths, stamps each file with the OW version,
 records ownership in `installation.json`, upgrades older files, leaves equal versions
 alone, asks before downgrades, preserves unversioned unrecorded files, and preflights
-every selected harness before writing. Deselection does not uninstall. Only schema 4
-is supported; `init`, `skills` and project commands reject other schemas before writing.
+every selected harness before writing. Deselection does not uninstall. Schema 4 is
+current; `init`, `skills` and project commands reject other schemas before writing.
+When the schema changes, `init` gains a migration from each earlier schema, run after
+a whole-project preflight, and project commands on an older schema direct users to it.
 
 ## Verification
 

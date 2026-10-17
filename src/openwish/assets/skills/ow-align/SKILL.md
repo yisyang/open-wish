@@ -5,14 +5,14 @@ description: Establish or reassess architecture for substantive OW work, from a 
 
 # Align
 
-Read `openwish/policy.md` and the affected code and tests.
+Load `ow-core`, then read `openwish/policy.md` and the affected code and tests.
 
 - **Direct:** run `ow context`; apply steps 1–4, 6 and 7 in the session. Write no
   Approach.
 - **Managed:** run `ow context C-001` and read the change; apply every step.
 
 1. **Know the constraints.** Every current need binds, including delivered ones,
-   as do the engineering requirements the policy links. Inspect affected modules, interfaces, consumers, tests and operational limits.
+   as do the engineering requirements the project policy links. Inspect affected modules, interfaces, consumers, tests and operational limits.
    Use `ow graph N-001 --json` and `ow trace N-001` to find related intent and the
    checks protecting it; neither proves that unlinked needs are unaffected.
 2. **Separate conflict from difficulty.** Distinguish intent that truly conflicts
@@ -44,7 +44,7 @@ finding connects **observation → consequence → improvement → verification*
 | Question | Good signs | Friction to investigate |
 | --- | --- | --- |
 | Can a maintainer find behavior? | Domain names, clear entry points, a one-line responsibility header per module, a README at major boundaries | Generic helpers, hidden dispatch, headers that no longer match the code |
-| Does each rule have one owner? | Changing a rule stays local, in code and in docs | Duplicated decisions; one responsibility spread across modules; docs restating rule values |
+| Does each rule have one owner? | Changing a rule stays local, in code and in docs | Duplicated decisions; one responsibility spread across modules; docs restating rule values by hand |
 | Are dependencies explicit? | Clear direction, data ownership and contracts | Cycles, hidden globals, leaking internals |
 | Can decisions run without effects? | Pure calculations and transitions with explicit inputs | Business rules that need network, database, clock or environment |
 | Do tests check intent? | Small, fast checks of outcomes and invariants | Snapshots of incidental output, private-call assertions |

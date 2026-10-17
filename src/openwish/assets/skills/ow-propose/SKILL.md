@@ -5,25 +5,24 @@ description: Interpret an ask that changes product behavior in an OW project, or
 
 # Propose
 
-Read `openwish/policy.md`, run `ow context` (needs and work state), and inspect the
+Load `ow-core`, read `openwish/policy.md`, run `ow context` (needs and work state), and inspect the
 relevant code and tests.
 
 1. **Interpret the ask.** Identify the actor, the valuable outcome, how to observe
    it, and genuine constraints. Keep every condition, exception, unit and boundary
    that distinguishes acceptable behavior, in the need or its referenced rules; a
-   shorter outcome must not erase one. Mark which rules the human stated or
-   approved, which are engineering choices, and which are open proposals.
+   shorter outcome must not erase one. Mark each rule's status (Rule status below).
 2. **Match existing intent** using Right-size intent below. If the outcome already
    exists, explain it. Revise a need in place, keeping its ID, when intent evolves.
    Leave `confirmed_at` empty for inferred intent. If an active change already
    covers the ask, continue it.
-3. **Choose delivery** (policy). Direct work continues through `ow-align` and
+3. **Choose delivery** (`ow-core`). Direct work continues through `ow-align` and
    `ow-plan` in the session, with no change records. Respect plan-only requests.
 4. **Scope changes** for managed work using Right-size delivery below. For each increment:
    `ow new change C-001 --title "..." --need N-001`, then fill in purpose, scope,
-   approach and verification (formats in `openwish/artifacts.md`).
+   approach and verification (formats in the `ow-core` artifact reference).
 5. **Clarify** only consequential uncertainty or conflict, in one numbered A/B/C
-   question set with `(Recommended)` before the preferred option (policy). Keep current constraints until a human decides.
+   question set with `(Recommended)` before the preferred option (`ow-core`). Keep current constraints until a human decides.
 6. **Continue** to `ow-align` and `ow-plan`. Preparing a plan needs no approval;
    plan-only requests stop after planning.
 
@@ -41,7 +40,7 @@ A need is one coherent valuable outcome, independent of mechanism and effort.
 - **Not a need:** how the code is built (data-driven dispatch, module splits,
   dependency direction, testability). These are engineering duties (`ow-align`)
   kept in code, tests and module headers; project-wide ones, such as reproducible
-  setup or release controls, are engineering requirements (policy). A requested
+  setup or release controls, are engineering requirements (`ow-core`). A requested
   extension property, such as "a new kind needs only data", is protected by a test
   that adds one. It becomes a need only when someone other than a developer gains
   the capability, such as staff adding kinds without a release.
@@ -61,8 +60,8 @@ Keep needs true as the product is tuned and rebuilt, and readable after a break:
   retuning the value after a pilot change what the human wants? If not, it is
   calibration. A boundary's meaning (is day 14 late?) stays with its rule. State a
   rule shared by several kinds once, with each kind's values in its table row.
-  An unsettled value does not block its mechanism: a labeled placeholder in its
-  home may back schemas, interfaces and test fixtures, never shipped behavior that
+  An unsettled value does not block its mechanism: a placeholder labeled `proposed` in
+  its home may back schemas, interfaces and test fixtures, never shipped behavior that
   depends on the value. Record the question in `open`.
 - **Outcomes, not setup.** Hosts, tools, sibling repositories and test accounts
   belong in ordinary docs; the need states only the requirement.
@@ -73,6 +72,26 @@ Keep needs true as the product is tuned and rebuilt, and readable after a break:
   clarifying questions; once decided, move each into acceptance, a rule or the body,
   or drop it. Moving unapproved items into `open`, or rewording without changing
   meaning, keeps `confirmed_at`.
+
+## Rule status
+
+Needs carry status in `confirmed_at` and `open`. A rule doc marks it per section: an
+opening `**Status:**` line lists tags, optionally scoped (`confirmed rules,
+approved-initial values`), and a sentence, bullet or row that differs starts with
+`[tag]`.
+
+- `confirmed`: a human stated or approved it.
+- `approved-initial`: a human approved it as a starting value that evidence, such as
+  a pilot, is expected to retune.
+- `inferred`: read from delivered behavior or context; it binds like an unconfirmed
+  need until a human confirms or changes it.
+- `engineering`: chosen within confirmed intent; it may change without a new decision
+  while that intent holds.
+- `proposed`: assumed or recommended for undecided behavior; it stands in for a rule
+  only as Commit progressively in `ow-plan` allows.
+- `open`: undecided; the question lives in a need's `open` list or an investigation.
+
+Only a recorded human decision makes a rule `confirmed` or `approved-initial`.
 
 ## Right-size delivery
 

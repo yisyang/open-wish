@@ -3,19 +3,24 @@
 from pathlib import Path
 
 from .integrations import asset, install_skills
+from .migrations import apply_migration, plan_migration
 from .storage import (SCHEMA_VERSION, WishError, contained, document, identifier,
-                      load_project, project_config, write_json, write_text)
+                      load_project, write_json, write_text)
 
 
 def initialize(root, harnesses="generic", *, confirm_downgrade=None):
     root = Path(root).resolve()
     config = contained(root, "openwish/config.json")
     if config.exists():
-        project_config(root)
+        # Preflight the migration, install skills (which may still refuse a downgrade),
+        # then write the migration, so a refusal leaves the project untouched.
+        migration = plan_migration(root)
         report = install_skills(root, harnesses, confirm_downgrade=confirm_downgrade)
-        return {"root": root, "initialized": False, **report}
-    outputs = {"openwish/policy.md": asset("policy.md")}
-    for relative in (*outputs, "openwish/artifacts.md"):
+        if migration:
+            apply_migration(root, migration)
+        return {"root": root, "initialized": False, "migration": migration, **report}
+    outputs = {"openwish/policy.md": asset("project-policy.md")}
+    for relative in outputs:
         if contained(root, relative).exists():
             raise WishError(f"Existing artifact preserved: {relative}")
     # A missing config must not turn existing knowledge into a new project.
@@ -29,7 +34,7 @@ def initialize(root, harnesses="generic", *, confirm_downgrade=None):
     write_json(config, {"version": SCHEMA_VERSION, "product": root.name, "needs_token_budget": 24000,
                         "source_hard_limit": 0, "successors_wait_for": "review", "code_exceptions": []},
                create=True)
-    return {"root": root, "initialized": True, **report}
+    return {"root": root, "initialized": True, "migration": None, **report}
 
 
 def new_artifact(root, kind, key, title, *, needs=(), fast_forward=False, after=()):

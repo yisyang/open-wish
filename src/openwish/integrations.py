@@ -7,12 +7,11 @@ from . import __version__
 from .storage import WishError, contained, read_json, write_json, write_text
 from .versions import declared_version, stamp, version_key
 
-SKILLS = ("propose", "align", "plan", "implement", "review", "consolidate", "fast-forward", "onboard", "assess")
+SKILLS = ("core", "propose", "align", "plan", "implement", "review", "consolidate", "fast-forward", "onboard", "assess")
 HARNESSES = ("opencode", "claude", "codex", "generic")
 DIRECTORIES = {"generic": ".agents", "codex": ".agents", "claude": ".claude", "opencode": ".opencode"}
 MANIFEST = "openwish/installation.json"
-# The artifact reference documents this CLI, so it upgrades with it; policy stays project-owned.
-REFERENCE = "openwish/artifacts.md"
+# Everything OW owns ships as skills; openwish/ holds only the project's knowledge.
 
 
 def asset(name):
@@ -63,12 +62,17 @@ def installed_harnesses(root):
 
 
 def integration_files(harnesses, version):
-    outputs = {REFERENCE: stamp(asset("artifacts.md"), version)}
+    outputs = {}
     for harness in normalize_harnesses(harnesses):
         directory = DIRECTORIES[harness]
         for skill in SKILLS:
             outputs[f"{directory}/skills/ow-{skill}/SKILL.md"] = stamp(
                 asset(f"skills/ow-{skill}/SKILL.md"), version, skill=True)
+            if skill == "core":
+                # The artifact reference documents this CLI, so it ships and upgrades with it.
+                outputs[f"{directory}/skills/ow-core/artifacts.md"] = stamp(
+                    asset("skills/ow-core/artifacts.md"), version)
+                continue
             if harness == "opencode":
                 prompt = (f"Follow the ow-{skill} skill in this project. "
                           f"Read .opencode/skills/ow-{skill}/SKILL.md if needed.\n\n$ARGUMENTS\n")
@@ -103,9 +107,6 @@ def install_skills(root, harnesses, *, confirm_downgrade=None):
             plan.append((relative, content, "installed", __version__))
             continue
         installed = declared_version(current) or manifest["files"].get(relative)
-        if installed is None and relative == REFERENCE:
-            raise WishError(f"{REFERENCE} predates version stamps; delete it and rerun 'ow init' "
-                            "to install the current reference (project knowledge lives elsewhere).")
         if installed is None:
             raise WishError(f"Integration file has no version or installation record; preserved: {relative}")
         existing = version_key(installed)

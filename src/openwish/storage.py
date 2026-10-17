@@ -117,12 +117,20 @@ def write_json(path, value, *, create=False):
     write_text(path, json.dumps(value, indent=2, ensure_ascii=False) + "\n", create=create)
 
 
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
+OLDEST_MIGRATABLE = 4
 
 
-def project_config(root):
+def project_config(root, *, migratable=False):
+    """Read the config; an older schema is accepted only where `ow init` will migrate it."""
     config = read_json(contained(root, "openwish/config.json"))
-    if type(config.get("version")) is not int or config["version"] != SCHEMA_VERSION:
+    version = config.get("version")
+    if type(version) is int and OLDEST_MIGRATABLE <= version < SCHEMA_VERSION:
+        if migratable:
+            return config
+        raise WishError(f"This project uses OW schema {version}; run 'ow init' to migrate it "
+                        f"(expected {SCHEMA_VERSION}).")
+    if type(version) is not int or version != SCHEMA_VERSION:
         raise WishError(f"Unsupported OW schema; expected {SCHEMA_VERSION}.")
     return config
 

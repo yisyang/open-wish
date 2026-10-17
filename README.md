@@ -20,8 +20,8 @@ needs stay binding after delivery, so the next feature does not quietly undo the
 last one.
 
 OW takes inspiration from [Spec Kit](https://github.com/github/spec-kit) and
-[OpenSpec](https://github.com/Fission-AI/OpenSpec). OpenWish **0.9.1** uses
-**artifact schema 4**.
+[OpenSpec](https://github.com/Fission-AI/OpenSpec). OpenWish **1.0.0-rc.1** uses
+**artifact schema 5**.
 
 ## Get started
 
@@ -85,6 +85,7 @@ See [Workflows](docs/workflows.md) for onboarding, large work and the change lif
 | `ow-fast-forward` | Run through review and disposal under explicit delegation |
 | `ow-onboard` | Infer needs, assess architecture, propose worthwhile refactoring |
 | `ow-assess` | Rate a sequence's readiness, pre-mortem it, queue discovery and questions |
+| `ow-core` | OW's own policy and artifact reference, loaded first by every other skill |
 
 ## What persists
 
@@ -97,6 +98,7 @@ See [Workflows](docs/workflows.md) for onboarding, large work and the change lif
 | Module responsibilities | A short header per module; a README at major boundaries |
 | Non-obvious rationale, environments and setup | Nearby comments or ordinary docs |
 | Working design, tasks, latest review | `openwish/changes/C-001/` (deleted after acceptance) |
+| Project rules, engineering-requirements link, review lessons | `openwish/policy.md` (the project's; OW never edits it) |
 
 Needs have no execution status; closing a change does not retire a need or claim it
 is complete. `confirmed_at` records that a human confirmed every acceptance criterion;
@@ -136,11 +138,11 @@ ow graph --json                      # recorded need relations
 ow check --json                      # structure, references, size targets
 ```
 
-Review freshness covers the change, tasks, all current needs, config, policy, the
+Review freshness covers the change, tasks, all current needs, config, project policy, the
 handoff and every product file, including submodules. Any edit makes a pending review
 stale, and `ow summary` names what changed. Linked needs are always recorded as
 affected; `--affected` adds others; every remaining current need is recorded as
-assessed and unaffected. See the [artifact reference](src/openwish/assets/artifacts.md).
+assessed and unaffected. See the [artifact reference](src/openwish/assets/skills/ow-core/artifacts.md).
 
 ## Size guidance
 
@@ -157,14 +159,17 @@ ow init
 ```
 
 Upgrades older integration files, keeps equal versions and local edits, and asks
-before downgrades. The artifact reference upgrades with the skills; project policy,
-needs and work are preserved. Before v1.0.0 only the current schema is supported,
-with no migration tooling.
+before downgrades. Everything under `openwish/` is the project's: OW's own policy and
+artifact reference ship in the `ow-core` skill and upgrade with it, while project
+policy, needs and work are preserved. Projects use artifact schema 5; `ow init`
+migrates schema 4 after a whole-project preflight, moving OW-shipped text out of
+`openwish/` and reporting any edited text it keeps. Other schemas are rejected before
+any write.
 
 ## Design and contribution
 
 - [Product requirements](docs/product.md) and [framework design](docs/design.md)
-- [Workflow policy](src/openwish/assets/policy.md) and [artifact reference](src/openwish/assets/artifacts.md)
+- [OW policy](src/openwish/assets/skills/ow-core/SKILL.md) and [artifact reference](src/openwish/assets/skills/ow-core/artifacts.md)
 - [Skill evaluations](evals/README.md), [changelog](CHANGELOG.md), [releases](docs/releases.md),
   [contributing](CONTRIBUTING.md)
 

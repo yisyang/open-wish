@@ -47,16 +47,28 @@ For an installed executable, use a virtual environment and `python -m pip instal
 
 ## Compatibility
 
-Before v1.0.0, prioritize a simple current design over migrations or legacy
-compatibility. Support only the current artifact schema, stored in
-`openwish/config.json`, and reject unsupported versions clearly.
-Preserve unknown project files. Integration updates overwrite
+Existing projects must keep working across upgrades. The artifact schema version
+lives in `openwish/config.json`. Any change to an artifact format (config, needs,
+changes, tasks, reviews or the installation manifest) increments the schema and
+ships a migration from every earlier schema since 4, applied by `ow init`:
+
+- Preflight the whole project before writing, so a failed migration changes nothing.
+- Preserve meaning, unknown files and project-owned policy; never drop a field's
+  content silently.
+- Project commands on an older schema stop and say to run `ow init`. A CLI that
+  does not know a project's schema refuses it and asks for an upgrade.
+- Test each migration on a fixture project of every earlier schema, including an
+  idempotent rerun.
+
+A change that breaks existing projects or documented CLI behavior, including
+removing a migration path, needs a major version. Preserve unknown project files. Integration updates overwrite
 older versions, preserve same-version edits, and require confirmation to downgrade.
 Keep package and `__version__` values in sync; bump the version when bundled skills
 or adapters change so installations can receive the update.
 
 Publish from the source checkout only after tests and a wheel-install smoke test
-pass. Check package data contains policy, artifact reference, and all eight skills.
+pass. Check package data contains the project-policy starter, the schema-4 migration
+digests and all ten skills, including `ow-core` with its artifact reference.
 
 ## Releases
 

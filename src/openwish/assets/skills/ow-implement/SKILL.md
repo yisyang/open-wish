@@ -5,7 +5,7 @@ description: Implement authorized OW work, directly or by executing or resuming 
 
 # Implement
 
-Read `openwish/policy.md`. Confirm the conversation authorizes implementation;
+Load `ow-core` and read `openwish/policy.md`. Confirm the conversation authorizes implementation;
 readiness does not, and an empty `confirmed_at` does not withhold it. Use an active
 change that covers the ask.
 
@@ -22,7 +22,7 @@ change that covers the ask.
    retrieve rule files listed by `ow context` (they are not loaded automatically),
    and inspect the code. If finishing would require inventing product policy,
    resolve that first (Task sizing in `ow-plan`). Run `ow task C-001/T-001
-   in-progress`. Ready investigations in other changes are planning (policy):
+   in-progress`. Ready investigations in other changes are planning (`ow-core`):
    take them too, within the in-flight limit of Discover ahead of delivery in
    `ow-plan`. Each ends with findings in their retained home, or `blocked` with
    its question for the next batch.

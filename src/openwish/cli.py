@@ -12,7 +12,7 @@ from .integrations import HARNESSES, install_skills, installed_harnesses, requir
 from .model import TASK_STATES, need_graph, ready_tasks, unplanned_changes
 from .repository import project_files
 from .scaffold import initialize, new_artifact
-from .storage import WishError, load_project, project_config, project_root, read_json
+from .storage import SCHEMA_VERSION, WishError, load_project, project_config, project_root, read_json
 from .terminal import confirm_downgrade, select_harnesses
 from .trace import mentions, reference_warnings, trace_data
 from .validation import knowledge_warnings, validate
@@ -154,11 +154,15 @@ def run(args):
     if args.command == "init":
         root = (args.root or args.path).resolve()
         if (root / "openwish/config.json").exists():
-            project_config(root)
+            project_config(root, migratable=True)
         harnesses = args.harness or select_harnesses(installed_harnesses(root))
         report = initialize(root, harnesses, confirm_downgrade=confirm_downgrade)
         print(f"{'Initialized' if report['initialized'] else 'Checked'} OpenWish in {root}")
         print_installation(report)
+        if report["migration"]:
+            print(f"Migrated OW schema {report['migration']['from']} to {SCHEMA_VERSION}.")
+            for note in report["migration"]["notes"]:
+                print(f"- {note}")
         if report["initialized"]:
             print("Start with ow-onboard or ow-propose in your agent.")
         return 0

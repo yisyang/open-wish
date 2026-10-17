@@ -6,7 +6,7 @@ description: Adopt OpenWish for a product or monorepo when explicitly requested.
 # Onboard
 
 If adoption was requested and OW is not initialized, run `ow init --harness HARNESS`.
-Read `openwish/policy.md` and `openwish/artifacts.md`. Default to one product/domain
+Load `ow-core` and its artifact reference, and read `openwish/policy.md`. Default to one product/domain
 per repository.
 
 1. **Inspect** product descriptions, interfaces, representative user paths, code,
@@ -15,8 +15,8 @@ per repository.
 2. **Propose a small set of needs** using Right-size intent in `ow-propose`: actors,
    independently valuable outcomes, observable acceptance, genuine constraints and
    open questions (in `open`). Code shows behavior, not confirmed intent; label
-   inference. On repeat onboarding, reuse existing IDs by comparing actor, outcome
-   and acceptance.
+   inference (`inferred` in rule docs, Rule status in `ow-propose`). On repeat
+   onboarding, reuse existing IDs by comparing actor, outcome and acceptance.
 3. **Confirm intent** in one batch decision (A/B/C) in default
    mode; set `confirmed_at` only for what the human actually confirms.
    Under explicit fast-forward, leave inference unconfirmed.
@@ -31,7 +31,7 @@ per repository.
    needs one explicit human decision before any product edit; onboarding alone
    authorizes none.
 6. **Preserve operational knowledge** (environments, hosts, accounts, setup) in
-   ordinary docs rather than needs, following One home per fact in the policy.
+   ordinary docs rather than needs, following One home per fact in `ow-core`.
 7. **Present** the needs, assessment and proposal in conversation. Create changes
    only when planning, implementation or verification was requested; for broad
    requested plans, task only ready increments (Right-size delivery in `ow-propose`)

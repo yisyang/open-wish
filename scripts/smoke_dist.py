@@ -8,8 +8,10 @@ import subprocess
 import sys
 import tempfile
 
+from check_release import cli_version
+
 HARNESSES = ("opencode", "claude", "codex", "generic")
-SKILLS = ("propose", "align", "plan", "implement", "review", "consolidate", "fast-forward", "onboard")
+SKILLS = ("core", "propose", "align", "plan", "implement", "review", "consolidate", "fast-forward", "onboard", "assess")
 
 
 def snapshot(root):
@@ -35,7 +37,7 @@ def smoke(artifact, version):
         ow = str(root / "bin" / ("ow.exe" if os.name == "nt" else "ow"))
         openwish = str(root / "bin" / ("openwish.exe" if os.name == "nt" else "openwish"))
         for executable in (ow, openwish):
-            if run(executable, "--version").strip() != f"OpenWish {version}":
+            if run(executable, "--version").strip() != f"OpenWish {cli_version(version)}":
                 raise RuntimeError(f"The installed {Path(executable).name} version does not match the release.")
         project = root / "product"
         run(ow, "init", str(project), "--harness", *HARNESSES)
@@ -45,12 +47,12 @@ def smoke(artifact, version):
         for directory in (".opencode", ".claude", ".agents"):
             for skill in SKILLS:
                 path = project / directory / f"skills/ow-{skill}/SKILL.md"
-                if f'openwish-version: "{version}"' not in path.read_text(encoding="utf-8"):
+                if f'openwish-version: "{cli_version(version)}"' not in path.read_text(encoding="utf-8"):
                     raise RuntimeError(f"Missing or incorrectly versioned packaged skill: {path}")
         for relative in (".opencode/commands/fast-forward.md", ".opencode/commands/onboard.md",
                          ".claude/skills/fast-forward/SKILL.md", ".claude/skills/onboard/SKILL.md",
                          ".agents/skills/ow-fast-forward/agents/openai.yaml",
-                         "openwish/policy.md", "openwish/artifacts.md"):
+                         ".agents/skills/ow-core/artifacts.md", "openwish/policy.md"):
             if not (project / relative).read_text(encoding="utf-8").strip():
                 raise RuntimeError(f"Missing installed asset: {relative}")
         before = snapshot(project)

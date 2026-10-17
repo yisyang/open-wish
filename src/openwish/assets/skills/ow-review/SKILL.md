@@ -5,7 +5,7 @@ description: Review OW work against all current needs, code, tests and regressio
 
 # Review
 
-Read `openwish/policy.md` and the actual diff.
+Load `ow-core`, then read `openwish/policy.md` and the actual diff.
 
 - **Direct:** run `ow context`; apply steps 1–4, preserve lasting knowledge (every
   material decision of the session has a retained home), then report as in
@@ -19,7 +19,7 @@ Read `openwish/policy.md` and the actual diff.
      Check each with direct evidence.
    - **Unaffected needs:** every other current need. Confirm briefly why the change
      cannot violate it. If you cannot, treat it as affected.
-   - **Engineering requirements** the policy links: check the diff against them.
+   - **Engineering requirements** the project policy links: check the diff against them.
    Compare results with delivers-now scope and exit evidence, not ticked tasks.
    Explain partial contributions and deferrals; an empty task list is not completion.
 2. **Judge the checks** (Strategic verification in `ow-plan`): would they catch a
@@ -35,7 +35,7 @@ Read `openwish/policy.md` and the actual diff.
 6. **Record:** run `ow check`, then
    `ow record-review C-001 --summary "user-visible outcome" --check "command: result"
    [--affected N-003] --handoff FILE` (or `--handoff -` with JSON on stdin; format
-   in `openwish/artifacts.md`). Unresolved findings use `--verdict blocked`.
+   in the `ow-core` artifact reference). Unresolved findings use `--verdict blocked`.
    Passing needs every task done. If anything changes afterwards (successor work
    often does), `ow summary C-001` names what made the review stale: rerun the
    affected checks, confirm the outcome still holds, and record again.
@@ -75,7 +75,7 @@ per-function matrix.
 
 Read both directions: requirements → code and checks, and consequential code
 choices → the intent that justifies them. Copies of a rule the change added to
-needs, READMEs or other changes become links (One home per fact in the policy).
+needs, READMEs or other changes become links (One home per fact in `ow-core`).
 Could a maintainer find, explain, verify and safely change this behavior with only
 the repository? The CLI checks that
 destinations exist and are fresh, not that they say the right thing. In submodule

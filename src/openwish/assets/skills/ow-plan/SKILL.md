@@ -5,7 +5,7 @@ description: Turn an aligned OW change into executable tasks and proportionate v
 
 # Plan
 
-Read `openwish/policy.md` and the affected source and tests.
+Load `ow-core`, then read `openwish/policy.md` and the affected source and tests.
 
 - **Direct:** run `ow context`. Plan in the session: the requested result is the
   boundary; name the files, the checks (Strategic verification below) and what
@@ -16,7 +16,7 @@ Read `openwish/policy.md` and the affected source and tests.
 1. **Confirm the boundary** (Right-size delivery in `ow-propose`): delivers now,
    preserves, defers, exit evidence. If the plan already exists, apply Reconcile the
    plan below before trusting it; for a change without tasks, apply Plan a candidate.
-2. **Write tasks** in `changes/C-001/tasks.json` (format in `openwish/artifacts.md`)
+2. **Write tasks** in `changes/C-001/tasks.json` (format in the `ow-core` artifact reference)
    using Task sizing below. Add `depends_on` only for real prerequisites within the
    change; order the list sensibly. Mark observations only a human can make as
    `kind: "manual"`.
@@ -75,10 +75,10 @@ Resolve uncertainty before the commitment it could disrupt, not before all work.
 - **Reversible choices** can be changed later within code and tests alone, with no
   stored data, published contract or outward effect to migrate. Ask with a
   recommended option. If work reaches the choice unanswered, proceed on the
-  recommendation: label it as an assumption in its home, keep the question in
-  `open`, and name it in the next report. An assumption stands in for a product
-  rule only as a labeled placeholder; it never decides the rule, and it never
-  reaches a commitment point.
+  recommendation: label it `proposed` in its home (Rule status in `ow-propose`),
+  keep the question in `open`, and name it in the next report. An assumption stands
+  in for a product rule only as a labeled placeholder; it never decides the rule,
+  and it never reaches a commitment point.
 - **Ask through cases.** Show an ordinary case, a boundary, competing claims, and a
   failure or recovery, each with the outcome every option produces. Humans choose
   product consequences; settle technical facts (library behavior, performance,
@@ -123,7 +123,7 @@ A candidate is an open change without delivery tasks (investigations may have ru
 
 ## Promote direct work
 
-When direct work needs coordination (policy), create one change for the whole
+When direct work needs coordination (`ow-core`), create one change for the whole
 requested result, not only the remainder:
 
 1. Write scope, approach and exit evidence from the repository as it now is, not
@@ -172,5 +172,15 @@ not goals.
 - **Link checks to needs:** a retained test protecting a need-level outcome mentions
   the need ID in its name, docstring or comment for `ow trace`; source and helpers
   stay untagged.
+- **Recompute worked examples once.** A rule doc's worked examples get one retained
+  check that reads their inputs and expected results from the doc; a value it must
+  restate quotes the doc text, so editing either side fails it. Before product code
+  exists, keep it small and outside shipped code; adding it is implementation, not
+  investigation (`ow-core`). It protects no delivered outcome, so it names no need
+  IDs. Once product tests replay an example (Architecture rubric in `ow-align`),
+  drop its recomputation and keep only the quote check for values those tests
+  restate. Run it when the doc, its data or the checked code changes; assessments
+  and reviews cite its passing run at the current revision instead of recomputing by
+  hand.
 - Keep routine verification under five minutes and name any slower checks needed.
   Delete temporary probes once their findings are preserved.

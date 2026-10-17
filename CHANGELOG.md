@@ -2,6 +2,55 @@
 
 Release notes for OpenWish, newest first. Update this file for every release.
 
+## v1.0.0rc1
+
+Release candidate for v1.0.0, with the changes listed there. Its CLI and installed
+skills report `1.0.0-rc.1`, which sorts below `1.0.0`, so the final release upgrades
+candidate installations. Release candidates publish only to TestPyPI.
+
+## v1.0.0
+
+First stable release. OW's own guidance moves out of `openwish/` into skills, so
+everything under `openwish/` belongs to the project; `ow init` migrates schema 4 to 5.
+
+### Added
+
+- Rule status (`ow-propose`): rule docs tag each section and differing sentence
+  `confirmed`, `approved-initial`, `inferred`, `engineering`, `proposed` or `open`,
+  matching the distinction needs already make with `confirmed_at` and `open`.
+  Assumptions made under Commit progressively and inferences from onboarding use
+  these tags; only a recorded human decision makes a rule `confirmed` or
+  `approved-initial`, and fast-forward never does.
+- Strategic verification (`ow-plan`): a rule doc's worked examples get one retained
+  check that reads the doc, runs only when its inputs change and carries no need
+  IDs. Once product tests replay an example, only its cheap quote check remains.
+  Assessments cite a current passing run instead of recomputing by hand.
+- Direct delivery (`ow-core`): a plan-only request is never direct, since its result
+  is finished in a later session; the plan is recorded as a change with its tasks.
+  Evaluations showed agents sometimes planned such requests in the session only.
+- One home per fact (policy): large tables live in domain data; a doc may show a
+  generated view that a check keeps current. The Architecture rubric's friction is
+  rule values restated by hand.
+
+### Changed
+
+- Ownership by location: OW owns what it installs as skills; everything under
+  `openwish/` is the project's. A new `ow-core` skill carries OW's policy and the
+  artifact reference, and every other skill loads it first. `openwish/policy.md` is
+  now a short project starter that OW never edits; its rules add to `ow-core` and
+  override one only by naming it.
+- Schema 5. `ow init` migrates schema-4 projects after preflighting them: policy
+  text and references OW shipped under schema 4 are recognized by digest and removed
+  from `openwish/`, while project text, adapted OW text and an edited reference are
+  kept and reported. The schema version is written last, so an interrupted migration
+  resumes. Other commands on schema 4 ask you to run `ow init`.
+- Compatibility policy: existing projects keep working across upgrades. Artifact
+  format changes now require a schema bump and a migration from every earlier
+  schema, applied by `ow init` after a whole-project preflight and tested from each
+  earlier schema; changes that break existing projects need a major version. This
+  replaces the pre-1.0 guidance that preferred breaking changes over migrations.
+- Package metadata marks OpenWish as production/stable.
+
 ## v0.9.1
 
 The `v0.9.0` tag was never published: its release check failed because the package

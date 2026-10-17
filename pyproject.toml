@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "openwish"
-version = "0.9.1"
+version = "1.0.0rc1"
 description = "Need-Driven Development for humans and coding agents"
 readme = "README.md"
 requires-python = ">=3.11"
@@ -13,7 +13,7 @@ license-files = ["LICENSE"]
 keywords = ["need-driven-development", "coding-agents", "agent-skills", "cli"]
 dependencies = []
 classifiers = [
-  "Development Status :: 3 - Alpha",
+  "Development Status :: 5 - Production/Stable",
   "Environment :: Console",
   "Programming Language :: Python :: 3",
   "Programming Language :: Python :: 3 :: Only",
@@ -37,4 +37,4 @@ where = ["src"]
 include = ["openwish*"]
 
 [tool.setuptools.package-data]
-openwish = ["assets/*.md", "assets/skills/*/SKILL.md"]
+openwish = ["assets/*.md", "assets/migrations/*.json", "assets/skills/*/*.md"]

@@ -4,8 +4,7 @@ The distribution name and Python module are `openwish`. The installed commands
 are the exact aliases `ow` (canonical in documentation) and `openwish`. Users
 install with `uv tool install openwish` and upgrade with
 `uv tool upgrade openwish`, followed by `ow init` in each project whose installed
-skills they want to update. Before v1.0.0, only the current artifact schema is
-supported; releases do not include migrations or legacy compatibility.
+skills they want to update.
 
 ## One-time human setup
 
@@ -84,6 +83,16 @@ TestPyPI and PyPI have independent version histories. Testing `0.5.0` on TestPyP
 does not prevent publishing `0.5.0` to PyPI. An already uploaded filename cannot
 be overwritten; use a new version for revised artifacts on the same registry.
 
+## Release candidates
+
+A candidate uses the PEP 440 version `MAJOR.MINOR.PATCHrcN` in `pyproject.toml` and
+the matching SemVer `MAJOR.MINOR.PATCH-rc.N` as `__version__`, which stamps installed
+skills; `scripts/check_release.py` accepts only that pair. SemVer orders `1.0.0-rc.1`
+below `1.0.0`, so `ow init` upgrades candidate installations to the final release
+instead of treating them as the same version. Tag the candidate `v1.0.0rc1`; the tag
+push publishes it to TestPyPI. Do not publish a stable GitHub release for a candidate:
+PyPI receives only final versions.
+
 ## Each production release
 
 1. Update `pyproject.toml` and `src/openwish/__init__.py` to the same stable version.
@@ -91,6 +100,9 @@ be overwritten; use a new version for revised artifacts on the same registry.
    [CHANGELOG.md](../CHANGELOG.md), newest first. Use version-only headings such as
    `## v0.5.0`, and use that entry for GitHub release notes.
    Bundled skill/adapter changes require a version bump for existing installations.
+   Artifact format changes require a schema bump and a migration tested from every
+   earlier schema (Compatibility in [CONTRIBUTING.md](../CONTRIBUTING.md)); changes
+   that break existing projects require a major version.
 2. Merge the release commit after Check passes.
 3. Create and push a tag such as `v0.5.0` pointing to that commit. Confirm the
    automatic TestPyPI publication succeeds and exercise the uploaded package.
