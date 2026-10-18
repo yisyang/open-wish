@@ -36,6 +36,13 @@ class ModelTests(ProjectCase):
         self.edit_document("needs/N-001.md", constraints=["All processing is offline"])
         self.assertIn("All processing is offline", needs_context(self.project()))
 
+    def test_open_items_enter_context_marked_not_binding(self):
+        self.fixture()
+        self.edit_document("needs/N-001.md", open=["Should voided rows appear?"], constraints=["Offline"])
+        lines = needs_context(self.project()).splitlines()
+        self.assertIn('Open (not binding): ["Should voided rows appear?"]', lines)
+        self.assertFalse([line for line in lines if line.startswith("Additional intent") and "voided" in line])
+
     def test_unsupported_toml_metadata_reports_an_error_before_projection(self):
         self.fixture()
         path = self.root / "openwish/needs/N-001.md"

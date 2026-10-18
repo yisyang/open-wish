@@ -42,7 +42,8 @@ change that covers the ask.
 6. **Preserve as you go.** Behavior goes in code, checks in tests, non-obvious
    rationale nearby. Keep material conditions, exceptions and units intact. Put
    approved unfinished detail in its retained home now. Note in the change where
-   each material rule landed; the review's handoff will reuse it.
+   each material rule landed; the review's handoff will reuse it. Change notes hold
+   decisions and their homes, not progress logs, run transcripts or failure history.
 7. **Ask only when blocked.** When only human blockers remain, explain the need and
    outcome, then ask A/B/C questions. Never discard
    unfinished work to look complete.

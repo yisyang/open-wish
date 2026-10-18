@@ -273,7 +273,8 @@ def run(args):
         print(f"Recorded {args.verdict} review for {args.change}. Affected: {', '.join(record['affected'])}; "
               f"assessed unaffected: {', '.join(record['unaffected']) or 'none'}")
     elif args.command == "close":
-        close_changes(project, args.changes, args.by)
+        for warning in close_changes(project, args.changes, args.by):
+            print("WARN " + warning)
         print("Closed " + ", ".join(args.changes) + "; current needs remain binding.")
     elif args.command == "clean":
         report = clean_changes(project, args.changes, dry_run=args.dry_run)

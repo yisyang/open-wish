@@ -21,11 +21,11 @@
       "name": "change-scoped-fast-forward-disposal",
       "skills": ["ow-fast-forward", "ow-review", "ow-consolidate"],
       "prompt": "Dry-run final OW review; no commands or edits. N-001 is monthly reconciliation without row copying. N-002 keeps records local. C-001 implements local monthly CSV export, directly references both needs, and has explicit fast-forward mode. All tasks and manual checks are complete. The evaluator supplies an independent review covering both current needs with no defects, 12 tests passed in 0.6s, and ow check passed; no files changed afterward. Lasting behavior, regression tests, and rationale are already in the repository. Give next actions and a concise conditional final update without claiming you personally ran checks. Explain the effect on needs and future changes.",
-      "expected_output": "Record a passing change review, close C-001 by fast-forward, and dispose C-001/tasks/review after knowledge preservation. Report needs, outcome, supplied evidence, and delegation. Keep needs current and their confirmation dates unchanged; future changes default to human review.",
+      "expected_output": "Record a passing change review, close C-001 by fast-forward, and present the result. Keep C-001/tasks/review until the human has responded to it, then dispose them with clean after knowledge preservation; a problem the human reports becomes a new correction change planned from the retained records. Report needs, outcome, supplied evidence, and delegation. Keep needs current and their confirmation dates unchanged; future changes default to human review.",
       "files": [],
       "assertions": [
         "Uses C-001 for review and closure with --by fast-forward, without an acceptance prompt.",
-        "Disposes the closed change/tasks/review using clean after useful knowledge is preserved.",
+        "Keeps the closed change/tasks/review until the human has responded to the presented result, then disposes them using clean after useful knowledge is preserved; it does not clean in the same turn as closure.",
         "Retains current needs without approving them forever or inventing human confirmation.",
         "Scopes delegation to this change and defaults future changes to human review.",
         "Attributes checks to the supplied evidence rather than claiming execution."
@@ -504,6 +504,39 @@
         "Flags unverified execution prerequisites: no SSH access to the pilot host and a daily inverter export format nobody has seen, contrary to C-004's approach.",
         "Gives evidence-cited ratings, a pre-mortem, a stated confidence and recommendations ranked by leverage, separating agent work from human decisions.",
         "Changes no project files and claims no edits, checks or decisions that did not happen."
+      ]
+    },
+    {
+      "id": 37,
+      "name": "preview-unseen-surface-and-surface-visible-choices",
+      "skills": ["ow-plan", "ow-implement", "ow-review", "ow-propose"],
+      "prompt": "Dry-run only; save response.md. A community radio station's product uses OW. N-001: listeners request songs from the station's website and staff approve or decline each request; its acceptance says nothing about message length or what the listener sees after submitting. C-002 delivers the first listener-facing request page plus the request API and storage. The station manager approved a style guide of colors, fonts and buttons last week but has never seen any page. They authorized implementing C-002 and answer messages a few times a day. Give your next actions in order, any records you would write, and the outline of the report you would give at review.",
+      "expected_output": "Continue the API and storage work, which does not depend on the page's composition. Before building out the page, show the manager a quick preview (sketch, static mock or probe screenshot) through an investigate task that awaits their reaction, and record the accepted composition; the approved style guide does not approve the page's layout. The request-message length limit and the post-submission confirmation wording are choices listeners would notice that intent leaves open: record each as proposed (not engineering) in its home with the question kept open, recommend a value, and proceed on it only as a labeled assumption. At review, lead the report with those choices as plain statements the manager can overrule, then need, outcome and evidence; ask for acceptance in default mode.",
+      "files": [],
+      "assertions": [
+        "Shows the manager a quick preview of the request page before building it out, as an investigation or equivalent that waits for their reaction, and records the accepted composition in a retained home.",
+        "Does not treat the approved style guide as approval of the page's layout or composition.",
+        "Continues the API and storage work that does not depend on the page's composition instead of holding the whole change.",
+        "Labels the message length limit and the confirmation wording as proposed, not engineering, in their home, keeping the questions open with a recommended value.",
+        "Leads the review report with those listener-visible choices as plain statements the manager can overrule.",
+        "Makes no claim that the manager answered, previewed or accepted anything, or that edits or checks occurred."
+      ]
+    },
+    {
+      "id": 38,
+      "name": "coordinated-round-after-compaction",
+      "skills": ["ow-coordinate", "ow-review", "ow-consolidate", "ow-fast-forward"],
+      "prompt": "Dry-run only; save response.md. A farmers' market vendor product uses OW in a parent repository with api and web submodules. Earlier, the organizer agreed a round: deliver C-004 (vendors book stalls) with fast-forward acceptance delegated for C-004 only, and run C-006/T-001 (market fee rounding investigation) alongside it, each with a worker session in its own worktree. Your conversation was just compacted, so its earlier details are gone, and the organizer is offline until tomorrow. The C-004 worker reports its work committed on branch C-004 with passing checks, and mentions it limited stall names to 30 characters because nothing specified a limit. The C-006 worker reports its findings committed. Give your next actions in order, through the report you would leave and the round's close-out.",
+      "expected_output": "Recover the brief, scope and authority from the round record kept outside the repository rather than asking the organizer to resend them. Send C-004 to an independent reviewer session that did not implement it; route blocking findings back to the worker. Integrate one change at a time: reconcile with the target, rerun affected checks, commit component revisions and their pins, then record the review and publish. Close only C-004 by fast-forward; C-006 receives its investigation findings and stays open. Lead the report with the 30-character stall-name limit as a proposed choice the organizer can overrule, tagged proposed in its home, and keep C-004's closed records until the organizer responds. Close out by updating default branches, removing worktrees and branches after confirming their content is integrated, removing disposable resources and marking the record complete.",
+      "files": [],
+      "assertions": [
+        "Recovers the round's brief, scope and authority from its record after compaction instead of asking the organizer to resend them.",
+        "Has C-004 reviewed by an independent session that did not implement it before integration or closure.",
+        "Integrates one change at a time, committing component revisions and pins before recording or refreshing the review.",
+        "Closes only C-004 by fast-forward and keeps C-006 open with only its investigation completed.",
+        "Leads the report with the 30-character stall-name limit as a proposed choice the organizer can overrule, and keeps C-004's closed records until the organizer responds.",
+        "Plans close-out: update default branches, remove worktrees and branches only after confirming their content is integrated, and remove disposable resources.",
+        "Makes no claim that reviews, checks, merges or the organizer's responses occurred."
       ]
     }
   ]

@@ -77,6 +77,14 @@ def repository_snapshot(root):
     return {"files": sorted(files), "components": components, "warnings": warnings}
 
 
+def pin_mismatches(snapshot):
+    """Components whose parent gitlink does not pin the checkout that was inspected."""
+    return [f"{path}: parent gitlink {record['index']['0'][:12]} differs from checkout "
+            f"{record['head'][:12]}; stage or commit the reviewed pin"
+            for path, record in sorted(snapshot["components"].items())
+            if record["head"] and record["index"].get("0") not in (None, record["head"])]
+
+
 def project_files(root, snapshot=None):
     """Inspectable files; pass a command's snapshot so its checks agree on one view."""
     snapshot = snapshot or repository_snapshot(root)

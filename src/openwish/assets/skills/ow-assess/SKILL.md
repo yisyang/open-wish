@@ -30,7 +30,9 @@ readiness. Scale the pass to the plan: a three-change sequence needs minutes.
 
 3. **Pre-mortem.** Assume the horizon was missed or needed major rework. Give the
    three most plausible causes, each traced to a finding. Prefer causes that
-   structural checks cannot see.
+   structural checks cannot see, such as the human rejecting the first look at a
+   surface nobody previewed (Unseen surfaces in `ow-plan`), or an expensive
+   investigation built on a question nobody asked (Costly investigations).
 4. **Queue discovery** (Discover ahead of delivery in `ow-plan`): each consequential
    unknown with what depends on it, its commitment point, whether it is reversible,
    and the last point it can be learned. Rank by the cost of learning late.

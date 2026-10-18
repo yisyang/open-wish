@@ -37,6 +37,25 @@ class BudgetTests(ProjectCase):
         self.assertFalse(errors)
         self.assertIn("review sizing and duplication", "\n".join(warnings))
 
+    def test_large_docs_referenced_by_current_needs_warn(self):
+        self.fixture()
+        (self.root / "docs").mkdir(exist_ok=True)
+        doc, data = self.root / "docs/rules.md", self.root / "docs/catalog.json"
+        doc.write_text("Rule.\n" * 100, encoding="utf-8")
+        data.write_text("[" + ",".join(['"item"'] * 6000) + "]", encoding="utf-8")
+        self.edit_document("needs/N-001.md", references=["docs/rules.md", "docs/catalog.json"])
+        self.assertEqual(check_budgets(self.project(), code=False)[1], [])
+        doc.write_text("A long rule section.\n" * 2000, encoding="utf-8")
+        errors, warnings = check_budgets(self.project(), code=False)
+        self.assertFalse(errors)
+        self.assertEqual(len(warnings), 1)
+        self.assertIn("docs/rules.md", warnings[0])
+        self.assertIn("N-001", warnings[0])
+        self.assertIn("dated doc", warnings[0])
+        # A large doc no current need references is not loaded as knowledge.
+        self.edit_document("needs/N-001.md", references=["docs/catalog.json"])
+        self.assertEqual(check_budgets(self.project(), code=False)[1], [])
+
     def test_source_soft_and_hard_boundaries(self):
         path = self.root / "app.py"
         path.write_text("pass\n" * 499, encoding="utf-8")

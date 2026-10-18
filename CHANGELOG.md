@@ -2,6 +2,89 @@
 
 Release notes for OpenWish, newest first. Update this file for every release.
 
+## v1.0.0rc3
+
+Third release candidate for v1.0.0; its CLI and skills report `1.0.0-rc.3`. The
+changes come from a coordinated multi-change round in a game project. Delegated
+acceptance closed and disposed a change before the owner had seen it, and their
+first look then rejected the delivered screen and several choices made on their
+behalf.
+
+### Added
+
+- `ow-coordinate` skill for parallel rounds. It keeps one round record outside the
+  repository, which the coordinator rereads after compaction instead of asking the
+  human to resend the brief. It isolates one worker per worktree, uses fresh-session
+  independent review (also for corrections after the round), integrates serially and
+  includes a close-out step for worktrees, branches and disposable resources.
+- Unseen surfaces (Commit progressively, `ow-plan`): a screen or layout the human
+  has not seen gets a quick preview in an investigation before it is built out.
+  Approved components do not approve a composition. `ow-plan` and the `ow-assess`
+  pre-mortem name it as a failure cause.
+- Costly investigations (Commit progressively, `ow-plan`): an investigation that
+  will take hours of work, large simulations or extensive evidence is a commitment
+  point. Its open human questions are asked first, in one batch. In the following
+  round, retail investigations simulated 604,800 one-second ticks on a proposed
+  cadence that the owner then replaced with 10-minute ticks in one sentence. The
+  `ow-assess` pre-mortem names it as a failure cause.
+- Investigation evidence has a home (Where knowledge lives, `ow-core`): the change
+  until disposal, then a dated evidence doc. Rule docs keep only the decisions and
+  rules it settled (`ow-consolidate` disposal). `ow check` and `ow context` warn when
+  a text doc that current needs reference reaches 8,000 estimated tokens; that
+  round's evidence had grown an architecture doc to about 39,000.
+- Settle outcomes, not alternatives (Strategic verification, `ow-plan`; `ow-review`
+  step 2): a check that accepts outcomes differing in money, rights or data marks an
+  undecided rule rather than passing. A reviewed race test accepted either a
+  completed farm or a full refund at its due time, which hid a refund of finished
+  work until longer server ticks widened the window.
+- Running cost (Architecture rubric, `ow-align`; `ow-review` step 7): reviews check
+  idle work, read-path locking, payload size and log volume, and present recurring-cost
+  choices such as polling cadence with their rates. Several reviews had passed
+  two-second full-state polling and a log line per second; the owner rejected both
+  once they were stated.
+- Guarantees, not mechanisms (Right-size intent, `ow-propose`): acceptance states
+  what an actor can rely on. How a rule is computed is designed in the change, then
+  carried by code and tests; a rule doc keeps tagged rules, values and worked
+  examples, never pseudo-code. In the game project, one need held 14 acceptance
+  criteria, most of them calculations, and its rule doc held pseudo-code for behavior
+  not yet built.
+
+### Changed
+
+- Delegated closures wait for the human (Dispose closed changes, `ow-consolidate`).
+  A change closed `--by fast-forward` keeps its records until the human responds to
+  the result. A reported problem becomes a correction change planned from those
+  records. `ow summary` says so for fast-forward closures.
+- Rule status (`ow-propose`): a choice users would notice that intent leaves open,
+  such as an input limit, displayed format, wording, layout or tunable value, is
+  `proposed`, never `engineering`. Reviews (`ow-review` step 7) lead with such
+  choices as plain statements the human can overrule.
+- Reports use the human's vocabulary and answer their direct questions in the final
+  report (`ow-core`). Change notes hold decisions and their homes, not run logs
+  (`ow-implement`), and run details never enter retained records. A disposal
+  commit carries the change's need → outcome summary (`ow-consolidate`).
+- Review freshness digests checked-out submodule revisions only. Staging or
+  committing the parent gitlink that pins the reviewed checkout no longer stales a
+  review, which previously forced a second "refresh review" commit. `ow close` and
+  `ow summary` warn while a pin differs from its checkout. Reviews recorded by
+  earlier versions stay fresh while nothing changes, so no schema change is needed.
+- Decided open items move to their one home (Right-size intent, `ow-propose`).
+  Approving rule-doc content adds at most one acceptance criterion, which states the
+  guarantee and links the doc. Approving a retail proposal had added six criteria that
+  restated rules the doc already marked confirmed, and the need and the doc were
+  edited together in four commits over two days.
+- One home per fact covers needs (`ow-core`): a rule several needs depend on lives in
+  the need whose outcome it serves, and the others cite its ID. One tax exemption had
+  been restated in three needs.
+- Engineering unknowns, such as precision, sizing, platform choices and measured
+  limits, wait in the change that depends on them rather than a need's `open` list
+  (Where knowledge lives, `ow-core`).
+- `ow context` prints `open` items as "Open (not binding)" instead of under
+  "Additional intent".
+- Compaction (`ow-consolidate`) replaces mechanism and rules restated from a rule doc
+  or another need with links. The referenced-doc size warning now says to move working
+  design to its change.
+
 ## v1.0.0rc2
 
 Second release candidate for v1.0.0; its CLI and skills report `1.0.0-rc.2`. It narrows

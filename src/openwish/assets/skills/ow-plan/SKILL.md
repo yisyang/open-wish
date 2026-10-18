@@ -27,7 +27,8 @@ Load `ow-core`, then read `openwish/policy.md` and the affected source and tests
    does not make a plan feasible.
 5. **Challenge the plan.** Name the strongest plausible reason it would fail: a
    capability nobody provides, a known later need it would force rework for, an
-   assumption nobody checked, an environment nobody has accessed. Repair the plan,
+   assumption nobody checked, an environment nobody has accessed, a surface the
+   human has not seen. Repair the plan,
    or add an investigation (Discover ahead of delivery below).
 6. **Stop or continue.** Plan-only requests present the increments, approach, tasks
    and open questions, then stop. Otherwise, if authority or a consequential choice
@@ -79,6 +80,16 @@ Resolve uncertainty before the commitment it could disrupt, not before all work.
   keep the question in `open`, and name it in the next report. An assumption stands
   in for a product rule only as a labeled placeholder; it never decides the rule,
   and it never reaches a commitment point.
+- **Unseen surfaces.** A screen, page or other layout people will work in that the
+  human has not seen is costly to learn late; approved components or styles do not
+  approve its composition. Before building it out, show a quick preview (sketch,
+  static mock or a probe's screenshot) in an `investigate` task that awaits their
+  reaction, and record the accepted composition in its retained home.
+- **Costly investigations.** An investigation that will take hours of work, large
+  simulations or extensive evidence is itself a commitment point. Before starting
+  it, ask the open human questions whose answers would change what it measures
+  (cadence, scale, which options), in one batch. If one stays unanswered, keep the
+  investigation small or label every result that depends on the assumption.
 - **Ask through cases.** Show an ordinary case, a boundary, competing claims, and a
   failure or recovery, each with the outcome every option produces. Humans choose
   product consequences; settle technical facts (library behavior, performance,
@@ -164,6 +175,10 @@ not goals.
   pure decisions and invariants, and consequential integration contracts.
 - Derive expected results from intent, not from the implementation. A harmless
   refactor should leave tests passing; violating a need should fail one.
+- **Settle outcomes, not alternatives.** A check that accepts several outcomes for
+  one input, such as a race that may end either way, is evidence only when intent
+  allows each of them. When they differ in money, rights or data, the rule is
+  undecided: ask, or record it in `open`, rather than pass the check.
 - Avoid asserting incidental wording, layout, helper names or private call order.
   Assert exact text, schema or layout narrowly when it is a real contract.
 - Cover credible costly failures (data loss, wrong charges, privacy leaks) even

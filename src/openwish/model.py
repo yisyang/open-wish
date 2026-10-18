@@ -102,9 +102,11 @@ def needs_context(project):
             f"Confirmed: {meta.get('confirmed_at') or 'unconfirmed'}",
         ])
         extra = {name: value for name, value in meta.items() if name not in
-                 {"id", "title", "currency", "actor", "outcome", "acceptance", "confirmed_at"}}
+                 {"id", "title", "currency", "actor", "outcome", "acceptance", "confirmed_at", "open"}}
         if extra:
             lines.append("Additional intent: " + json.dumps(extra, ensure_ascii=False))
+        if meta.get("open"):
+            lines.append("Open (not binding): " + json.dumps(meta["open"], ensure_ascii=False))
         if need["body"]:
             lines.append(need["body"])
         lines.append("")

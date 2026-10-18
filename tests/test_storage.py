@@ -16,7 +16,7 @@ class StorageTests(ProjectCase):
         path = self.root / ".agents/skills/ow-propose/SKILL.md"
         path.write_text("custom workflow\n", encoding="utf-8")
         result = install_skills(self.root, "generic")
-        self.assertEqual(result["unchanged"], 12)
+        self.assertEqual(result["unchanged"], 13)
         self.assertEqual(path.read_text(), "custom workflow\n")
 
     def test_integration_preflight_avoids_partial_overwrite(self):

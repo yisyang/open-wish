@@ -24,7 +24,8 @@ Load `ow-core`, then read `openwish/policy.md` and the actual diff.
    Explain partial contributions and deferrals; an empty task list is not completion.
 2. **Judge the checks** (Strategic verification in `ow-plan`): would they catch a
    need violation, survive a harmless refactor, and test intent rather than repeat
-   the code's own logic? Ask what plausible wrong implementation would still pass,
+   the code's own logic, and settle one outcome where outcomes differ in money,
+   rights or data? Ask what plausible wrong implementation would still pass,
    and what is the strongest plausible reason the result would fail in real use;
    check it, or report it as a limitation.
 3. **Judge the structure** with the Architecture rubric in `ow-align` on the changed
@@ -41,7 +42,11 @@ Load `ow-core`, then read `openwish/policy.md` and the actual diff.
    affected checks, confirm the outcome still holds, and record again.
 7. **Present need → outcome → evidence**, how other current needs were ruled
    out, limitations, any `open` items this result makes decidable, and any
-   assumptions it proceeded on (Commit progressively in `ow-plan`). Name plan
+   assumptions it proceeded on (Commit progressively in `ow-plan`). Lead with the
+   choices made on the human's behalf that users would notice, each a plain
+   statement they can overrule (`proposed` in its home, Rule status in
+   `ow-propose`), and engineering choices with recurring cost (polling or tick
+   cadence, payload size, log volume, retention), each with its rate. Name plan
    misses: gaps that surfaced during implementation or review but planning should
    have caught (a missing provider, a late decision, a foundational design
    reworked), each with its cause. Propose recording a lesson that will recur in

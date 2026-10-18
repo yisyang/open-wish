@@ -116,7 +116,7 @@ this checkout.
 | ID | Scenario | Behaviors to check |
 | --- | --- | --- |
 | 1 | Existing on-device trends vs. upload request (core) | Preserve current intent; ask the real choice; no duplicate need |
-| 2 | Fast-forward final results | Review, close and clean the change; keep needs; scope delegation; attribute evidence |
+| 2 | Fast-forward final results | Review and close the change; clean only after the human responds; keep needs; scope delegation; attribute evidence |
 | 3 | Independent work around a manual observation | Continue ready tasks; keep manual checks and evidence |
 | 4 | Routine alias | Implement and verify directly, no records or acceptance step |
 | 5 | Working design repair | Revise approach and tasks under existing authority |
@@ -146,6 +146,8 @@ this checkout.
 | 34 | Meal subscription answers arrive | Fold answers, retire an assumption, reconcile done and open tasks |
 | 35 | Clinic inventory after disposal | Coverage counts retained code and checks; prerequisites resolve to delivered code |
 | 36 | Solar co-op pilot readiness (seeded) | Whole-product assessment finds planted gaps: capability, schema pressure, money decision, coverage, arithmetic, access |
+| 37 | Radio song-request page | Preview an unseen page before building it; listener-visible choices are proposed and lead the report |
+| 38 | Farmers' market coordinated round | Recover the round from its record after compaction; independent review; serial integration; visible choices first; close-out |
 | 30 | Garden watering (3 stages) (core) | Direct delivery, then managed work with deferral and delayed acceptance, then continuing that change; mechanically graded (baseline arm) |
 
 Fixtures are evaluation inputs, not OW's implementation. Scenario prompts and the

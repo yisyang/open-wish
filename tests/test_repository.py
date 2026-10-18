@@ -1,10 +1,11 @@
 import subprocess
 import shutil
 
-from openwish.repository import project_files, repository_snapshot
+from openwish.repository import pin_mismatches, project_files, repository_snapshot
 from openwish.validation import validate
-from openwish.storage import WishError
-from openwish.workflow import clean_changes, close_changes, record_review, source_inputs, validate_review
+from openwish.storage import WishError, read_json, write_json
+from openwish.workflow import (clean_changes, close_changes, digest, record_review, source_inputs,
+                               validate_review)
 
 from tests.support import ProjectCase
 
@@ -46,13 +47,41 @@ class RepositoryTests(ProjectCase):
         with self.assertRaisesRegex(WishError, "stale"):
             validate_review(self.project(), "C-001")
 
-    def test_checkout_and_gitlink_revisions_are_both_fingerprinted(self):
+    def test_checkout_revisions_are_fingerprinted_but_a_matching_pin_is_not(self):
         original = source_inputs(self.project())
         self.git(self.component, "commit", "--allow-empty", "-m", "New revision, same files")
         checkout = source_inputs(self.project())
         self.assertNotEqual(original, checkout)
         self.git(self.root, "add", "component")
-        self.assertNotEqual(checkout, source_inputs(self.project()))
+        self.assertEqual(checkout, source_inputs(self.project()))
+
+    def test_pinning_the_reviewed_checkout_after_review_keeps_it_fresh(self):
+        self.git(self.component, "commit", "--allow-empty", "-m", "Reviewed revision")
+        self.review()
+        self.assertIn("stage or commit the reviewed pin", " ".join(pin_mismatches(repository_snapshot(self.root))))
+        self.git(self.root, "add", "component")
+        self.git(self.root, "commit", "-m", "Pin the reviewed component")
+        validate_review(self.project(), "C-001")
+        self.assertEqual(close_changes(self.project(), ["C-001"], "human"), [])
+
+    def test_unpinned_checkout_closes_with_a_warning(self):
+        self.git(self.component, "commit", "--allow-empty", "-m", "Reviewed revision")
+        self.review()
+        warnings = close_changes(self.project(), ["C-001"], "human")
+        self.assertEqual(len(warnings), 1)
+        self.assertIn("component", warnings[0])
+
+    def test_reviews_from_earlier_versions_stay_fresh_until_components_change(self):
+        self.review()
+        path = self.root / "openwish/changes/C-001/review.json"
+        record = read_json(path)
+        # Before 1.0.0-rc.3 the digest covered staged gitlinks as well as checkouts.
+        record["inputs"]["source"]["components"] = digest(repository_snapshot(self.root)["components"])
+        write_json(path, record)
+        validate_review(self.project(), "C-001")
+        self.git(self.component, "commit", "--allow-empty", "-m", "Unreviewed revision")
+        with self.assertRaisesRegex(WishError, "submodule revisions"):
+            validate_review(self.project(), "C-001")
 
     def test_missing_submodule_is_visible_and_blocks_review(self):
         self.git(self.root, "submodule", "deinit", "-f", "component")

@@ -36,11 +36,12 @@ Genuine constraints and essential rationale go in the body.
 ```
 
 - `currency` is `current` or `retired`. All current need content, including relation
-  reasons, enters `ow context` and review freshness, except `open`.
+  reasons, enters `ow context` and review freshness, except that `open` enters only
+  `ow context`, marked not binding.
 - `confirmed_at` is empty for inferred intent and an ISO date after a human actually
   confirms every acceptance criterion.
-- Optional `open`: undecided questions and proposed criteria, one sentence each; not
-  binding. `ow status` counts them.
+- Optional `open`: undecided product questions and proposed criteria, one sentence
+  each; not binding. `ow status` counts them.
 - Optional `references = ["docs/rules.md", "data/catalog.json"]` name existing,
   non-ignored repository files holding detailed rules or data. No symlinks, `..`
   or paths inside `openwish/changes/`. `ow context` lists and sizes them; it does
@@ -165,8 +166,10 @@ ow clean C-001
 status, closure fields and `after`), its tasks, every current and linked need (except
 `open`), the handoff and its destinations, config, project policy, each product file outside
 `openwish/` (Git tracked and unignored files, recursively including submodules;
-filesystem walk without Git) and submodule revisions. Any difference makes the
-review stale; `ow summary` and `ow close` name what changed. Missing or conflicted
+filesystem walk without Git) and checked-out submodule revisions. Any difference
+makes the review stale; `ow summary` and `ow close` name what changed. Staging or
+committing a parent gitlink that pins the reviewed checkout leaves the review fresh;
+both commands warn while a pin differs from its checkout. Missing or conflicted
 submodule checkouts prevent a fresh passing review.
 
 **Cleanup.** `ow clean` removes only `change.md`, `tasks.json` and `review.json` of

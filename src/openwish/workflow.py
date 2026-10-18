@@ -6,7 +6,7 @@ import json
 
 from .handoff import handoff_content, validate_handoff
 from .model import MODES, TASK_STATES, change_tasks, review_needs
-from .repository import project_files, repository_snapshot
+from .repository import pin_mismatches, project_files, repository_snapshot
 from .storage import WishError, contained, document, read_json, write_json, write_text
 from .trace import CHANGE_ID, text_files
 
@@ -42,7 +42,13 @@ def source_inputs(project, snapshot=None):
             content = hashlib.file_digest(source, "sha256").hexdigest()[:16]
         executable = path.stat().st_mode & 0o111
         files[relative] = content + (f"+{executable:o}" if executable else "")
-    return {"files": files, "components": digest(snapshot["components"])}
+    return {"files": files, "components": component_revisions(snapshot["components"])}
+
+
+def component_revisions(components):
+    # The reviewed state is each component's checked-out revision. Staging or committing
+    # the parent's gitlink to match it afterwards changes nothing that was reviewed.
+    return digest({path: record["head"] for path, record in components.items()})
 
 
 def review_inputs(project, key, *, snapshot=None, handoff=()):
@@ -67,7 +73,7 @@ def review_inputs(project, key, *, snapshot=None, handoff=()):
     }
 
 
-def stale_reasons(recorded, current):
+def stale_reasons(recorded, current, legacy_components=None):
     """Explain a freshness difference in terms a reviewer can act on."""
     if not isinstance(recorded, dict):
         return ["review has no recorded inputs"]
@@ -90,7 +96,7 @@ def stale_reasons(recorded, current):
     reasons += keyed("destinations", recorded.get("destinations"), current["destinations"])
     source = recorded.get("source") if isinstance(recorded.get("source"), dict) else {}
     reasons += keyed("files", source.get("files"), current["source"]["files"])
-    if source.get("components") != current["source"]["components"]:
+    if source.get("components") not in {current["source"]["components"], legacy_components} - {None}:
         reasons.append("submodule revisions")
     # A product-file destination also appears among source files; report it once.
     return list(dict.fromkeys(reasons))
@@ -200,8 +206,11 @@ def validate_review(project, key, *, fresh=True, snapshot=None):
     missing = set(review_needs(project, key)).difference(review["affected"] + review["unaffected"])
     if missing:
         raise WishError("Review is missing current/linked needs: " + ", ".join(sorted(missing)))
+    # Reviews recorded before 1.0.0-rc.3 also digested staged gitlinks; they stay fresh
+    # while neither those nor the checkouts change.
     reasons = stale_reasons(review.get("inputs"), review_inputs(project, key, snapshot=snapshot,
-                                                                 handoff=review["handoff"]))
+                                                                 handoff=review["handoff"]),
+                            legacy_components=digest(snapshot["components"]))
     if reasons:
         raise WishError("Review is stale; refresh affected verification and review before closing. "
                         "Changed: " + "; ".join(reasons))
@@ -233,6 +242,7 @@ def close_changes(project, keys, by):
         change["meta"] = meta
     # Closing an increment does not establish that every linked need is fully
     # satisfied. Needs and confirmation dates are deliberately untouched.
+    return pin_mismatches(snapshot) if snapshot else []
 
 
 def cleanup_plan(project, keys):

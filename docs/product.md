@@ -13,16 +13,21 @@ contributors; architecture is in [design.md](design.md).
 - Current needs bind all later work after delivery. Currency is `current | retired`;
   needs carry no execution state, and closing a change never retires or completes one.
 - Inferred intent stays distinguishable from human confirmation, at statement level:
-  `confirmed_at` covers every acceptance criterion; undecided questions and proposals
-  wait in a need's `open` list, which status surfaces until they are decided. Rule
-  docs tag each rule confirmed, approved-initial, inferred, engineering, proposed or
-  open.
+  `confirmed_at` covers every acceptance criterion; undecided product questions and
+  proposals wait in a need's `open` list, which status surfaces until they are decided
+  and context marks not binding; engineering unknowns wait in the change that depends
+  on them. Rule docs tag each rule confirmed, approved-initial, inferred, engineering,
+  proposed or open. A choice users would notice that intent leaves open is proposed, never
+  engineering, and results lead with such choices so the human can overrule them.
   Translation preserves material conditions, exceptions, units and consequences.
-- Needs stay true while the product is tuned and rebuilt: acceptance holds structural
-  rules in readable sentences; calibration lives in referenced rules and setup in
-  ordinary docs. Each fact has one home that other artifacts link to; a doc view
-  generated from domain data and kept current by a check is not a second home. Needs
-  never depend on files a fresh clone lacks.
+- Needs stay true while the product is tuned and rebuilt: acceptance holds the
+  guarantees actors rely on and structural rules in readable sentences. How a rule is
+  computed is designed in the change, then carried by code and tests; referenced rule
+  docs keep tagged rules, calibration and worked examples, and ordinary docs keep
+  setup. Each fact has one home that other artifacts link to, and a rule several needs
+  depend on lives in one of them; a doc view generated from domain data and kept
+  current by a check is not a second home. Needs never depend on files a fresh clone
+  lacks.
 - Needs are sized by outcome independence, not effort; mechanisms reuse existing
   needs; duplicates merge and bundles split with stable IDs where possible. How the
   product is built is not a need: project-wide engineering requirements (setup,
@@ -52,6 +57,8 @@ contributors; architecture is in [design.md](design.md).
   deploys), not before all work. Investigations run ahead of their change's
   predecessors, ranked by the cost of learning late; reversible choices proceed on
   a labeled assumption that stays open; questions reach humans in bounded batches.
+  A surface people will work in that the human has not seen gets a quick preview
+  before it is built out.
 - Foundational designs are tested against already-known later needs: the
   constraint is preserved now, resolved first, or given an affordable evolution
   path. Prerequisites name their provider and how they are verified, and resolve to
@@ -67,9 +74,11 @@ contributors; architecture is in [design.md](design.md).
 - A change is safe to forget before it passes review: each material requirement has a
   retained destination and evidence, or an explicit disposition. Approved unfinished
   detail gets a retained home immediately.
-- After acceptance, the change, tasks and review are deleted together. Cleanup
+- After acceptance, the change, tasks and review are deleted together; after
+  delegated acceptance, once the human has responded to the result. Cleanup
   preflights the whole batch, preserves unknown files, and rejects missing or
-  dependent destinations. Git holds history.
+  dependent destinations. Git holds history; a disposal commit carries the change's
+  need → outcome summary.
 
 ## Proportionate collaboration
 
@@ -84,8 +93,15 @@ contributors; architecture is in [design.md](design.md).
   plan-only requests stop at the plan; technical repairs need no new permission.
 - Humans accept managed results by default. Explicit fast-forward delegates
   acceptance for one change only and never invents confirmation, observations or checks.
+- Coordinated rounds run named changes in isolated worktrees under one record kept
+  outside the repository, which the coordinator rereads instead of asking the human
+  to resend the brief; consequential results get an independent review, and
+  integration is serial.
 - Workflow guidance is concise, with one owner per rule, so agents spend their context
   on the product rather than on the framework.
+- Reports use the human's vocabulary and answer their direct questions. Retained
+  records hold decisions and their homes, never run logs, resource names or session
+  details.
 
 ## Implementation and verification
 
@@ -108,15 +124,17 @@ contributors; architecture is in [design.md](design.md).
 - Reviews assess every current need: linked and other affected needs with direct
   evidence, the rest recorded as assessed and unaffected. Any change to a pending
   review's inputs makes it stale, and the CLI names what changed.
-- Review freshness includes recursive submodule revisions and content; uninspectable
-  components prevent fresh acceptance. Routine verification stays under five minutes.
+- Review freshness includes recursive submodule checkouts and content; pinning the
+  reviewed checkout afterwards keeps a review fresh, a differing pin is warned about,
+  and uninspectable components prevent fresh acceptance. Routine verification stays under five minutes.
 
 ## Bounded knowledge
 
 - All current need content enters context without truncation. A configurable 24,000
   estimated-token soft target warns at 80% and never blocks inspection.
-- OW artifacts warn at 8,000 estimated tokens and source at 500 nonblank lines; a source
-  hard limit is opt-in with justified exact-path exceptions.
+- OW artifacts, and text docs that current needs reference, warn at 8,000 estimated
+  tokens and source at 500 nonblank lines; a source hard limit is opt-in with
+  justified exact-path exceptions.
 - Context reports sized retrieval entries rather than loading referenced files.
 - Status exposes cleanup candidates, pending acceptance, blocked work and retired needs.
 
@@ -125,7 +143,7 @@ contributors; architecture is in [design.md](design.md).
 - Python 3.11+, no third-party runtime dependencies, no model API calls.
 - Published as `openwish` with identical `ow` and `openwish` commands; package, module
   and bundled skill versions advance together.
-- Ten canonical skills with thin OpenCode, Claude Code, Codex and generic adapters;
+- Eleven canonical skills with thin OpenCode, Claude Code, Codex and generic adapters;
   interactive and explicit harness selection; preserving, version-aware reinstall.
 - Ownership is by location: OW owns what it installs as skills, including its policy
   and artifact reference in `ow-core`; everything under `openwish/` is the project's.

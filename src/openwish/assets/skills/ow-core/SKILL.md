@@ -54,8 +54,9 @@ formatting, skip it.
 | Knowledge | Home |
 | --- | --- |
 | Actors, outcomes, acceptance, structural rules, constraints | Current needs |
-| Undecided questions and proposed criteria | The need's `open` list |
-| Detailed rules and tunable values | A referenced rule doc or domain data |
+| Undecided product questions and proposed criteria | The need's `open` list |
+| Engineering unknowns: precision, sizing, platform choices, measured limits | The change that depends on them, as an investigation or stated uncertainty; the answer goes to code or the engineering requirements doc |
+| Detailed rules, tunable values and their worked examples | A referenced rule doc or domain data |
 | Implemented behavior and interfaces | Source, types, schemas |
 | Repeatable checks of intent | Tests and documented manual procedures |
 | Engineering requirements: how the product is built, checked and released | An ordinary doc linked from the project policy |
@@ -63,13 +64,16 @@ formatting, skip it.
 | Rationale, operations, environments, test accounts | Nearby comments or ordinary docs |
 | Approved but unfinished detail | Another open change or retained domain data |
 | Working design, tasks, review | The change, until disposal |
+| Investigation evidence: measurements, probe results, rejected options | The change until disposal, then a dated evidence doc linked from what it supports; rule docs keep only the decisions and rules it settled |
+| Run logs, resource names, ports, session IDs, temporary paths | The conversation or temporary files only |
 
 **One home per fact.** Write each rule, value or decision once and link to it
-elsewhere. A large table or roster lives in domain data; a doc may show a view
-generated from it, which a check keeps current and which changes only through the
-data. Commit what durable knowledge depends on, or document how to obtain it.
-Reference secrets by location, never by value. Git holds history, so state current
-decisions without supersession notes.
+elsewhere. A rule several needs depend on lives in the need whose outcome it
+serves; the others cite its ID. A large table or roster lives in domain data; a doc
+may show a view generated from it, which a check keeps current and which changes
+only through the data. Commit what durable knowledge depends on, or document how to
+obtain it. Reference secrets by location, never by value. Git holds history, so state
+current decisions without supersession notes.
 
 Needs hold no execution status: closing a change neither retires a need nor proves
 it satisfied. `confirmed_at` records actual human confirmation of every acceptance
@@ -99,15 +103,19 @@ instruction faithfully needs no second approval round.
   with two or three A/B/C options, put `(Recommended)` before the preferred option,
   and state each option's effect.
 - Report as **need → outcome → evidence**, then limitations. Separate what you
-  observed from assumptions and checks you did not run.
+  observed from assumptions and checks you did not run. Use the human's vocabulary:
+  explain or drop internal terms, and answer their direct questions in the final
+  report, not only in interim messages.
 
 **Acceptance.** By default a human reviews managed results, then the agent runs
 `ow close C-001 --by human`. Explicit fast-forward delegates acceptance for one
 named change only (`--fast-forward` or `ow mode fast-forward C-001`, then `--by
 fast-forward`). It never supplies missing manual observations, access, passing
 checks or confirmation of inferred needs, and new changes default to human review.
-Successors named with `after` may start once their predecessors pass review (or are
-accepted, if `successors_wait_for` is `acceptance`); acceptance follows the sequence.
+A delegated closure keeps its records until the human has seen the result (Dispose
+closed changes in `ow-consolidate`). Successors named with `after` may start once
+their predecessors pass review (or are accepted, if `successors_wait_for` is
+`acceptance`); acceptance follows the sequence.
 
 ## Skill map
 
@@ -124,6 +132,7 @@ read the owning section when a step calls for it.
 | Delegated acceptance | `ow-fast-forward` |
 | Adoption for an existing or new product | `ow-onboard` |
 | Readiness of a sequence: horizon, pre-mortem, discovery queue | `ow-assess` |
+| Coordinated rounds: round record, workers, integration, close-out | `ow-coordinate` |
 
 `artifacts.md` beside this skill documents file formats and commands; read it when
 writing or repairing a record.

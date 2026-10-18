@@ -4,7 +4,7 @@ from functools import cache
 
 from .handoff import validate_handoff
 from .model import change_tasks, estimate_tokens, needs_context, retention_data, select_changes
-from .repository import repository_snapshot
+from .repository import pin_mismatches, repository_snapshot
 from .storage import WishError, read_json
 from .workflow import review_path, validate_review
 
@@ -56,11 +56,12 @@ def status_data(project):
 
 def summary(project, keys):
     lines = []
+    snapshot = lazy_snapshot(project)
     for key in keys:
         if key in project["needs"]:
             need = project["needs"][key]["meta"]
             lines.extend([f"{key} — {need['title']} [{need['currency']}]", f"Outcome: {need['outcome']}", ""])
-    for change in change_rows(project, select_changes(project, keys)):
+    for change in change_rows(project, select_changes(project, keys), snapshot):
         key = change["id"]
         lines.append(f"{key} — {change['title']} [{change['status']}]")
         for nid in change["needs"]:
@@ -88,6 +89,9 @@ def summary(project, keys):
             else:
                 lines.append(change.get("review_issue") or "Resolve findings and refresh verification before closure.")
         if change["status"] == "closed":
-            lines.append(f"Closed by {change['closed_by']} at {change['closed_at']}; eligible for cleanup.")
+            after = (" once the human has responded to the result" if change["closed_by"] == "fast-forward" else "")
+            lines.append(f"Closed by {change['closed_by']} at {change['closed_at']}; eligible for cleanup{after}.")
+        else:
+            lines.extend("WARN " + warning for warning in pin_mismatches(snapshot()))
         lines.append("")
     return "\n".join(lines)

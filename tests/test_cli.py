@@ -193,7 +193,7 @@ class CliTests(ProjectCase):
         self.assertIn("Harnesses: opencode, claude, codex", output)
         for directory in (".opencode", ".claude", ".agents"):
             self.assertTrue((self.root / directory / "skills/ow-propose/SKILL.md").is_file())
-        self.assertIn("47 unchanged", self.cli("init", "--harness", "opencode", "claude", "codex").stdout)
+        self.assertIn("51 unchanged", self.cli("init", "--harness", "opencode", "claude", "codex").stdout)
 
     def test_init_without_tty_requires_explicit_harnesses_and_writes_nothing(self):
         root = self.root / "new-project"

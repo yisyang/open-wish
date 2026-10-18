@@ -11,7 +11,8 @@ import tempfile
 from check_release import cli_version
 
 HARNESSES = ("opencode", "claude", "codex", "generic")
-SKILLS = ("core", "propose", "align", "plan", "implement", "review", "consolidate", "fast-forward", "onboard", "assess")
+SKILLS = ("core", "propose", "align", "plan", "implement", "review", "consolidate", "fast-forward", "onboard", "assess",
+          "coordinate")
 
 
 def snapshot(root):

@@ -71,7 +71,11 @@ Each change has one `review.json`, replaced on every review:
 - `inputs` (passing reviews): short digests of the change (without lifecycle fields
   or `after`), tasks, each current and linked need (without its non-binding `open`
   items), the handoff and each destination, config, project policy, each product file
-  outside `openwish/` (content plus executable bits), and submodule revisions.
+  outside `openwish/` (content plus executable bits), and checked-out submodule
+  revisions. The parent's gitlinks are not inputs: committing the reviewed pin is
+  routine, so `ow close` and `ow summary` only warn while a pin differs from its
+  checkout. Reviews from before 1.0.0-rc.3, whose digest also covered gitlinks,
+  remain fresh while nothing changes.
 
 Freshness compares recorded and current inputs. Any difference is stale, and the
 error lists what changed (approach, tasks, `N-001 modified`, `src/x.py added`, and
@@ -120,14 +124,16 @@ because explaining how to obtain an ignored input is their job.
 
 ## Context and bounds
 
-`ow context` includes all current need content without truncation, plus work state for
-the selection (changes with review freshness, ready and waiting tasks, unplanned
-changes, and repository, budget and knowledge warnings), so one call starts a session.
+`ow context` includes all current need content without truncation (`open` items marked
+not binding), plus work state for the selection (changes with review freshness, ready
+and waiting tasks, unplanned changes, and repository, budget and knowledge warnings),
+so one call starts a session.
 `--json` adds review scope and sized retrieval entries (`included: false`) for selected changes, tasks,
 linked retired needs and need references. Estimates use UTF-8 bytes/3 and exclude
 other source and conversation. `needs_token_budget` (default 24,000) warns at 80%;
 OW artifacts warn at 8,000 estimated tokens, except machine-written `review.json` and
-`installation.json`; source warns at 500 nonblank lines and fails only under an opt-in
+`installation.json`, and so do text docs that current needs reference (referenced data
+and code are sized as data and source); source warns at 500 nonblank lines and fails only under an opt-in
 `source_hard_limit`. Configured exceptions keep warning with their reason, except
 `generated` files, which are tool output and stay silent until they disappear. Status derives retention groups for closed, awaiting-acceptance
 and blocked changes and retired needs.
@@ -144,7 +150,7 @@ appear in the evaluation scenarios.
 
 ## Integration and compatibility
 
-Ten canonical skills are packaged once, with thin adapters for OpenCode, Claude Code,
+Eleven canonical skills are packaged once, with thin adapters for OpenCode, Claude Code,
 Codex and generic Agent Skills. OW owns only what it installs as skills; everything
 under `openwish/` is the project's, including `policy.md`, which `ow init` writes once
 from a short starter. `ow-core` carries OW's policy and the artifact reference, which

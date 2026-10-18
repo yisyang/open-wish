@@ -85,15 +85,16 @@ See [Workflows](docs/workflows.md) for onboarding, large work and the change lif
 | `ow-fast-forward` | Run through review and disposal under explicit delegation |
 | `ow-onboard` | Infer needs, assess architecture, propose worthwhile refactoring |
 | `ow-assess` | Rate a sequence's readiness, pre-mortem it, queue discovery and questions |
+| `ow-coordinate` | Run several changes in parallel worktrees; integrate, review and close out |
 | `ow-core` | OW's own policy and artifact reference, loaded first by every other skill |
 
 ## What persists
 
 | Knowledge | Home |
 | --- | --- |
-| Actors, outcomes, acceptance, structural rules | `openwish/needs/N-001.md` (durable) |
-| Detailed rules and tunable values | Rule docs or data that needs reference |
-| Implemented behavior | Source code |
+| Actors, outcomes, acceptance (guarantees and structural rules) | `openwish/needs/N-001.md` (durable) |
+| Detailed rules, tunable values, worked examples | Rule docs or data that needs reference |
+| Implemented behavior, including how rules are computed | Source code |
 | Checks of intent | Tests that mention the need ID they protect (`ow trace`) |
 | Module responsibilities | A short header per module; a README at major boundaries |
 | Non-obvious rationale, environments and setup | Nearby comments or ordinary docs |
@@ -102,8 +103,9 @@ See [Workflows](docs/workflows.md) for onboarding, large work and the change lif
 
 Needs have no execution status; closing a change does not retire a need or claim it
 is complete. `confirmed_at` records that a human confirmed every acceptance criterion;
-undecided questions and proposals wait in the need's `open` list. Each fact has one
-home, and other files link to it.
+undecided product questions and proposals wait in the need's `open` list, and
+engineering unknowns in the change that depends on them. Each fact has one home, and
+other files link to it.
 
 **Sequences.** A change can name predecessors with `after`. Successors become
 plannable once predecessors pass review (set `successors_wait_for` to `acceptance` to

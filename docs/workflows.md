@@ -279,12 +279,15 @@ flowchart TD
     H -->|No| I["Remediate, continue independent work, or obtain missing input"]
     I --> F
     H -->|Yes| J{"Acceptance explicitly delegated for this change?"}
-    J -->|Yes| K["Close with fast-forward provenance"]
+    J -->|Yes| K["Close with fast-forward provenance and present the result"]
     J -->|No| L["Present results for human review"]
     L --> M{"Human accepts?"}
     M -->|Revisions requested| F
     M -->|Yes| N["Close with human acceptance provenance"]
-    K --> O["Consolidate and dispose the closed change, tasks, and review"]
+    K --> Q{"Human's response raises a problem?"}
+    Q -->|Yes| R["Scope a correction change from the retained records"]
+    Q -->|No| O["Consolidate and dispose the closed change, tasks, and review"]
+    R --> O
     N --> O
     O --> P["Current needs, useful code, tests, and rationale remain"]
 ```
@@ -344,7 +347,9 @@ the affected verification and record the review again before closing.
 
 **Explicit fast-forward** delegates acceptance for the selected change. It retains
 the same implementation, verification, and AI review obligations, and closes with
-delegation provenance. It does not fabricate observations or human confirmation,
+delegation provenance. Its records stay until the human has responded to the
+presented result, so a problem found at that first look is scoped as a correction
+from them. It does not fabricate observations or human confirmation,
 override plan-only scope, or apply to unrelated future changes. When onboarding
 under explicit fast-forward, inferred intent remains unconfirmed; proposed
 additional refactoring still needs scope authorization.

@@ -13,20 +13,31 @@ Load `ow-core`, read `openwish/policy.md` and run `ow status` and `ow context`. 
 1. **Find candidates** in `ow status` retention groups: closed changes, results
    awaiting acceptance (refresh stale reviews first), blocked or manual work, and
    retired needs. Age and volume never prove work finished or abandoned; ask.
-2. **Check what survives.** Intent in needs, behavior in source, checks in tests,
+2. **Let the human see delegated results.** A change closed `--by fast-forward`
+   waits for the human's first response to its presented result. If that response
+   raises no problem with it, dispose it. If it reports a problem with what the
+   change delivered, scope the correction as a new change (default mode unless
+   delegated again), read the closed records while planning it, and dispose them
+   once its scope is written.
+3. **Check what survives.** Intent in needs, behavior in source, checks in tests,
    non-obvious rationale in nearby comments or ordinary docs, and future work in
    its own open changes. Inspect the review's handoff (Safe to forget in
    `ow-review`). Rewrite successor prerequisites as delivered code, not the disposed
-   change's plan or files. Do not copy whole plans into docs.
-3. **Preview, then clean:** `ow clean C-001 --dry-run`, then `ow clean C-001`. Resolve
+   change's plan or files. Do not copy whole plans into docs. Investigation evidence
+   still worth keeping goes to a dated evidence doc, not a rule doc (Where knowledge
+   lives in `ow-core`).
+4. **Preview, then clean:** `ow clean C-001 --dry-run`, then `ow clean C-001`. Resolve
    what preflight reports: move useful unknown files deliberately; reconcile
    reviews that cite the batch and retained mentions of the change ID; replace a
    cited closed successor with its delivered product files. If a destination moved
    after closure, update only that review's handoff paths and evidence.
-4. Knowledge that needs new edits after review belongs before closure; refresh the
+5. Knowledge that needs new edits after review belongs before closure; refresh the
    review. After closure, new implementation is a new change.
-5. Run `ow check` and report what was disposed and where knowledge now lives.
-6. **Continue the sequence.** For each `PLAN` change in `ow ready`, apply Plan a
+6. Run `ow check` and report what was disposed and where knowledge now lives. When
+   you commit a disposal, put the change's need → outcome summary and handoff
+   destinations (`ow summary C-001`, read before cleaning) in the commit message
+   body, since the records are gone afterwards.
+7. **Continue the sequence.** For each `PLAN` change in `ow ready`, apply Plan a
    candidate in `ow-plan`, and take ready investigations (Discover ahead of
    delivery); planning needs no approval. Present `ASK` questions as one batch.
    Implement only within authorized scope; otherwise present them as the next step.
@@ -40,8 +51,9 @@ overlap. Size is a prompt to look, not a cap.
   broad bundles and drift before shortening prose. Keep every acceptance criterion,
   constraint and meaningful exception.
 - Clarity is valid compaction even when it adds words: apply Right-size intent's
-  sentence, calibration, setup and `open` rules, and replace restated rules with
-  links to their one home. A value moved into a referenced rule is kept, not weakened.
+  sentence, calibration, mechanism, setup and `open` rules, and replace a rule
+  restated from a rule doc or another need with a link to its one home. A value
+  moved into a referenced rule is kept, not weakened.
 - Merging, splitting or retiring changes intent: get a decision (A/B/C) and
   keep stable IDs where possible. Check `ow graph --json` and
   `ow trace` and reconcile relations, change references and need IDs mentioned in
@@ -51,10 +63,12 @@ overlap. Size is a prompt to look, not a cap.
   work made decidable.
 
 **Size targets.** Current needs: 24,000 estimated tokens by default (configurable),
-with no line cap. Each OW artifact warns at 8,000. These cover retained knowledge,
-not your working context: on a 1M-token harness, 150k–200k tokens of relevant
-working context is a starting point to evaluate, not a quota, and small tasks need
-far less.
+with no line cap. Each OW artifact, and each text doc a current need references,
+warns at 8,000: keep a rule doc to decisions, rules and worked examples, and move
+working design to the change that will deliver it; once delivered, code carries it.
+These cover retained knowledge, not your working context: on a 1M-token harness,
+150k–200k tokens of relevant working context is a starting point to evaluate, not a
+quota, and small tasks need far less.
 
 **Tests.** Keep small regression checks of lasting outcomes and consequential
 boundaries; delete temporary probes; merge redundant or brittle tests only when

@@ -26,6 +26,6 @@ Use only after explicit delegation; loading this skill grants nothing. Load
 5. **Stay honest.** Never invent checks, mark manual work done, set
    `confirmed_at` on inferred needs, or tag a rule `confirmed` or
    `approved-initial`. After a fresh passing review: `ow close C-001 --by
-   fast-forward`, then dispose via `ow-consolidate`.
-6. **Report need → outcome → evidence** and limitations, and attribute acceptance
-   to delegation rather than human review.
+   fast-forward`; dispose via `ow-consolidate` once the human has seen the result.
+6. **Report as in `ow-review` step 7**, including the choices made on the human's
+   behalf, and attribute acceptance to delegation rather than human review.

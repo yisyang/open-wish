@@ -68,7 +68,7 @@ or adapters change so installations can receive the update.
 
 Publish from the source checkout only after tests and a wheel-install smoke test
 pass. Check package data contains the project-policy starter, the schema-4 migration
-digests and all ten skills, including `ow-core` with its artifact reference.
+digests and all eleven skills, including `ow-core` with its artifact reference.
 
 ## Releases
 

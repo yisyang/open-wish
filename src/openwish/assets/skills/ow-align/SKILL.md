@@ -50,6 +50,7 @@ finding connects **observation → consequence → improvement → verification*
 | Do tests check intent? | Small, fast checks of outcomes and invariants | Snapshots of incidental output, private-call assertions |
 | Does complexity earn its cost? | Boundaries serve current behavior | Speculative frameworks, layers, arbitrary file splits |
 | Will deleting the change lose understanding? | Code, tests and nearby rationale explain the behavior | The change's plan is the only map |
+| Is running cost proportionate? | Idle work near zero; reads use snapshots, not writers' locks; payloads sized to the view; logs record changes | Fixed-interval full-state polling, locks on read paths, unbounded payloads, a log line per idle poll or tick |
 | Can dense rules be checked before they are wired? | Rule-heavy logic (money, scheduling, scoring) runs as pure functions whose tests replay the rule doc's worked examples | Rules first exercised through UI or database; worked examples nobody recomputed |
 
 ## Future constraints

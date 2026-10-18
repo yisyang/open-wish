@@ -2,7 +2,7 @@
 
 from .model import estimate_tokens, needs_context
 from .repository import project_files, repository_snapshot
-from .storage import contained
+from .storage import WishError, contained
 
 CODE_SUFFIXES = set(".py .pyi .js .jsx .mjs .cjs .ts .tsx .vue .svelte .go .rs .java .kt .kts "
                     ".c .h .cc .cpp .hpp .cs .fs .fsx .rb .php .swift .scala .sh .bash .zsh "
@@ -27,6 +27,7 @@ def check_budgets(project, *, code=True):
         tokens = estimate_tokens(text)
         if tokens >= 8000:
             warnings.append(f"{path.relative_to(root)}: ~{tokens} tokens; inspect scope and duplication, preserve meaning")
+    warnings.extend(referenced_doc_warnings(project))
     context = needs_context(project)
     tokens = estimate_tokens(context)
     budget = project["config"]["needs_token_budget"]
@@ -71,3 +72,26 @@ def check_budgets(project, *, code=True):
         else:
             warnings.append(f"{relative}: {count} LOC; soft target is under 500")
     return errors, warnings
+
+
+def referenced_doc_warnings(project):
+    """Text docs that current needs reference are knowledge agents load; data and code are sized elsewhere."""
+    referenced = {}
+    for key, need in sorted(project["needs"].items()):
+        if need["meta"].get("currency") == "current":
+            for relative in need["meta"].get("references", []):
+                referenced.setdefault(relative, []).append(key)
+    warnings = []
+    for relative, keys in sorted(referenced.items()):
+        try:
+            path = contained(project["root"], relative)
+            if path.suffix in DATA_SUFFIXES | CODE_SUFFIXES or not path.is_file():
+                continue
+            tokens = estimate_tokens(path.read_text(encoding="utf-8"))
+        except (WishError, UnicodeError):
+            continue  # Validation reports unusable references.
+        if tokens >= 8000:
+            warnings.append(f"{relative}: ~{tokens} tokens, referenced by {', '.join(keys)}; "
+                            "keep decisions, rules and worked examples, move investigation evidence to a dated doc "
+                            "and working design to its change, preserve meaning")
+    return warnings
