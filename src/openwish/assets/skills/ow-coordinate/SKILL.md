@@ -11,9 +11,13 @@ integration and a record, never authority.
 
 1. **Propose the round.** From `ow ready`, name each change and the tasks in scope
    (delivery, or investigations only), what can run concurrently, the base
-   revisions and the integration targets. Ask only material questions, then wait for
-   an explicit instruction to begin. That authority covers the named scope only;
-   fast-forward applies per named change (`ow mode fast-forward C-001`).
+   revisions and the integration targets. First find the questions the round would
+   otherwise raise later (Discover ahead of delivery in `ow-plan`), including for
+   changes whose tasks are written only when they start, and preview each unseen
+   surface (Commit progressively in `ow-plan`). Ask only material questions, in one
+   batch, then wait for an explicit instruction to begin. That authority covers the
+   named scope only; fast-forward applies per named change
+   (`ow mode fast-forward C-001`).
 2. **Keep one round record** outside the repository, for example beside the
    worktrees: the human's brief verbatim, agreed scope and authority, bases, each
    worker's session, worktree and branch, integration order and current state.
@@ -35,7 +39,13 @@ integration and a record, never authority.
    result gets an independent review from a session that did not implement or
    correct it. A re-review may continue in the reviewer's own session while that
    session stays small (Keep context small in `ow-core`). Blocking findings
-   (`ow-review`) go back to a worker, then to re-review. Keep your context for
+   (`ow-review`) go back to a worker, then to re-review. Gate every question
+   before it reaches the human. Answer it from needs, rule docs, recorded decisions
+   or code when they settle it, and decide reversible choices yourself (Commit
+   progressively in `ow-plan`). An unseen surface found during the round is built on
+   its proposal and shown as a first look, and holds no work. Only a commitment-point
+   decision or a rule contradiction reaches the human: one question with its cases,
+   reported as something preparation missed. Keep your context for
    coordination: corrections, including those the human asks for after the round,
    also go to workers and reviewers.
 5. **Integrate one change at a time** on an integration branch: reconcile it with

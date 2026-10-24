@@ -2,6 +2,34 @@
 
 Release notes for OpenWish, newest first. Update this file for every release.
 
+## Unreleased
+
+Changes since rc.4, from the rest of the game project's sixth coordinated round. The
+owner was asked five questions after it began. Two were choices the agents could
+have made: a warning added to an existing screen, and review findings that turned
+out to be observations. The other three were decisions that preparation should have
+found. The round then sat idle for five hours waiting on three answers, and only
+one of them, a cancellation rule, needed to hold any work.
+
+### Changed
+
+- Question gate (`ow-coordinate`). Before a worker's question reaches the human, the
+  coordinator answers it from needs, rule docs, recorded decisions or code, and
+  decides reversible choices itself. Only a commitment-point decision or a rule
+  contradiction reaches the human, as one question with its cases, reported as
+  something preparation missed. A surface nobody has seen that comes up during a
+  round is built on its proposal and shown as a first look, and holds no work.
+- Preparation finds the round's questions (`ow-coordinate`), including for changes
+  whose tasks are written only when they start, and previews each unseen surface
+  then. The round met a new screen and two production-loss decisions only when it
+  planned those changes mid-round.
+- Whole-lifecycle questions (Ask through cases, `ow-plan`). A rule's question covers
+  completion, cancellation, early end and failure at once. One production-loss rule
+  reached the owner twice: first for natural completion, then for cancellation.
+- Additions to accepted surfaces (Unseen surfaces, `ow-plan`). A row, line or control
+  added to a surface the human has accepted is a reversible choice, not a new
+  preview.
+
 ## v1.0.0rc4
 
 Fourth release candidate for v1.0.0; its CLI and skills report `1.0.0-rc.4`. Most

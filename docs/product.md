@@ -58,7 +58,7 @@ contributors; architecture is in [design.md](design.md).
   predecessors, ranked by the cost of learning late; reversible choices proceed on
   a labeled assumption that stays open; questions reach humans in bounded batches.
   A surface people will work in that the human has not seen gets a quick preview
-  before it is built out.
+  before it is built out; an addition to an accepted surface is a reversible choice.
 - Foundational designs are tested against already-known later needs: the
   constraint is preserved now, resolved first, or given an affordable evolution
   path. Prerequisites name their provider and how they are verified, and resolve to
@@ -97,7 +97,11 @@ contributors; architecture is in [design.md](design.md).
   outside the repository, which the coordinator rereads instead of asking the human
   to resend the brief; consequential results get an independent review, and
   integration is serial. Workers stop at submission, the coordinator acts on each
-  result as it arrives, and the round's evidence survives restarts.
+  result as it arrives, and the round's evidence survives restarts. Questions and
+  previews are settled before a round begins, including for changes planned later.
+  Afterwards the coordinator answers or decides what existing intent or a reversible
+  choice settles. Only commitment-point decisions reach the human, each with its
+  cases, and a late preview holds no work.
 - Workflow guidance is concise, with one owner per rule, so agents spend their context
   on the product rather than on the framework. Agents read only what each step needs
   and hand off to a fresh session rather than working in a very large one.

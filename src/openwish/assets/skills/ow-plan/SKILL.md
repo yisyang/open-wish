@@ -84,14 +84,18 @@ Resolve uncertainty before the commitment it could disrupt, not before all work.
   human has not seen is costly to learn late; approved components or styles do not
   approve its composition. Before building it out, show a quick preview (sketch,
   static mock or a probe's screenshot) in an `investigate` task that awaits their
-  reaction, and record the accepted composition in its retained home.
+  reaction, and record the accepted composition in its retained home. A row,
+  line or control added to an accepted surface is a reversible choice, not an
+  unseen surface.
 - **Costly investigations.** An investigation that will take hours of work, large
   simulations or extensive evidence is itself a commitment point. Before starting
   it, ask the open human questions whose answers would change what it measures
   (cadence, scale, which options), in one batch. If one stays unanswered, keep the
   investigation small or label every result that depends on the assumption.
 - **Ask through cases.** Show an ordinary case, a boundary, competing claims, and a
-  failure or recovery, each with the outcome every option produces. Humans choose
+  failure or recovery, each with the outcome every option produces. Cover the rule
+  across its whole lifecycle (completion, cancellation, early end, failure) in one
+  question, so the decision does not come back as a second question. Humans choose
   product consequences; settle technical facts (library behavior, performance,
   access) with a bounded experiment instead of a question.
 - **Batch questions.** One numbered A/B/C set per pause, hard-to-reverse first, each
