@@ -12,6 +12,10 @@ Load `ow-core`, then read `openwish/policy.md` and the actual diff.
   step 7. Run no record, close or clean commands.
 - **Managed:** run `ow context C-001`, read the change and its tasks, and apply
   every step.
+- **Task or correction review** (a task reviewed before its change is complete, or a
+  re-review of a correction): apply steps 2–4 to the diff against the task's
+  acceptance and the needs it affects, and return Blocking findings below. The full
+  need assessment, Safe to forget and the record wait for the change's final review.
 
 1. **Assess the needs.** Run `ow trace` and compare the traced checks and files
    with the diff.
@@ -30,7 +34,8 @@ Load `ow-core`, then read `openwish/policy.md` and the actual diff.
    check it, or report it as a limitation.
 3. **Judge the structure** with the Architecture rubric in `ow-align` on the changed
    paths, including whether module headers and boundary READMEs still describe them.
-4. **Fix** within authorized intent and rerun affected checks. Keep unresolved
+4. **Fix** within authorized intent and rerun affected checks, or, when another
+   session will correct the work, return Blocking findings below. Keep unresolved
    manual observations and limitations visible.
 5. **Make it safe to forget** (below) before recording the result.
 6. **Record:** run `ow check`, then
@@ -60,6 +65,32 @@ Load `ow-core`, then read `openwish/policy.md` and the actual diff.
      attributed to delegation, never to a human.
 8. **Dispose and continue** via `ow-consolidate`. Needs stay current; further work
    uses a new change in default mode unless delegated again.
+
+## Blocking findings
+
+- **One complete list.** A blocked review lists every blocker against the whole
+  acceptance at once. Each blocker comes with the check that settles it (a command
+  or procedure, with its expected result or threshold) and its evidence. Corrections
+  work against that list. A re-review checks the list, the correction's diff and its
+  affected checks. It adds a blocker only for a regression the correction introduced
+  or for a defect a listed check reveals, and it says which.
+- **What blocks.** A finding blocks when it shows behavior that violates the
+  acceptance or a current need, a risk to money, data, permissions, security or a
+  policy tenet, or a missing or wrong check for the acceptance. Check style,
+  harnesses, evidence format and wording are observations unless they hide such a
+  failure.
+- **Pre-existing failures.** A check that fails the same way on the base revision is
+  not this work's blocker. Record it with an owner (an open change or task) and
+  continue.
+- **Setup failures.** A check that fails before it exercises the work, because of its
+  setup, environment or its own tooling, is not a finding against the work and uses
+  up no correction. Fix the setup and run the check again.
+- **Rule contradictions.** A blocker that only a change to a rule can resolve goes to
+  the human at once, as a decision with its options (Ask through cases in `ow-plan`),
+  without a correction first.
+- **Bounded correction.** After two blocked re-reviews of one task, stop correcting
+  it. Split or re-plan it (Reconcile the plan in `ow-plan`), or present the recurring
+  finding to the human as a blocker.
 
 ## Safe to forget
 

@@ -65,7 +65,7 @@ formatting, skip it.
 | Approved but unfinished detail | Another open change or retained domain data |
 | Working design, tasks, review | The change, until disposal |
 | Investigation evidence: measurements, probe results, rejected options | The change until disposal, then a dated evidence doc linked from what it supports; rule docs keep only the decisions and rules it settled |
-| Run logs, resource names, ports, session IDs, temporary paths | The conversation or temporary files only |
+| Run logs, resource names, ports, session IDs, temporary paths | The conversation or files outside the repository; records may point to logs by path |
 
 **One home per fact.** Write each rule, value or decision once and link to it
 elsewhere. A rule several needs depend on lives in the need whose outcome it
@@ -117,6 +117,22 @@ closed changes in `ow-consolidate`). Successors named with `after` may start onc
 their predecessors pass review (or are accepted, if `successors_wait_for` is
 `acceptance`); acceptance follows the sequence.
 
+## Evidence and context
+
+- **Evidence is a short record.** Completion and review evidence names the command or
+  procedure, the revision it ran on, its result and where its log is. A run recorded
+  at the reviewed revision is evidence for the reviewer too; rerun only what is
+  missing, stale or in doubt. Use the project's own check commands. Build
+  provenance machinery (hash manifests, archived copies of the work, custom wrappers
+  around checks) only when a result's integrity is genuinely in question, and keep
+  logs a record cites where they survive a restart.
+- **Keep context small.** Every step rereads the session's whole context, so a session
+  past about 150k tokens works several times slower than a fresh one. Read only what
+  the step needs: batch independent reads and searches, read a log's failing excerpt
+  rather than all of it, and leave large binary files unread unless the work is about
+  them. When a session grows that large, hand off to a fresh one with a short summary
+  of state, evidence and next step.
+
 ## Skill map
 
 Each rule has one owner. Load a skill when its step begins, not all at once, and
@@ -127,7 +143,7 @@ read the owning section when a step calls for it.
 | Right-size intent, Rule status, Right-size delivery, relationships | `ow-propose` |
 | Architecture rubric, Future constraints | `ow-align` |
 | Task sizing, Commit progressively, Discover ahead of delivery, Plan a candidate, Promote direct work, Reconcile the plan, Strategic verification | `ow-plan` |
-| Need assessment, Safe to forget | `ow-review` |
+| Need assessment, Safe to forget, Blocking findings | `ow-review` |
 | Disposal, compaction, size targets | `ow-consolidate` |
 | Delegated acceptance | `ow-fast-forward` |
 | Adoption for an existing or new product | `ow-onboard` |

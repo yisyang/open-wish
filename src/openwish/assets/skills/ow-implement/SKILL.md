@@ -47,6 +47,7 @@ change that covers the ask.
 7. **Ask only when blocked.** When only human blockers remain, explain the need and
    outcome, then ask A/B/C questions. Never discard
    unfinished work to look complete.
-8. **Review.** When work is complete, continue into `ow-review` without asking.
+8. **Review.** When work is complete, continue into `ow-review` without asking. A
+   worker in a coordinated round submits and reports instead (`ow-coordinate` step 3).
 
 Lead updates with **need → outcome → evidence**; task IDs support, not replace, that.

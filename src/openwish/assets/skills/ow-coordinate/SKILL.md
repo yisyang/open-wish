@@ -19,17 +19,25 @@ integration and a record, never authority.
    worker's session, worktree and branch, integration order and current state.
    Re-read the record and brief after compaction, interruption or resumption, before
    acting; never ask the human to resend them. Session and resource details stay in
-   this record, not in changes or docs.
+   this record, not in changes or docs. Keep the round's evidence where it survives
+   a restart. Until the record says the round is complete, restart nothing its
+   sessions depend on.
 3. **Set up workers.** One worktree and branch per change, and per component in a
    submodule project, from the agreed base; one writer each. Verify directories,
    roots, branches and bases before sending work. Brief each worker with the change,
-   its needs and rule files, interfaces to preserve, checks to run, and the duty to
-   report every choice made on the human's behalf.
+   its needs and rule files, the files and interfaces to start from, the checks to
+   run, and the duty to report every choice made on the human's behalf. A worker
+   submits its result and stops: it does not continue into `ow-review` or record
+   reviews, which the coordinator does at integration (step 5).
 4. **Run and review.** Keep independent work moving; serialize shared-interface and
-   migration conflicts. Each consequential result gets an independent review in a
-   fresh session that did not implement it; blocking findings go back to the worker,
-   then to re-review. Keep your context for coordination: corrections, including
-   those the human asks for after the round, also go to workers and reviewers.
+   migration conflicts. Wait for whichever session finishes first and act on its
+   result; never let one slow session hold finished results. Each consequential
+   result gets an independent review from a session that did not implement or
+   correct it. A re-review may continue in the reviewer's own session while that
+   session stays small (Keep context small in `ow-core`). Blocking findings
+   (`ow-review`) go back to a worker, then to re-review. Keep your context for
+   coordination: corrections, including those the human asks for after the round,
+   also go to workers and reviewers.
 5. **Integrate one change at a time** on an integration branch: reconcile it with
    the current target, rerun affected checks, commit component revisions and their
    pins, record or refresh the review (`ow-review`), then publish. Hold effects that

@@ -44,7 +44,7 @@ contributors; architecture is in [design.md](design.md).
 - Changes are bounded by results that stay useful if later work is postponed. Broad
   asks become sequences; only ready increments (prerequisites delivered, decisions
   made) get tasks, and the rest stay open changes with empty task lists that are
-  planned against delivered code once unblocked. Changes name predecessors in
+  planned against delivered code when they are about to start. Changes name predecessors in
   `after`; successors may start once predecessors pass review (configurable to wait
   for acceptance), acceptance follows the sequence, and `ow ready` surfaces what
   can be planned next.
@@ -96,9 +96,11 @@ contributors; architecture is in [design.md](design.md).
 - Coordinated rounds run named changes in isolated worktrees under one record kept
   outside the repository, which the coordinator rereads instead of asking the human
   to resend the brief; consequential results get an independent review, and
-  integration is serial.
+  integration is serial. Workers stop at submission, the coordinator acts on each
+  result as it arrives, and the round's evidence survives restarts.
 - Workflow guidance is concise, with one owner per rule, so agents spend their context
-  on the product rather than on the framework.
+  on the product rather than on the framework. Agents read only what each step needs
+  and hand off to a fresh session rather than working in a very large one.
 - Reports use the human's vocabulary and answer their direct questions. Retained
   records hold decisions and their homes, never run logs, resource names or session
   details.
@@ -121,9 +123,21 @@ contributors; architecture is in [design.md](design.md).
   dependencies, assessed with an evidence-based architecture rubric.
 - Greenfield work starts with a minimal structure and an end-to-end slice. Brownfield
   onboarding proposes refactoring only when it earns its cost, with human approval.
-- Reviews assess every current need: linked and other affected needs with direct
-  evidence, the rest recorded as assessed and unaffected. Any change to a pending
-  review's inputs makes it stale, and the CLI names what changed.
+- A change's final review assesses every current need: linked and other affected
+  needs with direct evidence, the rest recorded as assessed and unaffected. Reviews of
+  a single task or a correction cover its diff, its acceptance and the needs it
+  affects. Any change to a pending review's inputs makes it stale, and the CLI names
+  what changed.
+- A blocked review returns one complete list of blockers, each with the check that
+  settles it. Re-reviews add a blocker only for a regression the correction introduced
+  or a defect those checks reveal. Only product risk blocks, a failure that
+  reproduces on the base revision is pre-existing, and correction of one task is
+  bounded before it is re-planned or escalated. A check that fails on its own setup
+  is rerun, not counted against the work, and a blocker only a rule change can
+  resolve goes straight to the human.
+- Evidence is a short record: command, revision, result and where the log is. Runs
+  recorded at the reviewed revision are reused, and provenance machinery is built only
+  when a result's integrity is in doubt.
 - Review freshness includes recursive submodule checkouts and content; pinning the
   reviewed checkout afterwards keeps a review fresh, a differing pin is warned about,
   and uninspectable components prevent fresh acceptance. Routine verification stays under five minutes.

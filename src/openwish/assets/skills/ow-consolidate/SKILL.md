@@ -25,7 +25,9 @@ Load `ow-core`, read `openwish/policy.md` and run `ow status` and `ow context`. 
    `ow-review`). Rewrite successor prerequisites as delivered code, not the disposed
    change's plan or files. Do not copy whole plans into docs. Investigation evidence
    still worth keeping goes to a dated evidence doc, not a rule doc (Where knowledge
-   lives in `ow-core`).
+   lives in `ow-core`). Where an `implemented` handoff item's design also sits in a
+   doc, cut that text to its decisions, rules and worked examples; code now carries
+   the rest (Size targets below).
 4. **Preview, then clean:** `ow clean C-001 --dry-run`, then `ow clean C-001`. Resolve
    what preflight reports: move useful unknown files deliberately; reconcile
    reviews that cite the batch and retained mentions of the change ID; replace a
@@ -37,9 +39,10 @@ Load `ow-core`, read `openwish/policy.md` and run `ow status` and `ow context`. 
    you commit a disposal, put the change's need → outcome summary and handoff
    destinations (`ow summary C-001`, read before cleaning) in the commit message
    body, since the records are gone afterwards.
-7. **Continue the sequence.** For each `PLAN` change in `ow ready`, apply Plan a
-   candidate in `ow-plan`, and take ready investigations (Discover ahead of
-   delivery); planning needs no approval. Present `ASK` questions as one batch.
+7. **Continue the sequence.** For the next `PLAN` change to start in `ow ready`,
+   apply Plan a candidate in `ow-plan` (plan the others when they are about to
+   start), and take ready investigations (Discover ahead of delivery); planning needs
+   no approval. Present `ASK` questions as one batch.
    Implement only within authorized scope; otherwise present them as the next step.
 
 ## Compact needs

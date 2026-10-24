@@ -2,6 +2,76 @@
 
 Release notes for OpenWish, newest first. Update this file for every release.
 
+## v1.0.0rc4
+
+Fourth release candidate for v1.0.0; its CLI and skills report `1.0.0-rc.4`. Most
+changes come from the game project's sixth coordinated round. Its tasks were small,
+yet it ran for more than 40 hours. In one 12-hour stretch, corrections and their
+re-reviews took 72% of worker time. One task went through ten reviews and 27
+worker-hours without passing.
+
+### Added
+
+- Blocking findings (`ow-review`). A blocked review lists every blocker at once, each
+  with the check that settles it. A re-review adds a blocker only for a regression the
+  correction introduced or a defect those checks reveal. Only product risk blocks. A
+  failure that reproduces on the base revision is pre-existing and gets an owner, and
+  after two blocked re-reviews a task is split, re-planned or escalated. Each review of
+  that task had raised new findings (8, then 5, 4, 2, 1 and 2); once its list was
+  fixed, three re-reviews added none. More than half of the later blockers concerned
+  test timing, pre-existing failures or the agents' own qualification scripts, not
+  product behavior.
+- Setup failures and rule contradictions (Blocking findings, `ow-review`). A check
+  that fails before it exercises the work, because of its setup, environment or
+  tooling, is rerun after the setup is fixed and uses up no correction. A blocker that
+  only a rule change can resolve goes to the human at once, without a correction.
+  In the first hours on a pre-release rc.4 in the same round, a task was held for the
+  owner because its one check run failed on a missing directory and a misdirected
+  helper path; it then passed its first review once the check ran. A rule
+  contradiction that the investigation had already shown went through a correction
+  and a re-review before it reached the owner.
+- Task and correction reviews (`ow-review`). A review of one task or of a correction
+  covers its diff, the task's acceptance and the needs it affects. The full need
+  assessment, Safe to forget and the record wait for the change's final review. Those
+  re-reviews had each run with 200,000–260,000 tokens of context and taken 40–60
+  minutes.
+- Evidence and context (`ow-core`). Evidence is a short record (command, revision,
+  result, log location) that reviewers reuse, and provenance machinery is built only
+  when a result's integrity is in doubt. Agents had written 448 one-off harness
+  scripts and twice as much evidence text as product code, and half of what they read
+  was that evidence. Sessions read only what each step needs and hand off before
+  their context grows large; 63% of model calls had run with more than 150,000 tokens
+  of context, at roughly twice the time per call.
+- Fix the bar when planning (Strategic verification, `ow-plan`). Task acceptance names
+  its settling checks, with thresholds where running cost, timing or recovery matter,
+  and repeated or mutation runs need a reason. Reviews had kept adding qualification
+  runs, up to a 55-entry matrix with a 127-test suite that had to pass twice.
+
+### Changed
+
+- Coordinated workers stop at submission (`ow-coordinate` step 3, `ow-implement`
+  step 8). They no longer continue into `ow-review`; the coordinator records reviews
+  at integration. Workers had recorded their own self-assessments as the change's
+  review. Worker briefs also name the files and interfaces to start from.
+- The coordinator acts on whichever session finishes first (`ow-coordinate` step 4).
+  Paired blocking dispatches had left finished results waiting more than three hours
+  in total behind slower ones.
+- Re-reviews may continue in the reviewer's own session while it stays small, and
+  independence means a session that did not implement or correct the work
+  (`ow-coordinate` step 4).
+- Round evidence survives restarts, and nothing a running round depends on is
+  restarted (`ow-coordinate` step 2). A host reboot mid-round emptied `/tmp` and with
+  it every log the round's records cited. Records may point to logs kept outside the
+  repository (Where knowledge lives, `ow-core`).
+- Consolidation plans only the next change to start (`ow-consolidate` step 7, Plan a
+  candidate in `ow-plan`); plans written early had gone stale and needed realigning.
+- Disposal trims delivered design from docs (Dispose closed changes, `ow-consolidate`
+  step 3). Where an `implemented` handoff item's design also sits in a doc, that text
+  is cut to its decisions, rules and worked examples, since code now carries the rest.
+  In the game project, a disposal after upgrading to rc.3 left a delivered change's
+  full float-arithmetic design in the architecture doc, including database checks
+  copied from the schema, although its handoff already pointed to that code.
+
 ## v1.0.0rc3
 
 Third release candidate for v1.0.0; its CLI and skills report `1.0.0-rc.3`. The

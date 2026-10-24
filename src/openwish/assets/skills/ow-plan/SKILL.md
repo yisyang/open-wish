@@ -119,7 +119,8 @@ only investigations is still unplanned.
 ## Plan a candidate
 
 A candidate is an open change without delivery tasks (investigations may have run);
-`ow ready` shows it as `PLAN` once its `after` predecessors pass.
+`ow ready` shows it as `PLAN` once its `after` predecessors pass. Plan it when it is
+about to start: a plan written earlier goes stale while other work lands.
 
 1. **Verify its prerequisites in the repository** (code, interfaces, checks); a
    passing predecessor is a reason to look, not proof. If one is missing, record
@@ -197,5 +198,10 @@ not goals.
   restate. Run it when the doc, its data or the checked code changes; assessments
   and reviews cite its passing run at the current revision instead of recomputing by
   hand.
+- **Fix the bar when planning.** Each task's acceptance names the checks that settle
+  it, with commands and thresholds where running cost, timing or recovery matter.
+  Reviews judge against them (Blocking findings in `ow-review`). Repeat a run only
+  to settle a known-flaky result, and add mutation matrices or repeated full-suite
+  runs only when the acceptance needs them.
 - Keep routine verification under five minutes and name any slower checks needed.
   Delete temporary probes once their findings are preserved.
