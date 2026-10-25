@@ -31,7 +31,10 @@ change that covers the ask.
    rubric in `ow-align`: pure decisions, effects at the edges, no speculative
    abstractions. Keep module headers and boundary READMEs accurate where you
    change responsibilities.
-4. **Verify** with Strategic verification in `ow-plan`: run affected checks, add the
+4. **Verify** with Strategic verification in `ow-plan`: run the checks the task's
+   acceptance names, find every test that uses what you changed (a schema, shared
+   fixture or data, displayed text) and run the affected ones, and ask what
+   plausible wrong implementation would still pass (step 2 of `ow-review`). Add the
    smallest checks for real gaps, mention need IDs in need-level tests. Then
    `ow task C-001/T-001 done --evidence "what ran and what it showed"`. Manual
    observations need real evidence; fast-forward cannot supply them.

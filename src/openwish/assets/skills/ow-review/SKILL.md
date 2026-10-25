@@ -11,11 +11,15 @@ Load `ow-core`, then read `openwish/policy.md` and the actual diff.
   material decision of the session has a retained home), then report as in
   step 7. Run no record, close or clean commands.
 - **Managed:** run `ow context C-001`, read the change and its tasks, and apply
-  every step.
+  every step. When its tasks had task reviews, this final review reuses them: it
+  judges how the tasks work together, the diffs no task review covered and which
+  failures of the change's own checks block, without re-reading reviewed diffs.
 - **Task or correction review** (a task reviewed before its change is complete, or a
   re-review of a correction): apply steps 2–4 to the diff against the task's
   acceptance and the needs it affects, and return Blocking findings below. The full
   need assessment, Safe to forget and the record wait for the change's final review.
+  A task that only adds tests or records gets no task review; the final review
+  covers it.
 
 1. **Assess the needs.** Run `ow trace` and compare the traced checks and files
    with the diff.

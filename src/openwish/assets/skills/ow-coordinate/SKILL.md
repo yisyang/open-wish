@@ -31,8 +31,9 @@ integration and a record, never authority.
    roots, branches and bases before sending work. Brief each worker with the change,
    its needs and rule files, the files and interfaces to start from, the checks to
    run, and the duty to report every choice made on the human's behalf. A worker
-   submits its result and stops: it does not continue into `ow-review` or record
-   reviews, which the coordinator does at integration (step 5).
+   verifies its own task (step 4 of `ow-implement`), submits its result and stops:
+   it does not continue into `ow-review` or record reviews, which the coordinator
+   does at integration (step 5).
 4. **Run and review.** Keep independent work moving; serialize shared-interface and
    migration conflicts. Wait for whichever session finishes first and act on its
    result; never let one slow session hold finished results. Each consequential

@@ -131,7 +131,10 @@ contributors; architecture is in [design.md](design.md).
 - A change's final review assesses every current need: linked and other affected
   needs with direct evidence, the rest recorded as assessed and unaffected. Reviews of
   a single task or a correction cover its diff, its acceptance and the needs it
-  affects. Any change to a pending review's inputs makes it stale, and the CLI names
+  affects. A final review reuses its change's task reviews and judges what they could
+  not: the tasks together and any task that only added tests or records. The
+  implementer first checks its own work against its acceptance, every test that uses
+  what it changed and the wrong implementations those checks would miss. Any change to a pending review's inputs makes it stale, and the CLI names
   what changed.
 - A blocked review returns one complete list of blockers, each with the check that
   settles it. Re-reviews add a blocker only for a regression the correction introduced

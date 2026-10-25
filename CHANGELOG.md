@@ -40,6 +40,19 @@ one of them, a cancellation rule, needed to hold any work.
   minutes.
 - Rule contradictions (Blocking findings, `ow-review`) go straight to the human while
   work that does not depend on them continues.
+- Review roles (`ow-implement`, `ow-review`, `ow-coordinate`):
+  - **The implementer's self-check.** Before submitting, the implementer runs the
+    task's named checks and every test that uses what it changed, and asks which wrong
+    implementation would still pass. A search for tests using a changed formatter
+    would have found three stale browser assertions that instead cost a review and a
+    correction.
+  - **Test-only and record-only tasks.** These get no task review; the final review
+    covers them. Two tasks that only added restore tests each had a review session of
+    their own.
+  - **The final review.** It reuses the change's task reviews and judges what they
+    could not: the tasks together, and which failures of the change's own checks
+    block. Both final reviews that blocked did so on failures the change's
+    qualification run had already reported.
 
 ## v1.0.0rc4
 
