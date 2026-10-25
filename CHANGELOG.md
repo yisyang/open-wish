@@ -29,6 +29,11 @@ one of them, a cancellation rule, needed to hold any work.
 - Additions to accepted surfaces (Unseen surfaces, `ow-plan`). A row, line or control
   added to a surface the human has accepted is a reversible choice, not a new
   preview.
+- Previews get no independent review (`ow-coordinate`). A preview or static mock is
+  not a consequential result, and the surface built from it is reviewed. In that
+  round, a static mock of a research screen went through an independent review, a
+  blocker, a correction and the start of a re-review before the screen itself was
+  built and reviewed.
 
 ## v1.0.0rc4
 

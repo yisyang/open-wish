@@ -37,7 +37,8 @@ integration and a record, never authority.
    migration conflicts. Wait for whichever session finishes first and act on its
    result; never let one slow session hold finished results. Each consequential
    result gets an independent review from a session that did not implement or
-   correct it. A re-review may continue in the reviewer's own session while that
+   correct it; a preview or static mock is not one, and the surface built from it
+   is. A re-review may continue in the reviewer's own session while that
    session stays small (Keep context small in `ow-core`). Blocking findings
    (`ow-review`) go back to a worker, then to re-review. Gate every question
    before it reaches the human. Answer it from needs, rule docs, recorded decisions
