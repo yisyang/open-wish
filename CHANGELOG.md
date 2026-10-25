@@ -34,6 +34,12 @@ one of them, a cancellation rule, needed to hold any work.
   round, a static mock of a research screen went through an independent review, a
   blocker, a correction and the start of a re-review before the screen itself was
   built and reviewed.
+- Corrections can continue their session (`ow-coordinate`). A correction may continue
+  in its own session while that session stays small, as re-reviews already could. A
+  correction resumed in the implementer's session there was submitted in eight
+  minutes.
+- Rule contradictions (Blocking findings, `ow-review`) go straight to the human while
+  work that does not depend on them continues.
 
 ## v1.0.0rc4
 

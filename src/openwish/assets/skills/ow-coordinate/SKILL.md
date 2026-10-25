@@ -37,18 +37,20 @@ integration and a record, never authority.
    migration conflicts. Wait for whichever session finishes first and act on its
    result; never let one slow session hold finished results. Each consequential
    result gets an independent review from a session that did not implement or
-   correct it; a preview or static mock is not one, and the surface built from it
-   is. A re-review may continue in the reviewer's own session while that
-   session stays small (Keep context small in `ow-core`). Blocking findings
-   (`ow-review`) go back to a worker, then to re-review. Gate every question
-   before it reaches the human. Answer it from needs, rule docs, recorded decisions
-   or code when they settle it, and decide reversible choices yourself (Commit
-   progressively in `ow-plan`). An unseen surface found during the round is built on
-   its proposal and shown as a first look, and holds no work. Only a commitment-point
-   decision or a rule contradiction reaches the human: one question with its cases,
-   reported as something preparation missed. Keep your context for
-   coordination: corrections, including those the human asks for after the round,
-   also go to workers and reviewers.
+   correct it. A preview or static mock is not consequential; the surface built from
+   it is. Blocking findings (`ow-review`) go back to a worker, then to re-review. A
+   correction or re-review may continue in its own session while that session stays
+   small (Keep context small in `ow-core`). Keep your context for coordination:
+   corrections, including those the human asks for after the round, also go to
+   workers and reviewers.
+   - **Gate questions.** Answer a worker's question from needs, rule docs, recorded
+     decisions or code when they settle it. Decide a reversible choice without asking,
+     since the human delegated the round (Reversible choices in `ow-plan`). An unseen
+     surface found during the round is built on its proposal and shown as a first
+     look; it holds no work (an exception to Unseen surfaces in `ow-plan`). Only a
+     commitment-point decision or a rule contradiction reaches the human, as one
+     question with its cases, reported as something preparation missed, while work
+     that does not depend on it continues.
 5. **Integrate one change at a time** on an integration branch: reconcile it with
    the current target, rerun affected checks, commit component revisions and their
    pins, record or refresh the review (`ow-review`), then publish. Hold effects that

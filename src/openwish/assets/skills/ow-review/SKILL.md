@@ -85,9 +85,9 @@ Load `ow-core`, then read `openwish/policy.md` and the actual diff.
 - **Setup failures.** A check that fails before it exercises the work, because of its
   setup, environment or its own tooling, is not a finding against the work and uses
   up no correction. Fix the setup and run the check again.
-- **Rule contradictions.** A blocker that only a change to a rule can resolve goes to
-  the human at once, as a decision with its options (Ask through cases in `ow-plan`),
-  without a correction first.
+- **Rule contradictions.** A blocker that only a change to a rule can resolve goes
+  straight to the human as a decision with its options (Ask through cases in
+  `ow-plan`), without a correction first. Work that does not depend on it continues.
 - **Bounded correction.** After two blocked re-reviews of one task, stop correcting
   it. Split or re-plan it (Reconcile the plan in `ow-plan`), or present the recurring
   finding to the human as a blocker.

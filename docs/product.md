@@ -100,8 +100,9 @@ contributors; architecture is in [design.md](design.md).
   result as it arrives, and the round's evidence survives restarts. Questions and
   previews are settled before a round begins, including for changes planned later.
   Afterwards the coordinator answers or decides what existing intent or a reversible
-  choice settles. Only commitment-point decisions reach the human, each with its
-  cases, and a late preview holds no work.
+  choice settles. Only commitment-point decisions and rule contradictions reach the
+  human, each with its cases, and a late preview holds no work. A preview gets no
+  independent review; the surface built from it does.
 - Workflow guidance is concise, with one owner per rule, so agents spend their context
   on the product rather than on the framework. Agents read only what each step needs
   and hand off to a fresh session rather than working in a very large one.
