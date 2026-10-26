@@ -126,11 +126,11 @@ their predecessors pass review (or are accepted, if `successors_wait_for` is
   provenance machinery (hash manifests, archived copies of the work, custom wrappers
   around checks) only when a result's integrity is genuinely in question, and keep
   logs a record cites where they survive a restart.
-- **Keep context small.** Every step rereads the session's whole context, so a session
-  past about 150k tokens works several times slower than a fresh one. Read only what
-  the step needs: batch independent reads and searches, read a log's failing excerpt
-  rather than all of it, and leave large binary files unread unless the work is about
-  them. When a session grows that large, hand off to a fresh one with a short summary
+- **Keep context small.** Every step rereads the session's whole context, so a long
+  session works several times slower than a fresh one. Read only what the step needs:
+  batch independent reads and searches, read a log's failing excerpt rather than all of
+  it, and leave large binary files unread unless the work is about them. When a
+  session passes about 200k tokens, hand off to a fresh one with a short summary
   of state, evidence and next step. A session rarely sees its own size, so whoever
   starts or resumes it (a coordinator, or the human) checks it before sending more
   work, and asks a session past the limit to hand off instead.
