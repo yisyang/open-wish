@@ -131,7 +131,9 @@ their predecessors pass review (or are accepted, if `successors_wait_for` is
   the step needs: batch independent reads and searches, read a log's failing excerpt
   rather than all of it, and leave large binary files unread unless the work is about
   them. When a session grows that large, hand off to a fresh one with a short summary
-  of state, evidence and next step.
+  of state, evidence and next step. A session rarely sees its own size, so whoever
+  starts or resumes it (a coordinator, or the human) checks it before sending more
+  work, and asks a session past the limit to hand off instead.
 
 ## Skill map
 

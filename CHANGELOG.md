@@ -13,6 +13,12 @@ one of them, a cancellation rule, needed to hold any work.
 
 ### Changed
 
+- Context handoff (Keep context small, `ow-core`). Whoever starts or resumes a session
+  checks its size, because a session rarely sees its own, and hands one past about
+  150k tokens off rather than sending it more work. `ow-consolidate` no longer offers
+  150k–200k tokens of working context as a starting point, which contradicted the
+  handoff. In the game project's seventh round, a worker ran at a median of 256k
+  tokens and peaked at 410k because nobody measured it.
 - Question gate (`ow-coordinate`). Before a worker's question reaches the human, the
   coordinator answers it from needs, rule docs, recorded decisions or code, and
   decides reversible choices itself. Only a commitment-point decision or a rule

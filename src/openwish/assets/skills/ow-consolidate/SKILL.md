@@ -69,9 +69,8 @@ overlap. Size is a prompt to look, not a cap.
 with no line cap. Each OW artifact, and each text doc a current need references,
 warns at 8,000: keep a rule doc to decisions, rules and worked examples, and move
 working design to the change that will deliver it; once delivered, code carries it.
-These cover retained knowledge, not your working context: on a 1M-token harness,
-150k–200k tokens of relevant working context is a starting point to evaluate, not a
-quota, and small tasks need far less.
+These cover retained knowledge, not your working context, which follows Keep context
+small in `ow-core`.
 
 **Tests.** Keep small regression checks of lasting outcomes and consequential
 boundaries; delete temporary probes; merge redundant or brittle tests only when
