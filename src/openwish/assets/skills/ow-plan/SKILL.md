@@ -186,9 +186,25 @@ not goals.
   undecided: ask, or record it in `open`, rather than pass the check.
 - Avoid asserting incidental wording, layout, helper names or private call order.
   Assert exact text, schema or layout narrowly when it is a real contract.
-- Cover credible costly failures (data loss, wrong charges, privacy leaks) even
-  unrequested. Expand for risk, observed failures or explicit requirements; honor
-  requested coverage targets without treating 100% as correctness.
+- **Credible failures.** Cover credible costly failures (data loss, wrong charges,
+  privacy leaks) even unrequested. Credible means reachable through the system's real
+  inputs: client requests, concurrency and retries, crashes and restarts, recovery
+  and operator commands. The product's own code writing outside its owner module is
+  not; structure checks and review cover it. A threat model in the project policy
+  decides when there is one. Expand for risk, observed failures or explicit
+  requirements; honor requested coverage targets without treating 100% as correctness.
+- **Test shared mechanisms once,** where they are implemented (locking, idempotent
+  retry, recovery, authorization). A feature that uses one gets one case showing it
+  is wired in, not its own matrix.
+- **Checks that add no evidence.** Flagship agents read and review code as well as
+  they write it, so a check earns its run time and context only by catching what
+  types, lint and an independent review cannot. Do not write tests that restate the
+  implementation, its constants or generated output; a case for every input variant
+  where one accepted and one rejected case per rule suffice; tests of framework,
+  library or generated-code behavior; guards or tests against the product's own code
+  bypassing its owner module; a regression test for a slip that types, lint or an
+  existing check now catches; or checks kept only as review evidence (run them,
+  record the result and delete them).
 - **Link checks to needs:** a retained test protecting a need-level outcome mentions
   the need ID in its name, docstring or comment for `ow trace`; source and helpers
   stay untagged.
@@ -208,4 +224,6 @@ not goals.
   to settle a known-flaky result, and add mutation matrices or repeated full-suite
   runs only when the acceptance needs them.
 - Keep routine verification under five minutes and name any slower checks needed.
-  Delete temporary probes once their findings are preserved.
+  Delete temporary probes once their findings are preserved. A change that edits
+  code deletes or merges the tests there that protect no credible failure, with no
+  replacement.

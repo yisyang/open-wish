@@ -73,5 +73,6 @@ These cover retained knowledge, not your working context, which follows Keep con
 small in `ow-core`.
 
 **Tests.** Keep small regression checks of lasting outcomes and consequential
-boundaries; delete temporary probes; merge redundant or brittle tests only when
-their protection is preserved.
+boundaries; delete temporary probes and the checks Strategic verification in
+`ow-plan` excludes; merge redundant or brittle tests only when their protection is
+preserved.

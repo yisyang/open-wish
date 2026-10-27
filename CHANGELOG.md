@@ -13,6 +13,18 @@ one of them, a cancellation rule, needed to hold any work.
 
 ### Changed
 
+- Test restraint (Strategic verification, `ow-plan`). "Credible failures" are those
+  reachable through real inputs: requests, concurrency, crashes, recovery and operator
+  commands, not the product's own code bypassing its owner module. Shared mechanisms
+  are tested once. "Checks that add no evidence" lists the tests flagship agents no
+  longer need: restated implementation, per-variant cases, framework behavior, guards
+  against the product's own code, regressions types or lint now catch, and checks kept
+  only as review evidence. Changes prune such tests where they edit code, and
+  `ow-review` blocks only on gaps in credible failures. Although the guidance already
+  said test count was not a goal, the game project grew about 80k test lines for 37k
+  of source: plans wrote adversarial checks into acceptance, review findings added
+  tests and none were removed, and 219 database triggers each guarded the server
+  against its own code.
 - Context handoff (Keep context small, `ow-core`). A session hands off at about 200k
   tokens. Whoever starts or resumes a session checks its size, because a session
   rarely sees its own, and hands one past the limit off rather than sending it more

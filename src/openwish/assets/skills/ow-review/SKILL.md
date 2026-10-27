@@ -33,9 +33,10 @@ Load `ow-core`, then read `openwish/policy.md` and the actual diff.
 2. **Judge the checks** (Strategic verification in `ow-plan`): would they catch a
    need violation, survive a harmless refactor, and test intent rather than repeat
    the code's own logic, and settle one outcome where outcomes differ in money,
-   rights or data? Ask what plausible wrong implementation would still pass,
-   and what is the strongest plausible reason the result would fail in real use;
-   check it, or report it as a limitation.
+   rights or data? Ask what plausible wrong implementation would still pass through
+   a credible failure, and what is the strongest plausible reason the result would
+   fail in real use; check it, or report it as a limitation. Checks that add no
+   evidence are findings to remove, not gaps to fill.
 3. **Judge the structure** with the Architecture rubric in `ow-align` on the changed
    paths, including whether module headers and boundary READMEs still describe them.
 4. **Fix** within authorized intent and rerun affected checks, or, when another
@@ -80,9 +81,11 @@ Load `ow-core`, then read `openwish/policy.md` and the actual diff.
   or for a defect a listed check reveals, and it says which.
 - **What blocks.** A finding blocks when it shows behavior that violates the
   acceptance or a current need, a risk to money, data, permissions, security or a
-  policy tenet, or a missing or wrong check for the acceptance. Check style,
-  harnesses, evidence format and wording are observations unless they hide such a
-  failure.
+  policy tenet, or a missing or wrong check for the acceptance or a credible failure
+  (Strategic verification in `ow-plan`). A gap reachable only through a non-credible
+  path, or a check Strategic verification excludes, is an observation and adds no
+  check. Check style, harnesses, evidence format and wording are observations unless
+  they hide such a failure.
 - **Pre-existing failures.** A check that fails the same way on the base revision is
   not this work's blocker. Record it with an owner (an open change or task) and
   continue.
