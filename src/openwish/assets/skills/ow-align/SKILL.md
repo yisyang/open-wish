@@ -46,6 +46,7 @@ finding connects **observation → consequence → improvement → verification*
 | Can a maintainer find behavior? | Domain names, clear entry points, a one-line responsibility header per module, a README at major boundaries | Generic helpers, hidden dispatch, headers that no longer match the code |
 | Does each rule have one owner? | Changing a rule stays local, in code and in docs | Duplicated decisions; one responsibility spread across modules; docs restating rule values by hand |
 | Are dependencies explicit? | Clear direction, data ownership and contracts | Cycles, hidden globals, leaking internals |
+| Does each piece of state have one owner? | Every value a screen shows has one named owner (server, client cache, component or layout container), and the design says how a reply, a rejection and a retried or out-of-order reply reach it | Per-path flags guarding asynchronous reads; a client state machine that grows with each fix; corrections that move state between components |
 | Can decisions run without effects? | Pure calculations and transitions with explicit inputs | Business rules that need network, database, clock or environment |
 | Do tests check intent? | Small, fast checks of outcomes and invariants | Snapshots of incidental output, private-call assertions |
 | Does complexity earn its cost? | Boundaries serve current behavior | Speculative frameworks, layers, arbitrary file splits |

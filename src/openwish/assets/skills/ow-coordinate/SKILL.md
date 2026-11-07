@@ -10,7 +10,9 @@ side; each still follows the ordinary skills. Coordination adds isolation,
 integration and a record, never authority.
 
 1. **Propose the round.** From `ow ready`, name each change and the tasks in scope
-   (delivery, or investigations only), what can run concurrently, the base
+   (delivery; investigations and previews only, which settle schemas, interfaces
+   and screens before a later round builds them; or process improvements measured
+   from earlier rounds), what can run concurrently, the base
    revisions and the integration targets. First find the questions the round would
    otherwise raise later (Discover ahead of delivery in `ow-plan`), including for
    changes whose tasks are written only when they start, and preview each unseen
@@ -19,13 +21,14 @@ integration and a record, never authority.
    named scope only; fast-forward applies per named change
    (`ow mode fast-forward C-001`).
 2. **Keep one round record** outside the repository, for example beside the
-   worktrees: the human's brief verbatim, agreed scope and authority, bases, each
-   worker's session, worktree and branch, integration order and current state.
-   Re-read the record and brief after compaction, interruption or resumption, before
-   acting; never ask the human to resend them. Session and resource details stay in
-   this record, not in changes or docs. Keep the round's evidence where it survives
-   a restart. Until the record says the round is complete, restart nothing its
-   sessions depend on.
+   worktrees: the human's brief verbatim, agreed scope and authority, bases,
+   integration order and decisions. Read sessions, worktrees, branches, task
+   states and check results from their own stores (version control, `ow status`,
+   session and check records) instead of copying them into the record, where
+   copies go stale. Re-read the record and brief after compaction, interruption
+   or resumption, before acting; never ask the human to resend them. Keep the
+   round's evidence where it survives a restart. Until the record says the round
+   is complete, restart nothing its sessions depend on.
 3. **Set up workers.** One worktree and branch per change, and per component in a
    submodule project, from the agreed base; one writer each. Verify directories,
    roots, branches and bases before sending work. Brief each worker with the change,

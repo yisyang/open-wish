@@ -227,3 +227,7 @@ not goals.
   Delete temporary probes once their findings are preserved. A change that edits
   code deletes or merges the tests there that protect no credible failure, with no
   replacement.
+- Iterate on layout against a fixture page that renders the real components over
+  in-memory data, and run the slower end-to-end check last. Split a check whose
+  single run exceeds the routine budget so its parts run in parallel, and set
+  state directly where the test does not exist to prove the path to it.
