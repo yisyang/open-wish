@@ -119,41 +119,47 @@ def plan_migration(root):
     version = config["version"]
     if version == SCHEMA_VERSION:
         return None
-    if version != OLDEST_MIGRATABLE:
+    if not OLDEST_MIGRATABLE <= version < SCHEMA_VERSION:
         raise WishError(f"No migration from OW schema {version} (expected {SCHEMA_VERSION}).")
-    known = known_digests()
     writes, removals, notes = {}, [], []
-    policy = contained(root, POLICY)
-    text = policy.read_text(encoding="utf-8") if policy.exists() else ""
-    migrated, kept = split_policy(text, known["policy"])
-    if migrated != text:
-        writes[POLICY] = migrated
-    if kept:
-        notes.append(f"{POLICY}: kept project text under {', '.join(kept)}. OW's own rules now ship in "
-                     "the ow-core skill; check that kept text adds to them or names the rule it overrides.")
-    reference = contained(root, LEGACY_REFERENCE)
-    if reference.exists():
-        body = reference.read_text(encoding="utf-8")
-        if declared_version(body):
-            body = body.split("\n", 1)[1] if "\n" in body else ""
-        if digest(body) in known["artifacts"]:
-            removals.append(LEGACY_REFERENCE)
-        else:
-            notes.append(f"{LEGACY_REFERENCE}: edited, so kept as a project file; the current "
-                         "artifact reference ships in the ow-core skill.")
-    manifest_path = contained(root, MANIFEST)
-    if manifest_path.exists():
-        manifest = read_json(manifest_path)
-        if not isinstance(manifest.get("files"), dict):
-            raise WishError("Unsupported or malformed OW installation manifest.")
-        if LEGACY_REFERENCE in manifest["files"]:
-            files = {k: v for k, v in manifest["files"].items() if k != LEGACY_REFERENCE}
-            writes[MANIFEST] = json.dumps({**manifest, "files": files}, indent=2, ensure_ascii=False) + "\n"
+    if version == 4:
+        # Schema 5 moved OW's own text into ow-core; openwish/ keeps only project knowledge.
+        known = known_digests()
+        policy = contained(root, POLICY)
+        text = policy.read_text(encoding="utf-8") if policy.exists() else ""
+        migrated, kept = split_policy(text, known["policy"])
+        if migrated != text:
+            writes[POLICY] = migrated
+        if kept:
+            notes.append(f"{POLICY}: kept project text under {', '.join(kept)}. OW's own rules now ship in "
+                         "the ow-core skill; check that kept text adds to them or names the rule it overrides.")
+        reference = contained(root, LEGACY_REFERENCE)
+        if reference.exists():
+            body = reference.read_text(encoding="utf-8")
+            if declared_version(body):
+                body = body.split("\n", 1)[1] if "\n" in body else ""
+            if digest(body) in known["artifacts"]:
+                removals.append(LEGACY_REFERENCE)
+            else:
+                notes.append(f"{LEGACY_REFERENCE}: edited, so kept as a project file; the current "
+                             "artifact reference ships in the ow-core skill.")
+        manifest_path = contained(root, MANIFEST)
+        if manifest_path.exists():
+            manifest = read_json(manifest_path)
+            if not isinstance(manifest.get("files"), dict):
+                raise WishError("Unsupported or malformed OW installation manifest.")
+            if LEGACY_REFERENCE in manifest["files"]:
+                files = {k: v for k, v in manifest["files"].items() if k != LEGACY_REFERENCE}
+                writes[MANIFEST] = json.dumps({**manifest, "files": files},
+                                              indent=2, ensure_ascii=False) + "\n"
+        if POLICY in writes and any(contained(root, "openwish/changes").glob("*/review.json")):
+            notes.append("Recorded reviews digested the old policy and are now stale; refresh any still "
+                         "pending before closing.")
+    # Schema 6 records compact source inputs; recorded reviews are left exactly as they are.
+    notes.append("Recorded reviews keep their current inputs; the next recorded review uses the "
+                 "compact source form.")
     writes["openwish/config.json"] = json.dumps({**config, "version": SCHEMA_VERSION},
                                                 indent=2, ensure_ascii=False) + "\n"
-    if POLICY in writes and any(contained(root, "openwish/changes").glob("*/review.json")):
-        notes.append("Recorded reviews digested the old policy and are now stale; refresh any still "
-                     "pending before closing.")
     return {"from": version, "writes": writes, "removals": removals, "notes": notes}
 
 

@@ -6,7 +6,7 @@ import json
 
 from .handoff import handoff_content, validate_handoff
 from .model import MODES, TASK_STATES, change_tasks, review_needs
-from .repository import pin_mismatches, project_files, repository_snapshot
+from .repository import pin_mismatches, product_tree, project_files, repository_snapshot, tree_changes
 from .storage import WishError, contained, document, read_json, write_json, write_text
 from .trace import CHANGE_ID, text_files
 
@@ -31,9 +31,9 @@ def review_path(project, key):
 
 
 def source_inputs(project, snapshot=None):
-    """Per-file digests of product content, so staleness can name what changed."""
+    """One digest of product content and, in a repository, its git tree for naming changes."""
     snapshot = snapshot or repository_snapshot(project["root"])
-    files = {}
+    files, modes = {}, {}
     for path in project_files(project["root"], snapshot):
         relative = path.relative_to(project["root"]).as_posix()
         if relative.startswith("openwish/"):
@@ -42,7 +42,19 @@ def source_inputs(project, snapshot=None):
             content = hashlib.file_digest(source, "sha256").hexdigest()[:16]
         executable = path.stat().st_mode & 0o111
         files[relative] = content + (f"+{executable:o}" if executable else "")
-    return {"files": files, "components": component_revisions(snapshot["components"])}
+        modes[relative] = "100755" if executable else "100644"
+    source = {"digest": source_digest(files),
+              "components": component_revisions(snapshot["components"])}
+    # One product tree per snapshot, like the snapshot itself across a projection.
+    if "product_tree" not in snapshot:
+        snapshot["product_tree"] = product_tree(project["root"], modes)
+    tree = snapshot["product_tree"]
+    return {"tree": tree, **source} if tree else source
+
+
+def source_digest(files):
+    """One digest over the sorted path:digest lines; a schema-5 `files` map digests identically."""
+    return digest(sorted(f"{path}:{value}" for path, value in files.items()))
 
 
 def component_revisions(components):
@@ -73,7 +85,7 @@ def review_inputs(project, key, *, snapshot=None, handoff=()):
     }
 
 
-def stale_reasons(recorded, current, legacy_components=None):
+def stale_reasons(recorded, current, *, root=None, legacy_components=None):
     """Explain a freshness difference in terms a reviewer can act on."""
     if not isinstance(recorded, dict):
         return ["review has no recorded inputs"]
@@ -95,7 +107,20 @@ def stale_reasons(recorded, current, legacy_components=None):
     reasons += keyed("needs", recorded.get("needs"), current["needs"])
     reasons += keyed("destinations", recorded.get("destinations"), current["destinations"])
     source = recorded.get("source") if isinstance(recorded.get("source"), dict) else {}
-    reasons += keyed("files", source.get("files"), current["source"]["files"])
+    recorded_digest = source.get("digest")
+    if recorded_digest is None and isinstance(source.get("files"), dict):
+        # Schema-5 reviews recorded the file map itself; its lines digest identically.
+        recorded_digest = source_digest(source["files"])
+    if recorded_digest != current["source"]["digest"]:
+        changed = None
+        if root and source.get("tree") and current["source"].get("tree"):
+            changed = tree_changes(root, source["tree"], current["source"]["tree"])
+        if changed:
+            if len(changed) > SHOWN_PATHS:
+                changed = changed[:SHOWN_PATHS] + [f"{len(changed) - SHOWN_PATHS} more files"]
+            reasons += changed
+        else:
+            reasons.append("product files changed")
     if source.get("components") not in {current["source"]["components"], legacy_components} - {None}:
         reasons.append("submodule revisions")
     # A product-file destination also appears among source files; report it once.
@@ -210,7 +235,7 @@ def validate_review(project, key, *, fresh=True, snapshot=None):
     # while neither those nor the checkouts change.
     reasons = stale_reasons(review.get("inputs"), review_inputs(project, key, snapshot=snapshot,
                                                                  handoff=review["handoff"]),
-                            legacy_components=digest(snapshot["components"]))
+                            root=project["root"], legacy_components=digest(snapshot["components"]))
     if reasons:
         raise WishError("Review is stale; refresh affected verification and review before closing. "
                         "Changed: " + "; ".join(reasons))

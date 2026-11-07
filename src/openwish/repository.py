@@ -1,7 +1,9 @@
 """Git-aware product discovery, including component revisions and dirty submodules."""
 
+import os
 from pathlib import Path
 import subprocess
+import tempfile
 
 from .storage import WishError
 
@@ -15,9 +17,52 @@ def is_repository(directory):
     return marker.is_file() or (marker / "HEAD").exists()
 
 
-def git(root, *arguments):
-    return subprocess.run(["git", *arguments], cwd=root, capture_output=True,
-                          check=True, timeout=10).stdout
+def git(root, *arguments, env=None, stdin=None):
+    environment = {**os.environ, **env} if env else None
+    return subprocess.run(["git", *arguments], cwd=root, env=environment, input=stdin,
+                          capture_output=True, check=True, timeout=10).stdout
+
+
+def product_tree(root, entries):
+    """The git tree ID of the given product paths ({name: "100644" or "100755"}),
+    including uncommitted content. It is built in a temporary index, so the
+    repository's own index and working tree are untouched; component files are
+    hashed into the parent's object store so the tree covers the whole product.
+    None without a repository or a working git."""
+    if not is_repository(Path(root)):
+        return None
+    fd, index = tempfile.mkstemp()
+    os.close(fd)
+    try:
+        os.unlink(index)  # an empty path makes git create a fresh index there
+        env = {"GIT_INDEX_FILE": index}
+        names = sorted(entries)
+        try:
+            blobs = git(root, "hash-object", "-w", "--stdin-paths", env=env,
+                        stdin=b"\n".join(os.fsencode(name) for name in names)).split()
+            listing = b"".join(entries[name].encode() + b" " + blob + b"\t" +
+                               os.fsencode(name) + b"\0" for name, blob in zip(names, blobs))
+            git(root, "update-index", "-z", "--index-info", env=env, stdin=listing)
+            return git(root, "write-tree", env=env).decode().strip()
+        except (OSError, subprocess.SubprocessError):
+            return None
+    finally:
+        Path(index).unlink(missing_ok=True)
+
+
+def tree_changes(root, before, after):
+    """Changed paths between two recorded product trees; None when git cannot compare them."""
+    try:
+        output = git(root, "diff", "--name-status", "--no-renames", "-z", before, after)
+    except (OSError, subprocess.SubprocessError):
+        return None
+    labels = {"A": "added", "D": "removed"}
+    changed = []
+    fields = output.split(b"\0")
+    for status, path in zip(fields[::2], fields[1::2]):
+        if status and path:
+            changed.append(f"{os.fsdecode(path)} {labels.get(status[:1].decode(), 'modified')}")
+    return changed
 
 
 def repository_snapshot(root):

@@ -16,7 +16,8 @@ LINKED_ROW = ("| Engineering requirements: how the product is built, checked and
 
 
 class MigrationTests(ProjectCase):
-    """Schema 4 kept OW's policy and reference in openwish/; schema 5 keeps only project knowledge there."""
+    """Schema 4 kept OW's policy and reference in openwish/; later schemas keep only project
+    knowledge there. Schema 6 records compact review inputs and rewrites no recorded review."""
 
     def schema_4(self, *, policy=None, reference=None):
         self.fixture()
@@ -29,6 +30,20 @@ class MigrationTests(ProjectCase):
         manifest = load_manifest(self.root)
         manifest["files"]["openwish/artifacts.md"] = "0.9.1"
         write_json(self.root / "openwish/installation.json", manifest)
+
+    def schema_5(self):
+        self.fixture()
+        self.finish_tasks()
+        self.review()
+        config = self.root / "openwish/config.json"
+        write_json(config, {**read_json(config), "version": 5})
+        # A schema-5 review records a per-file digest map; the migration must not rewrite it.
+        review = self.root / "openwish/changes/C-001/review.json"
+        record = read_json(review)
+        record["inputs"]["source"] = {"files": {"app.py": "0123456789abcdef"},
+                                      "components": record["inputs"]["source"]["components"]}
+        write_json(review, record)
+        return review
 
     def adapted_policy(self):
         text = (SCHEMA_4 / "policy.md").read_text().replace(ENGINEERING_ROW, LINKED_ROW)
@@ -44,7 +59,7 @@ class MigrationTests(ProjectCase):
         self.assertFalse((self.root / "openwish/artifacts.md").exists())
         self.assertTrue((self.root / ".agents/skills/ow-core/SKILL.md").is_file())
         self.assertIn("# OW artifact reference", (self.root / ".agents/skills/ow-core/artifacts.md").read_text())
-        self.assertEqual(read_json(self.root / "openwish/config.json")["version"], 5)
+        self.assertEqual(read_json(self.root / "openwish/config.json")["version"], 6)
 
     def test_migration_keeps_project_rules_and_drops_text_ow_now_ships(self):
         self.schema_4(policy=self.adapted_policy())
@@ -62,7 +77,7 @@ class MigrationTests(ProjectCase):
         self.assertIn("## Team rules", notes)
         self.assertFalse((self.root / "openwish/artifacts.md").exists())
         self.assertNotIn("openwish/artifacts.md", load_manifest(self.root)["files"])
-        self.assertEqual(read_json(self.root / "openwish/config.json")["version"], 5)
+        self.assertEqual(read_json(self.root / "openwish/config.json")["version"], 6)
         self.assertEqual(self.cli("check").returncode, 0)
 
     def test_unadapted_policy_becomes_the_project_template(self):
@@ -103,7 +118,7 @@ class MigrationTests(ProjectCase):
         for args in (("check",), ("status",), ("new", "need", "N-009", "--title", "Need")):
             self.assertIn("run 'ow init' to migrate", self.cli(*args, success=False).stderr)
         self.assertEqual(self.files(), before)
-        self.assertIn("Migrated OW schema 4 to 5.", self.cli("init", "--harness", "generic").stdout)
+        self.assertIn("Migrated OW schema 4 to 6.", self.cli("init", "--harness", "generic").stdout)
 
     def test_apply_writes_the_schema_version_last(self):
         self.schema_4(policy=self.adapted_policy())
@@ -117,4 +132,23 @@ class MigrationTests(ProjectCase):
         finally:
             migrations.write_text = original
         self.assertEqual(order[-1], "config.json")
-        self.assertEqual(json.loads((self.root / "openwish/config.json").read_text())["version"], 5)
+        self.assertEqual(json.loads((self.root / "openwish/config.json").read_text())["version"], 6)
+
+    def test_schema_5_migration_only_bumps_the_version_and_notes_compact_inputs(self):
+        review = self.schema_5()
+        recorded = review.read_bytes()
+        plan = plan_migration(self.root)
+        self.assertEqual(plan["from"], 5)
+        self.assertEqual(set(plan["writes"]), {"openwish/config.json"})
+        self.assertEqual(plan["removals"], [])
+        self.assertIn("compact source form", "\n".join(plan["notes"]))
+        initialize(self.root, "generic")
+        self.assertEqual(read_json(self.root / "openwish/config.json")["version"], 6)
+        self.assertEqual(review.read_bytes(), recorded)
+        before = self.files()
+        self.assertIsNone(initialize(self.root, "generic")["migration"])
+        self.assertEqual(self.files(), before)
+
+    def test_schema_5_commands_ask_for_init(self):
+        self.schema_5()
+        self.assertIn("run 'ow init' to migrate", self.cli("check", success=False).stderr)

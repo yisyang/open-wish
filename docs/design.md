@@ -70,18 +70,22 @@ Each change has one `review.json`, replaced on every review:
   the record makes it explicit and the summary shows it.
 - `inputs` (passing reviews): short digests of the change (without lifecycle fields
   or `after`), tasks, each current and linked need (without its non-binding `open`
-  items), the handoff and each destination, config, project policy, each product file
-  outside `openwish/` (content plus executable bits), and checked-out submodule
-  revisions. The parent's gitlinks are not inputs: committing the reviewed pin is
-  routine, so `ow close` and `ow summary` only warn while a pin differs from its
-  checkout. Reviews from before 1.0.0-rc.3, whose digest also covered gitlinks,
-  remain fresh while nothing changes.
+  items), the handoff and each destination, config, project policy, the product
+  files outside `openwish/`, and checked-out submodule revisions. Product files
+  are recorded as one digest over their content plus executable bits and, in a
+  Git repository, the tree ID of their current content, built in a temporary
+  index so uncommitted edits count. The parent's gitlinks are not inputs:
+  committing the reviewed pin is routine, so `ow close` and `ow summary` only
+  warn while a pin differs from its checkout. Schema-5 reviews, which recorded
+  a digest per file, and reviews from before 1.0.0-rc.3, whose component digest
+  also covered gitlinks, remain fresh while nothing changes.
 
 Freshness compares recorded and current inputs. Any difference is stale, and the
 error lists what changed (approach, tasks, `N-001 modified`, `src/x.py added`, and
-so on), so a reviewer can refresh only the affected verification. Per-file digests
-keep the check conservative: a parallel change's edits also stale a pending review,
-deliberately, because the reviewer must judge whether they matter.
+so on, from the difference between the recorded and current trees when both
+exist), so a reviewer can refresh only the affected verification. Whole-product
+digests keep the check conservative: a parallel change's edits also stale a
+pending review, deliberately, because the reviewer must judge whether they matter.
 
 Repository discovery uses Git tracked and unignored untracked files (recursively into
 submodules, including staged gitlinks and checked-out revisions); non-Git projects
@@ -154,14 +158,15 @@ Eleven canonical skills are packaged once, with thin adapters for OpenCode, Clau
 Codex and generic Agent Skills. OW owns only what it installs as skills; everything
 under `openwish/` is the project's, including `policy.md`, which `ow init` writes once
 from a short starter. `ow-core` carries OW's policy and the artifact reference, which
-documents the CLI and so upgrades with it. `migrations.py` moves schema-4 projects to
-this split: it drops policy blocks and references whose digests match text OW shipped
-under schema 4 (`assets/migrations/schema-4.json`), keeps and reports everything
-else, and writes the schema version last. The installer offers interactive multi-select and
+documents the CLI and so upgrades with it. `migrations.py` brings older schemas
+forward: for schema-4 projects it drops policy blocks and references whose digests
+match text OW shipped under schema 4 (`assets/migrations/schema-4.json`) and keeps
+and reports everything else; schema-5 projects need only the version bump. In
+every case it writes the schema version last. The installer offers interactive multi-select and
 repeatable flags, deduplicates shared paths, stamps each file with the OW version,
 records ownership in `installation.json`, upgrades older files, leaves equal versions
 alone, asks before downgrades, preserves unversioned unrecorded files, and preflights
-every selected harness before writing. Deselection does not uninstall. Schema 4 is
+every selected harness before writing. Deselection does not uninstall. Schema 6 is
 current; `init`, `skills` and project commands reject other schemas before writing.
 When the schema changes, `init` gains a migration from each earlier schema, run after
 a whole-project preflight, and project commands on an older schema direct users to it.

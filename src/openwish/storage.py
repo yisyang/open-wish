@@ -117,7 +117,7 @@ def write_json(path, value, *, create=False):
     write_text(path, json.dumps(value, indent=2, ensure_ascii=False) + "\n", create=create)
 
 
-SCHEMA_VERSION = 5
+SCHEMA_VERSION = 6
 OLDEST_MIGRATABLE = 4
 
 

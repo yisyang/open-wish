@@ -1,4 +1,4 @@
-# OW artifact reference — schema 5
+# OW artifact reference — schema 6
 
 Formats and commands. Workflow guidance lives in the skills, starting with `ow-core`;
 project rules live in `openwish/policy.md`. Everything under `openwish/` is the
@@ -7,7 +7,7 @@ Markdown files use TOML frontmatter between `+++` lines.
 
 ```text
 openwish/
-  config.json                 # schema 5, product name, size targets
+  config.json                 # schema 6, product name, size targets
   installation.json           # installer bookkeeping
   policy.md                   # project policy, adding to or overriding ow-core
   needs/N-001.md              # durable intent
@@ -164,10 +164,13 @@ ow clean C-001
 
 **Freshness.** A passing review records digests of its inputs: the change (except
 status, closure fields and `after`), its tasks, every current and linked need (except
-`open`), the handoff and its destinations, config, project policy, each product file outside
-`openwish/` (Git tracked and unignored files, recursively including submodules;
-filesystem walk without Git) and checked-out submodule revisions. Any difference
-makes the review stale; `ow summary` and `ow close` name what changed. Staging or
+`open`), the handoff and its destinations, config, project policy, and checked-out
+submodule revisions. Product files outside `openwish/` (Git tracked and unignored
+files, recursively including submodules; filesystem walk without Git) are recorded
+as one digest and, in a Git repository, the tree ID of their current content;
+schema-5 reviews keep their recorded per-file digests. Any difference makes the
+review stale; `ow summary` and `ow close` name changed paths from the tree
+difference, or report that product files changed. Staging or
 committing a parent gitlink that pins the reviewed checkout leaves the review fresh;
 both commands warn while a pin differs from its checkout. Missing or conflicted
 submodule checkouts prevent a fresh passing review.
@@ -204,7 +207,7 @@ change's files.
 
 ## Configuration and installation
 
-`config.json`: `version: 5`, `product`, `needs_token_budget` (default 24000, a soft
+`config.json`: `version: 6`, `product`, `needs_token_budget` (default 24000, a soft
 target that warns at 80%), `source_hard_limit` (default 0 = off),
 `successors_wait_for` (`review`, the default, or `acceptance`), and
 `code_exceptions` (each with exact `path`, `kind` of `data`, `low-complexity` or
@@ -218,7 +221,9 @@ Reinitializing preserves project knowledge and policy, upgrades older skills (th
 reference ships in `ow-core`), leaves equal versions untouched and asks before
 downgrades. `ow skills --harness NAME` uses the same installer.
 
-`ow init` migrates a schema-4 project to schema 5 after preflighting it: OW-shipped
-text leaves `openwish/policy.md` and an unedited `openwish/artifacts.md` is removed,
-since both now ship in `ow-core`. Edited text is kept as the project's and reported.
-Other commands on an older schema ask you to run `ow init`.
+`ow init` migrates a schema-4 or schema-5 project to schema 6 after preflighting
+it. On the schema-4 path, OW-shipped text leaves `openwish/policy.md` and an
+unedited `openwish/artifacts.md` is removed, since both now ship in `ow-core`.
+Edited text is kept as the project's and reported. Recorded reviews are left as
+they are; the next recorded review uses the compact source form. Other commands
+on an older schema ask you to run `ow init`.

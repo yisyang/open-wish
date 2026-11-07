@@ -20,8 +20,8 @@ needs stay binding after delivery, so the next feature does not quietly undo the
 last one.
 
 OW takes inspiration from [Spec Kit](https://github.com/github/spec-kit) and
-[OpenSpec](https://github.com/Fission-AI/OpenSpec). OpenWish **1.0.0-rc.2** uses
-**artifact schema 5**.
+[OpenSpec](https://github.com/Fission-AI/OpenSpec). OpenWish uses
+**artifact schema 6**.
 
 ## Get started
 
@@ -163,10 +163,10 @@ ow init
 Upgrades older integration files, keeps equal versions and local edits, and asks
 before downgrades. Everything under `openwish/` is the project's: OW's own policy and
 artifact reference ship in the `ow-core` skill and upgrade with it, while project
-policy, needs and work are preserved. Projects use artifact schema 5; `ow init`
-migrates schema 4 after a whole-project preflight, moving OW-shipped text out of
-`openwish/` and reporting any edited text it keeps. Other schemas are rejected before
-any write.
+policy, needs and work are preserved. Projects use artifact schema 6; `ow init`
+migrates schemas 4 and 5 after a whole-project preflight — for schema 4, moving
+OW-shipped text out of `openwish/` and reporting any edited text it keeps. Other
+schemas are rejected before any write.
 
 ## Design and contribution
 

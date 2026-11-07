@@ -1,9 +1,11 @@
+import hashlib
+import subprocess
 from unittest.mock import patch
 
 from openwish.model import needs_context
 from openwish.storage import WishError, read_json, write_json
 from openwish.views import status_data, summary
-from openwish.repository import repository_snapshot
+from openwish.repository import project_files, repository_snapshot
 from openwish.workflow import (clean_changes, close_changes, record_review, set_mode, set_task,
                                validate_review)
 
@@ -68,6 +70,7 @@ class WorkflowTests(ProjectCase):
         self.assertEqual(validate_review(self.project(), "C-001")["verdict"], "pass")
 
     def test_stale_review_names_what_changed(self):
+        subprocess.run(["git", "init", "-q"], cwd=self.root, check=True)
         self.reviewed()
         (self.root / "new.py").write_text("pass\n", encoding="utf-8")
         (self.root / "app.py").write_text("def export():\n    return [1]\n", encoding="utf-8")
@@ -259,6 +262,39 @@ class WorkflowTests(ProjectCase):
             self.review()
         clean_changes(self.project(), ["C-001"])
 
+    def test_compact_source_inputs_without_git(self):
+        self.reviewed()
+        record = read_json(self.root / "openwish/changes/C-001/review.json")
+        source = record["inputs"]["source"]
+        self.assertEqual(set(source), {"digest", "components"})
+        self.assertLess(len(str(source)), 160)
+
+    def test_openwish_edits_do_not_stale_reviews(self):
+        self.reviewed()
+        (self.root / "openwish/scratch.md").write_text("Working notes\n", encoding="utf-8")
+        self.assertEqual(validate_review(self.project(), "C-001")["verdict"], "pass")
+
+    def test_schema_5_reviews_stay_fresh_until_the_product_changes(self):
+        self.reviewed()
+        path = self.root / "openwish/changes/C-001/review.json"
+        record = read_json(path)
+        # The per-file map schema-5 reviews recorded, rebuilt the same way.
+        files = {}
+        for product_file in project_files(self.root):
+            relative = product_file.relative_to(self.root).as_posix()
+            if relative.startswith("openwish/"):
+                continue
+            content = hashlib.sha256(product_file.read_bytes()).hexdigest()[:16]
+            executable = product_file.stat().st_mode & 0o111
+            files[relative] = content + (f"+{executable:o}" if executable else "")
+        record["inputs"]["source"] = {"files": files,
+                                      "components": record["inputs"]["source"]["components"]}
+        write_json(path, record)
+        self.assertEqual(validate_review(self.project(), "C-001")["verdict"], "pass")
+        (self.root / "app.py").write_text("def export():\n    return [1]\n", encoding="utf-8")
+        with self.assertRaisesRegex(WishError, "product files changed"):
+            validate_review(self.project(), "C-001")
+
     def test_malformed_review_is_actionable_and_prevents_closure(self):
         self.reviewed()
         path = self.root / "openwish/changes/C-001/review.json"
@@ -268,3 +304,44 @@ class WorkflowTests(ProjectCase):
                 write_json(path, {**review, field: value})
                 with self.assertRaises(WishError):
                     close_changes(self.project(), ["C-001"], "human")
+
+
+class TreeBackedReviewTests(ProjectCase):
+    """In a git repository the recorded tree names each kind of product change."""
+
+    def setUp(self):
+        super().setUp()
+        self.fixture()
+        subprocess.run(["git", "init", "-q"], cwd=self.root, check=True)
+        self.finish_tasks()
+
+    def stale(self, pattern):
+        with self.assertRaisesRegex(WishError, pattern):
+            validate_review(self.project(), "C-001")
+
+    def test_compact_source_inputs_record_the_product_tree(self):
+        record = self.review()
+        source = record["inputs"]["source"]
+        self.assertEqual(set(source), {"tree", "digest", "components"})
+        self.assertLess(len(str(source)), 200)
+
+    def test_recording_leaves_the_repository_index_untouched(self):
+        self.review()
+        staged = subprocess.run(["git", "diff", "--cached", "--name-only"], cwd=self.root,
+                                capture_output=True, text=True, check=True).stdout
+        self.assertEqual(staged.strip(), "")
+
+    def test_each_kind_of_product_change_is_stale_and_named(self):
+        (self.root / "lib.py").write_text("x = 0\n", encoding="utf-8")
+        self.review()
+        (self.root / "app.py").write_text("def export():\n    return [1]\n", encoding="utf-8")
+        self.stale("app.py modified")
+        self.review()
+        (self.root / "new.py").write_text("pass\n", encoding="utf-8")
+        self.stale("new.py added")
+        self.review()
+        (self.root / "lib.py").unlink()
+        self.stale("lib.py removed")
+        self.review()
+        (self.root / "app.py").chmod(0o755)
+        self.stale("app.py modified")
