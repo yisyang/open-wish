@@ -28,6 +28,8 @@ one of them, a cancellation rule, needed to hold any work.
   passes on a rerun is `FLAKY`, never a pass. The game project had built this runner
   itself after agents wrote 448 one-off harness scripts, and after a session called a
   real focus bug transient on the strength of one rerun.
+- A word budget for shipped skills, checked by the test suite. They had grown from
+  5,800 to 12,400 words in four weeks.
 
 ### Changed
 

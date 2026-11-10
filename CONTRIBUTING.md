@@ -37,6 +37,9 @@ For an installed executable, use a virtual environment and `python -m pip instal
   by name elsewhere. Keep skills procedural and concise; every sentence costs agent
   context in every user's project. Use worked examples from domains that no eval
   scenario uses.
+- Shipped guidance has a word budget (`tests/test_guidance.py`). A new rule replaces
+  or merges an old one. Lower a ceiling whenever guidance shrinks; raise one only with
+  the reason stated in the changelog.
 - Keep workflow overhead proportional to the work. Test routine changes without
   creating OW records to manage the contribution.
 - For skill changes, run the executable scenarios with both arms
