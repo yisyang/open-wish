@@ -2,14 +2,17 @@
 
 Release notes for OpenWish, newest first. Update this file for every release.
 
-## Unreleased
+## v1.0.0rc5
 
-Changes since rc.4, from the rest of the game project's sixth coordinated round. The
-owner was asked five questions after it began. Two were choices the agents could
-have made: a warning added to an existing screen, and review findings that turned
-out to be observations. The other three were decisions that preparation should have
-found. The round then sat idle for five hours waiting on three answers, and only
-one of them, a cancellation rule, needed to hold any work.
+Fifth release candidate for v1.0.0; its CLI and skills report `1.0.0-rc.5`. Projects
+move to artifact schema 6: run `ow init` after upgrading. The new commands address
+costs seen across the game project's 27 rounds: repeated context reads, oversized
+rule docs and hand-built check runners. The skill changes come from the rest of its
+sixth coordinated round. The owner was asked five questions after it began. Two were
+choices the agents could have made: a warning added to an existing screen, and review
+findings that turned out to be observations. The other three were decisions that
+preparation should have found. The round then sat idle for five hours waiting on
+three answers, and only one of them, a cancellation rule, needed to hold any work.
 
 ### Added
 
@@ -36,6 +39,12 @@ one of them, a cancellation rule, needed to hold any work.
 
 ### Changed
 
+- Schema 6. A review records the product files as one digest plus, in a Git
+  repository, the tree ID of their current content, instead of a digest per file, and
+  `ow summary` names changed paths from the tree difference. The game project's
+  schema-5 `review.json` files had reached 5–8.6 MB. `ow init` migrates schema-4 and
+  schema-5 projects after a preflight; recorded reviews are left as they are and stay
+  fresh while nothing changes, and the next review uses the compact form.
 - Test restraint (Strategic verification, `ow-plan`). "Credible failures" are those
   reachable through real inputs: requests, concurrency, crashes, recovery and operator
   commands, not the product's own code bypassing its owner module. Shared mechanisms
