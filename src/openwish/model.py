@@ -88,28 +88,47 @@ def review_needs(project, key):
                    if need["meta"]["currency"] == "current"})
 
 
-def needs_context(project):
-    lines = ["# Current needs (binding after delivery)", ""]
-    for key, need in sorted(project["needs"].items()):
-        meta = need["meta"]
-        if meta.get("currency") != "current":
-            continue
-        lines.extend([
-            f"## {key}: {meta.get('title', '')}",
-            f"Actor: {meta.get('actor', '')}",
-            f"Outcome: {meta.get('outcome', '')}",
-            f"Acceptance: {json.dumps(meta.get('acceptance', []), ensure_ascii=False)}",
-            f"Confirmed: {meta.get('confirmed_at') or 'unconfirmed'}",
-        ])
-        extra = {name: value for name, value in meta.items() if name not in
-                 {"id", "title", "currency", "actor", "outcome", "acceptance", "confirmed_at", "open"}}
-        if extra:
-            lines.append("Additional intent: " + json.dumps(extra, ensure_ascii=False))
-        if meta.get("open"):
-            lines.append("Open (not binding): " + json.dumps(meta["open"], ensure_ascii=False))
-        if need["body"]:
-            lines.append(need["body"])
-        lines.append("")
+def need_lines(key, need):
+    meta = need["meta"]
+    lines = [
+        f"## {key}: {meta.get('title', '')}",
+        f"Actor: {meta.get('actor', '')}",
+        f"Outcome: {meta.get('outcome', '')}",
+        f"Acceptance: {json.dumps(meta.get('acceptance', []), ensure_ascii=False)}",
+        f"Confirmed: {meta.get('confirmed_at') or 'unconfirmed'}",
+    ]
+    extra = {name: value for name, value in meta.items() if name not in
+             {"id", "title", "currency", "actor", "outcome", "acceptance", "confirmed_at", "open"}}
+    if extra:
+        lines.append("Additional intent: " + json.dumps(extra, ensure_ascii=False))
+    if meta.get("open"):
+        lines.append("Open (not binding): " + json.dumps(meta["open"], ensure_ascii=False))
+    if need["body"]:
+        lines.append(need["body"])
+    lines.append("")
+    return lines
+
+
+def needs_context(project, full=None):
+    """Current needs as text. `full` (need IDs) keeps those complete and lists the other
+    current needs by title and outcome; None keeps every current need complete."""
+    current = [(key, need) for key, need in sorted(project["needs"].items())
+               if need["meta"].get("currency") == "current"]
+    if full is None:
+        lines = ["# Current needs (binding after delivery)", ""]
+        for key, need in current:
+            lines.extend(need_lines(key, need))
+        return "\n".join(lines)
+    lines = ["# Linked and related needs (complete)", ""]
+    for key, need in current:
+        if key in full:
+            lines.extend(need_lines(key, need))
+    others = [(key, need) for key, need in current if key not in full]
+    if others:
+        lines += ["# Other current needs (binding; title and outcome only)", ""]
+        lines += [f"- {key}: {need['meta'].get('title', '')} — {need['meta'].get('outcome', '')}"
+                  for key, need in others]
+        lines += ["", "Run `ow context` without --linked for their acceptance and constraints.", ""]
     return "\n".join(lines)
 
 

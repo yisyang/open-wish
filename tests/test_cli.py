@@ -223,3 +223,20 @@ class CliTests(ProjectCase):
             self.assertIn("9.0.0", result.stderr)
         # Installing keeps its own handling of newer files: an explicit downgrade prompt.
         self.assertIn("Downgrade requires confirmation", self.cli("skills", "--harness", "opencode", success=False).stderr)
+
+    def test_linked_context_keeps_linked_and_related_needs_complete_and_lists_the_rest(self):
+        self.fixture()                      # N-001, linked by C-001
+        self.add_need()                     # N-002, not linked
+        self.add_need("N-003")
+        self.edit_document("needs/N-003.md", acceptance=["Exports are signed"], relations=[{
+            "kind": "constrains", "need": "N-001", "reason": "Exports must be signed."}])
+        self.assertIn("No raw records leave the device", self.cli("context", "C-001").stdout)
+        linked = self.cli("context", "C-001", "--linked").stdout
+        self.assertIn("No manual row copying", linked)
+        self.assertIn("Exports are signed", linked)
+        self.assertIn("- N-002: Private reconciliation — Keep records local", linked)
+        self.assertNotIn("No raw records leave the device", linked)
+        data = json.loads(self.cli("context", "C-001", "--linked", "--json").stdout)
+        self.assertEqual(data["needs_scope"], "linked")
+        self.assertEqual(json.loads(self.cli("context", "C-001", "--json").stdout)["needs_scope"], "all")
+        self.cli("context", "--linked", success=False)

@@ -12,8 +12,8 @@ change that covers the ask.
 - **Direct:** run `ow context`; apply steps 3, 4, 6, 7 and 8 without `ow task`
   commands or change notes. If coordination needs appear, apply Promote direct
   work in `ow-plan`.
-- **Managed:** run `ow context C-001` (needs, readiness, warnings), read the
-  change's approach, and apply every step.
+- **Managed:** run `ow context C-001 --linked` (Keep context small in `ow-core`),
+  read the change's approach, and apply every step.
 
 1. **Resume safely.** Verify prerequisite capabilities in the repository. On
    resumption, changed scope or a revised predecessor, apply Reconcile the plan in

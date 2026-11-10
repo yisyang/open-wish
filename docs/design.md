@@ -131,7 +131,11 @@ because explaining how to obtain an ignored input is their job.
 `ow context` includes all current need content without truncation (`open` items marked
 not binding), plus work state for the selection (changes with review freshness, ready
 and waiting tasks, unplanned changes, and repository, budget and knowledge warnings),
-so one call starts a session.
+so one call starts a session. `--linked` with a selection keeps complete content for
+the needs the selection links and the needs sharing a recorded relation with them,
+lists every other current need by title and outcome, and limits the manifest's
+references to the complete ones. It serves work on one task of a planned change,
+whose plan and final review read every need.
 `--json` adds review scope and sized retrieval entries (`included: false`) for selected changes, tasks,
 linked retired needs and need references. Estimates use UTF-8 bytes/3 and exclude
 other source and conversation. `needs_token_budget` (default 24,000) warns at 80%;

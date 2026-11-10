@@ -11,6 +11,14 @@ out to be observations. The other three were decisions that preparation should h
 found. The round then sat idle for five hours waiting on three answers, and only
 one of them, a cancellation rule, needed to hold any work.
 
+### Added
+
+- Scoped context (`ow context C-001 --linked`). Task work on a planned change loads
+  its linked and related needs in full and every other current need as one line.
+  `ow-core` also says to run `ow context` once per session. In the game project a call
+  printed about 82 kB for a change that linked one 2.5 kB need, sessions ran it up to
+  15 times, and the project's policy had told task workers to skip it.
+
 ### Changed
 
 - Test restraint (Strategic verification, `ow-plan`). "Credible failures" are those

@@ -152,8 +152,11 @@ contributors; architecture is in [design.md](design.md).
 
 ## Bounded knowledge
 
-- All current need content enters context without truncation. A configurable 24,000
-  estimated-token soft target warns at 80% and never blocks inspection.
+- All current need content enters context without truncation for intake, design,
+  planning and a change's final review. Work on one task of a planned change may load
+  the change's linked and related needs in full and the other current needs by title
+  and outcome. A configurable 24,000 estimated-token soft target warns at 80% and
+  never blocks inspection.
 - OW artifacts, and text docs that current needs reference, warn at 8,000 estimated
   tokens and source at 500 nonblank lines; a source hard limit is opt-in with
   justified exact-path exceptions.

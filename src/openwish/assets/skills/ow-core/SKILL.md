@@ -129,11 +129,16 @@ their predecessors pass review (or are accepted, if `successors_wait_for` is
 - **Keep context small.** Every step rereads the session's whole context, so a long
   session works several times slower than a fresh one. Read only what the step needs:
   batch independent reads and searches, read a log's failing excerpt rather than all of
-  it, and leave large binary files unread unless the work is about them. When a
-  session passes about 200k tokens, hand off to a fresh one with a short summary
-  of state, evidence and next step. A session rarely sees its own size, so whoever
-  starts or resumes it (a coordinator, or the human) checks it before sending more
-  work, and asks a session past the limit to hand off instead.
+  it, and leave large binary files unread unless the work is about them. Run `ow
+  context` once per session, and again only when needs or change records change or a
+  step needs the fuller form; a skill loaded later reuses it. To implement or review
+  one task of a planned change, `ow context C-001 --linked` is enough: its linked and
+  related needs in full, the others by title and outcome. Intake, alignment, planning
+  and a change's final review read every need. When a session passes about 200k
+  tokens, hand off to a fresh one with a short summary of state, evidence and next
+  step. A session rarely sees its own size, so whoever starts or resumes it (a
+  coordinator, or the human) checks it before sending more work, and asks a session
+  past the limit to hand off instead.
 
 ## Skill map
 

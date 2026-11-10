@@ -46,6 +46,9 @@ def parser():
     context = commands.add_parser("context", help="Print all current needs, work state, and a retrieval manifest")
     context.add_argument("selection", nargs="*", help="Need or change IDs")
     context.add_argument("--json", action="store_true", help="Complete needs, work state and sized retrieval manifest")
+    context.add_argument("--linked", action="store_true",
+                         help="Complete content only for the selection's linked and related needs; "
+                              "other current needs by title and outcome")
     graph = commands.add_parser("graph", help="Derive reasoned need relationships; selections show incident links")
     graph.add_argument("selection", nargs="*", help="Need IDs; default all retained needs")
     graph.add_argument("--json", action="store_true")
@@ -225,7 +228,7 @@ def run(args):
                 print(f"{edge['source']} {edge['kind']} {edge['target']}: {edge['reason']}")
             print("Recorded intent links guide investigation; all current needs remain binding.")
     elif args.command == "context":
-        data = context_data(project, args.selection)
+        data = context_data(project, args.selection, linked=args.linked)
         if args.json:
             print(json.dumps(data, indent=2, ensure_ascii=False))
         else:

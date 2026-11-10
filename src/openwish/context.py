@@ -1,7 +1,9 @@
 """Complete intent with an explicit, sized retrieval manifest and the state of selected work."""
 
 from .budgets import check_budgets
-from .model import estimate_tokens, needs_context, ready_tasks, review_needs, select_changes, unplanned_changes
+from .model import (estimate_tokens, need_graph, needs_context, ready_tasks, review_needs, select_changes,
+                    unplanned_changes)
+from .storage import WishError
 from .validation import knowledge_warnings
 from .views import change_rows, lazy_snapshot
 
@@ -22,9 +24,23 @@ def work_data(project, keys=()):
             "unplanned": unplanned_changes(project, keys), "warnings": warnings}
 
 
-def context_data(project, keys=()):
-    needs = needs_context(project)
-    selected = select_changes(project, keys) if keys else []
+def linked_needs(project, keys):
+    """Needs the selection names or its changes link, plus needs sharing a recorded relation with them."""
+    linked = set()
+    for key in keys:
+        if key in project["needs"]:
+            linked.add(key)
+        else:
+            linked.update(project["changes"][key]["meta"]["needs"])
+    return {node["id"] for node in need_graph(project, sorted(linked))["needs"]} if linked else set()
+
+
+def context_data(project, keys=(), linked=False):
+    if linked and not keys:
+        raise WishError("--linked needs a change or need ID, for example: ow context C-001 --linked")
+    selected = select_changes(project, keys) if keys else []   # also rejects unknown IDs
+    full = linked_needs(project, keys) if linked else None
+    needs = needs_context(project, full)
     retrieve = {}
 
     def entry(path, category):
@@ -40,16 +56,20 @@ def context_data(project, keys=()):
         if need["meta"]["currency"] == "current" or any(key in review_needs(project, cid) for cid in selected):
             if need["meta"]["currency"] != "current":
                 entry(need["path"], "linked_retired_needs")
+            if full is not None and key not in full:
+                continue  # references of needs shown by title are not part of this task's reading
             for relative in need["meta"].get("references", []):
                 entry(project["root"] / relative, "references")
     estimates = {"needs": estimate_tokens(needs)}
     for item in retrieve.values():
         category = item["category"]
         estimates[category] = estimates.get(category, 0) + item["estimated_tokens"]
-    return {"needs": needs, "work": work_data(project, keys),
+    note = ("Linked and related needs are complete; other current needs are listed by title and still bind. "
+            if linked else "All current needs are included. ")
+    return {"needs": needs, "needs_scope": "linked" if linked else "all", "work": work_data(project, keys),
             "changes": [{"id": cid, "needs": project["changes"][cid]["meta"]["needs"],
                          "review_needs": review_needs(project, cid)} for cid in selected],
             "retrieve": list(retrieve.values()), "estimated_tokens": estimates,
             "estimated_loaded_and_retrievable_tokens": sum(estimates.values()),
-            "note": "All current needs are included. Retrieve listed files for relevant rules and work; "
+            "note": note + "Retrieve listed files for relevant rules and work; "
                     "their content is not included. Estimates exclude other source, conversation, and tool output."}
