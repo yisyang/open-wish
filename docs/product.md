@@ -160,7 +160,8 @@ contributors; architecture is in [design.md](design.md).
 - OW artifacts, and text docs that current needs reference, warn at 8,000 estimated
   tokens and source at 500 nonblank lines; a source hard limit is opt-in with
   justified exact-path exceptions.
-- Context reports sized retrieval entries rather than loading referenced files.
+- Context reports sized retrieval entries rather than loading referenced files. A
+  large doc is read by section.
 - Status exposes cleanup candidates, pending acceptance, blocked work and retired needs.
 
 ## Adoption, distribution and evaluation

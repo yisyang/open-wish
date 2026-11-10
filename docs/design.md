@@ -23,7 +23,7 @@ those rather than a duplicated table here. Dependency direction:
 
 ```text
 cli ─→ views ─→ workflow ─→ handoff, trace, repository ─→ storage
-   └─→ scaffold, integrations, context, budgets, validation ─→ model ─→ storage
+   └─→ scaffold, integrations, context, sections, budgets, validation ─→ model ─→ storage
 ```
 
 `model.py` holds pure projections and scheduling; filesystem effects stay in
@@ -145,6 +145,9 @@ and code are sized as data and source); source warns at 500 nonblank lines and f
 `source_hard_limit`. Configured exceptions keep warning with their reason, except
 `generated` files, which are tool output and stay silent until they disappear. Status derives retention groups for closed, awaiting-acceptance
 and blocked changes and retired needs.
+
+`ow section` prints a Markdown doc's heading outline with estimated sizes, or the
+sections named by their GitHub-style anchors, so sessions read part of a large doc.
 
 ## Agent guidance
 

@@ -134,11 +134,13 @@ their predecessors pass review (or are accepted, if `successors_wait_for` is
   step needs the fuller form; a skill loaded later reuses it. To implement or review
   one task of a planned change, `ow context C-001 --linked` is enough: its linked and
   related needs in full, the others by title and outcome. Intake, alignment, planning
-  and a change's final review read every need. When a session passes about 200k
-  tokens, hand off to a fresh one with a short summary of state, evidence and next
-  step. A session rarely sees its own size, so whoever starts or resumes it (a
-  coordinator, or the human) checks it before sending more work, and asks a session
-  past the limit to hand off instead.
+  and a change's final review read every need. Read a large doc by section: `ow
+  section docs/rules.md` lists its sections with sizes, and `ow section
+  docs/rules.md#opening-hours` prints one. When a session passes about 200k tokens,
+  hand off to a fresh one with a short summary of state, evidence and next step. A
+  session rarely sees its own size, so whoever starts or resumes it (a coordinator, or
+  the human) checks it before sending more work, and asks a session past the limit to
+  hand off instead.
 
 ## Skill map
 

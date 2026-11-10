@@ -188,6 +188,7 @@ do not block cleanup.
 ow status --json            # needs, changes, task progress, review state, retention groups
 ow context [IDS] [--json]   # all current needs, work state and warnings, and a sized retrieval manifest
 ow context C-001 --linked   # linked and related needs in full, the rest by title and outcome
+ow section PATH[#anchor]... # a Markdown doc's outline with sizes, or the named sections
 ow graph [N-001] [--json]   # recorded need relations and their endpoints
 ow trace [N-001] [--json]   # need → files and tests that mention the need ID
 ow ready [IDS] [--json]     # ready tasks, blockers and unplanned changes

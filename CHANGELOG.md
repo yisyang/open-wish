@@ -18,6 +18,11 @@ one of them, a cancellation rule, needed to hold any work.
   `ow-core` also says to run `ow context` once per session. In the game project a call
   printed about 82 kB for a change that linked one 2.5 kB need, sessions ran it up to
   15 times, and the project's policy had told task workers to skip it.
+- `ow section PATH[#anchor]` prints a Markdown doc's outline with sizes, or one
+  section. In the game project eight docs that needs reference had passed the
+  8,000-token warning (213,000 estimated tokens together), fresh sessions reached 77k
+  to 95k tokens within ten calls, mostly reading, and the project had written its own
+  section reader.
 
 ### Changed
 

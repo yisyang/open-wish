@@ -72,4 +72,5 @@ def context_data(project, keys=(), linked=False):
             "retrieve": list(retrieve.values()), "estimated_tokens": estimates,
             "estimated_loaded_and_retrievable_tokens": sum(estimates.values()),
             "note": note + "Retrieve listed files for relevant rules and work; "
-                    "their content is not included. Estimates exclude other source, conversation, and tool output."}
+                    "their content is not included. Estimates exclude other source, conversation, and tool output. "
+                    "`ow section PATH` outlines a large doc."}

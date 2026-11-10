@@ -12,6 +12,7 @@ from .integrations import HARNESSES, install_skills, installed_harnesses, requir
 from .model import TASK_STATES, need_graph, ready_tasks, unplanned_changes
 from .repository import project_files
 from .scaffold import initialize, new_artifact
+from .sections import read_sections
 from .storage import SCHEMA_VERSION, WishError, load_project, project_config, project_root, read_json
 from .terminal import confirm_downgrade, select_harnesses
 from .trace import mentions, reference_warnings, trace_data
@@ -62,6 +63,8 @@ def parser():
     trace = commands.add_parser("trace", help="Derive need → check links from IDs mentioned in code, tests and docs")
     trace.add_argument("selection", nargs="*", help="Need IDs; default all")
     trace.add_argument("--json", action="store_true")
+    section = commands.add_parser("section", help="Outline a Markdown doc with sizes, or print sections named PATH#anchor")
+    section.add_argument("targets", nargs="+", metavar="PATH[#anchor]", help="Paths relative to the project root")
     report = commands.add_parser("summary", help="Show needs, outcomes, work, and verification")
     report.add_argument("selection", nargs="+", help="Need or change IDs")
     mode = commands.add_parser("mode", help="Set explicitly requested acceptance mode for one active change")
@@ -179,6 +182,9 @@ def run(args):
     if args.command == "new":
         print(new_artifact(root, args.kind, args.id, args.title, needs=args.needs,
                            fast_forward=args.fast_forward, after=args.after))
+        return 0
+    if args.command == "section":
+        print(read_sections(root, args.targets))
         return 0
     if args.command == "check":
         project = load_project(root)
