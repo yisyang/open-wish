@@ -143,9 +143,9 @@ contributors; architecture is in [design.md](design.md).
   bounded before it is re-planned or escalated. A check that fails on its own setup
   is rerun, not counted against the work, and a blocker only a rule change can
   resolve goes straight to the human.
-- Evidence is a short record: command, revision, result and where the log is. Runs
-  recorded at the reviewed revision are reused, and provenance machinery is built only
-  when a result's integrity is in doubt.
+- Evidence is a short record: command, revision, result and where the log is.
+  `ow run-check` writes one. Runs recorded at the reviewed revision are reused, and
+  provenance machinery is built only when a result's integrity is in doubt.
 - Review freshness includes recursive submodule checkouts and content; pinning the
   reviewed checkout afterwards keeps a review fresh, a differing pin is warned about,
   and uninspectable components prevent fresh acceptance. Routine verification stays under five minutes.

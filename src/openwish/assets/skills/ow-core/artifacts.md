@@ -182,6 +182,22 @@ and other retained reviews that cite the batch. It warns about retained files th
 still mention a removed change ID. A closed review is historical: later code edits
 do not block cleanup.
 
+## Check records
+
+```sh
+ow run-check --name unit --evidence ../evidence/C-001 -- python -m unittest discover -s tests
+```
+
+Runs the command from the current directory, writes its whole output to `unit.log`
+and a record to `unit.json` in the evidence directory (`name`, `command`, `cwd`,
+`started_at`, `ended_at`, `seconds`, `status`, `exit_code`, `revision` with `head`
+and `dirty`, `log`), and prints one summary line plus, when it did not pass, the
+log's last 30 lines. `status` is `PASS`, `FAIL` or `FLAKY` (failed, then passed
+within `--attempts`; exit 4). A record still `RUNNING` whose `pid` is gone was
+killed. A second run under one name writes `unit-2`. The evidence directory is
+outside the repository or ignored by it, because logs inside it would make pending
+reviews stale. Cite the summary line as a task's `--evidence` or a review's `--check`.
+
 ## Inspection
 
 ```sh

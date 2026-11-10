@@ -120,12 +120,15 @@ their predecessors pass review (or are accepted, if `successors_wait_for` is
 ## Evidence and context
 
 - **Evidence is a short record.** Completion and review evidence names the command or
-  procedure, the revision it ran on, its result and where its log is. A run recorded
-  at the reviewed revision is evidence for the reviewer too; rerun only what is
-  missing, stale or in doubt. Use the project's own check commands. Build
-  provenance machinery (hash manifests, archived copies of the work, custom wrappers
-  around checks) only when a result's integrity is genuinely in question, and keep
-  logs a record cites where they survive a restart.
+  procedure, the revision it ran on, its result and where its log is. `ow run-check
+  --name unit --evidence DIR -- COMMAND` runs a check, keeps its log, writes that
+  record and prints the line to cite; a check that fails and then passes on a rerun
+  (`--attempts`) is `FLAKY`, never a pass. A run recorded at the reviewed revision is
+  evidence for the reviewer too; rerun only what is missing, stale or in doubt. Use
+  the project's own check commands. Build provenance machinery (hash manifests,
+  archived copies of the work, custom wrappers around checks) only when a result's
+  integrity is genuinely in question, and keep logs a record cites where they survive
+  a restart.
 - **Keep context small.** Every step rereads the session's whole context, so a long
   session works several times slower than a fresh one. Read only what the step needs:
   batch independent reads and searches, read a log's failing excerpt rather than all of

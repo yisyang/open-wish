@@ -68,12 +68,13 @@ class ProjectCase(unittest.TestCase):
                              ["Representative reconciliation: passed"], affected, "pass",
                              handoff=[self.handoff()] if handoff is None else handoff)
 
-    def cli(self, *arguments, success=True, cwd=None, stdin=None):
+    def cli(self, *arguments, success=True, cwd=None, stdin=None, code=None):
         environment = os.environ.copy()
         environment["PYTHONPATH"] = str(Path(__file__).resolve().parents[1] / "src")
         result = subprocess.run([sys.executable, "-m", "openwish", *arguments],
                                 cwd=cwd or self.root, env=environment, input=stdin,
                                 text=True, capture_output=True, timeout=10)
-        self.assertEqual(result.returncode, 0 if success else 1, result.stdout + result.stderr)
+        expected = code if code is not None else (0 if success else 1)
+        self.assertEqual(result.returncode, expected, result.stdout + result.stderr)
         self.assertNotIn("Traceback", result.stderr)
         return result

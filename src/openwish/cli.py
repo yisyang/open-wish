@@ -7,6 +7,7 @@ import sys
 
 from . import __version__
 from .budgets import check_budgets
+from .checks import run_check
 from .context import context_data
 from .integrations import HARNESSES, install_skills, installed_harnesses, require_current_cli
 from .model import TASK_STATES, need_graph, ready_tasks, unplanned_changes
@@ -65,6 +66,13 @@ def parser():
     trace.add_argument("--json", action="store_true")
     section = commands.add_parser("section", help="Outline a Markdown doc with sizes, or print sections named PATH#anchor")
     section.add_argument("targets", nargs="+", metavar="PATH[#anchor]", help="Paths relative to the project root")
+    run_one = commands.add_parser("run-check", help="Run one check, keep its log and write a short evidence record")
+    run_one.add_argument("--name", required=True, help="Record name, such as unit or browser")
+    run_one.add_argument("--evidence", required=True, type=Path,
+                         help="Directory for the log and record: outside the repository, or ignored by it")
+    run_one.add_argument("--attempts", type=int, default=1,
+                         help="Runs allowed in all; a failure followed by a pass is FLAKY (exit 4), never PASS")
+    run_one.add_argument("argv", nargs="+", metavar="COMMAND", help="The check command, after --")
     report = commands.add_parser("summary", help="Show needs, outcomes, work, and verification")
     report.add_argument("selection", nargs="+", help="Need or change IDs")
     mode = commands.add_parser("mode", help="Set explicitly requested acceptance mode for one active change")
@@ -186,6 +194,10 @@ def run(args):
     if args.command == "section":
         print(read_sections(root, args.targets))
         return 0
+    if args.command == "run-check":
+        code, text = run_check(root, args.name, args.evidence, args.argv, args.attempts)
+        print(text)
+        return code
     if args.command == "check":
         project = load_project(root)
         errors, warnings = validate(project), []

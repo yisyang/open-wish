@@ -23,6 +23,11 @@ one of them, a cancellation rule, needed to hold any work.
   8,000-token warning (213,000 estimated tokens together), fresh sessions reached 77k
   to 95k tokens within ten calls, mostly reading, and the project had written its own
   section reader.
+- `ow run-check` runs one check, keeps its full log, writes the short evidence
+  record `ow-core` asks for, and prints one line to cite. A check that fails and then
+  passes on a rerun is `FLAKY`, never a pass. The game project had built this runner
+  itself after agents wrote 448 one-off harness scripts, and after a session called a
+  real focus bug transient on the strength of one rerun.
 
 ### Changed
 

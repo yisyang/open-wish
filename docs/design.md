@@ -23,7 +23,7 @@ those rather than a duplicated table here. Dependency direction:
 
 ```text
 cli ─→ views ─→ workflow ─→ handoff, trace, repository ─→ storage
-   └─→ scaffold, integrations, context, sections, budgets, validation ─→ model ─→ storage
+   └─→ scaffold, integrations, context, sections, checks, budgets, validation ─→ model ─→ storage
 ```
 
 `model.py` holds pure projections and scheduling; filesystem effects stay in
@@ -125,6 +125,14 @@ on demand; nothing is stored, and absence of a trace is never treated as proof.
 existing path that repository inspection excludes (ignored, so a fresh clone lacks it),
 and a change body linking to another change's files. Referenced docs are not scanned,
 because explaining how to obtain an ignored input is their job.
+
+## Check records
+
+`checks.py` runs one command, streams its output to a log file and writes a small
+JSON record beside it: command, working directory, times, exit code, status and the
+repository's HEAD with a dirty flag. A failure followed by a pass within `--attempts`
+is `FLAKY` and exits 4. Records live outside the repository or in an ignored
+directory, so they are never review inputs and need no schema.
 
 ## Context and bounds
 

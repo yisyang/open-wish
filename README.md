@@ -129,6 +129,7 @@ ow new change C-002 --title "Scheduled export" --need N-001 --after C-001
 ow context C-001                     # all current needs, work state, sized retrieval manifest
 ow context C-001 --linked            # linked and related needs in full, the rest by title and outcome
 ow section docs/rules.md#opening-hours   # one section of a large doc; no anchor lists the outline
+ow run-check --name unit --evidence ../evidence -- python -m unittest   # full log + short record to cite
 ow ready C-001                       # ready tasks, blockers, unplanned changes
 ow task C-001/T-001 done --evidence "tests/test_export.py: 4 passed"
 ow trace N-001                       # tests and files that mention N-001
