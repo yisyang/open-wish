@@ -198,6 +198,7 @@ built wheels and sdists and exercise both aliases and a lifecycle.
 Skill behavior is evaluated separately (`evals/`): a runner executes scenarios per arm
 (OW skills versus no-OW baseline), runs multi-stage scenarios as fresh sessions, grades
 executable scenarios with external acceptance checks and with seeded mutants against
-the product's retained tests, and records time and token usage. A unit test keeps the
-evaluator references and acceptance checks consistent. Small samples do not prove
-behavior across every model or harness.
+the product's retained tests, and records time and token usage. Dry-run scenarios can
+be graded by a fresh agent session against their assertions (`grade --judge`). A unit
+test keeps the evaluator references and acceptance checks consistent. Small samples do
+not prove behavior across every model or harness.

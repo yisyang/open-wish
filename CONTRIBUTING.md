@@ -44,7 +44,8 @@ For an installed executable, use a virtual environment and `python -m pip instal
   creating OW records to manage the contribution.
 - For skill changes, run the executable scenarios with both arms
   (`python3 evals/run.py run ...`, see [evals](evals/README.md)) and compare against
-  the previous skills on the same prompts.
+  the previous skills on the same prompts. Also run the dry-run evals of each skill
+  you changed and judge them (`grade --judge`).
 - In the product, distinguish conversation authority from task readiness and
   human result acceptance from change-scoped fast-forward delegation.
 

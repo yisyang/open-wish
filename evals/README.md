@@ -15,7 +15,15 @@ as its slowest arm.
 ```sh
 python3 evals/run.py run --workspace /tmp/ow-evals
 python3 evals/run.py grade --workspace /tmp/ow-evals
+python3 evals/run.py grade --workspace /tmp/ow-evals --judge
 ```
+
+`--judge` has a fresh session of the workspace's agent grade each dry-run response
+against its assertions (pass the same `--agent` as the run). It writes
+`judgement.json` and `judge-transcript.txt` in the stage directory and the counts in
+`results.json`. The judge runs in an empty directory without OW. Read failed
+assertions against the response before trusting them; a judge is a filter, not a
+proof.
 
 `--full` runs every eval (run it before a release or after broad guidance changes),
 and `--ids` selects specific ones. Use a fresh workspace per sample.
@@ -89,8 +97,10 @@ presets when a newer flagship model ships, and do not compare scores across mode
   the product's own suite passes.
 - **Intent.** Need count and size per stage, needs changed since the previous
   stage, and change directories left behind.
-- **Dry-run evals** get a `grading.md` checklist of their assertions for a
-  human or model grader. Grade actual responses and edits, not claims of
+- **Lines.** Nonblank Python source and test lines per stage; compare arms, since
+  test volume is a cost.
+- **Dry-run evals** get a `grading.md` checklist of their assertions, graded by
+  `--judge` or by a human. Grade actual responses and edits, not claims of
   compliance. Their prompts describe a project the agent cannot see; the
   coordinator header says so, so an empty working directory is not evidence
   against the described state.

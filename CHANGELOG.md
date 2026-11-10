@@ -30,6 +30,9 @@ one of them, a cancellation rule, needed to hold any work.
   real focus bug transient on the strength of one rerun.
 - A word budget for shipped skills, checked by the test suite. They had grown from
   5,800 to 12,400 words in four weeks.
+- Eval grading: `evals/run.py grade --judge` has a fresh agent session grade each
+  dry-run response against its assertions, and executable scenarios report test and
+  source line counts per arm. Thirty of the 34 evals had needed a human to grade them.
 
 ### Changed
 
