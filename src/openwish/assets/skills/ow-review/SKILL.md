@@ -11,16 +11,13 @@ Load `ow-core`, then read `openwish/policy.md` and the actual diff.
   material decision of the session has a retained home), then report as in
   step 7. Run no record, close or clean commands.
 - **Managed:** run `ow context C-001`, read the change and its tasks, and apply
-  every step. When its tasks had task reviews, this final review reuses them: it
-  judges how the tasks work together, the diffs no task review covered and which
-  failures of the change's own checks block, without re-reading reviewed diffs.
-- **Task or correction review** (a task reviewed before its change is complete, or a
-  re-review of a correction): run `ow context C-001 --linked`, then apply steps 2–4 to
-  the diff against the task's acceptance and the needs it affects, and return Blocking
-  findings below. The full need assessment, Safe to forget and the record wait for the
-  change's final review.
-  A task that only adds tests or records gets no task review; the final review
-  covers it.
+  every step. A change is reviewed once, when its tasks are done; a task whose diff
+  was reviewed earlier is judged for how it works with the rest, not re-read.
+- **Task or correction review** (a task other work builds on at a commitment point,
+  step 4 of `ow-coordinate`, or a re-review of a correction): run `ow context C-001
+  --linked`, then apply steps 2–4 to the diff against the task's acceptance and the
+  needs it affects, and return Blocking findings below. The need assessment, Safe to
+  forget and the record wait for the change's review.
 
 1. **Assess the needs.** Run `ow trace` and compare the traced checks and files
    with the diff.
@@ -30,14 +27,14 @@ Load `ow-core`, then read `openwish/policy.md` and the actual diff.
      cannot violate it. If you cannot, treat it as affected.
    - **Engineering requirements** the project policy links: check the diff against them.
    Compare results with delivers-now scope and exit evidence, not ticked tasks.
-   Explain partial contributions and deferrals; an empty task list is not completion.
 2. **Judge the checks** (Strategic verification in `ow-plan`): would they catch a
    need violation, survive a harmless refactor, and test intent rather than repeat
    the code's own logic, and settle one outcome where outcomes differ in money,
    rights or data? Ask what plausible wrong implementation would still pass through
    a credible failure, and what is the strongest plausible reason the result would
    fail in real use; check it, or report it as a limitation. Checks that add no
-   evidence are findings to remove, not gaps to fill.
+   evidence, and anything temporary left behind (Leave nothing temporary in
+   `ow-implement`), are findings to remove, not gaps to fill.
 3. **Judge the structure** with the Architecture rubric in `ow-align` on the changed
    paths, including whether module headers and boundary READMEs still describe them.
 4. **Fix** within authorized intent and rerun affected checks, or, when another
@@ -51,19 +48,16 @@ Load `ow-core`, then read `openwish/policy.md` and the actual diff.
    Passing needs every task done. If anything changes afterwards (successor work
    often does), `ow summary C-001` names what made the review stale: rerun the
    affected checks, confirm the outcome still holds, and record again.
-7. **Present need → outcome → evidence**, how other current needs were ruled
-   out, limitations, any `open` items this result makes decidable, and any
-   assumptions it proceeded on (Commit progressively in `ow-plan`). Lead with the
-   choices made on the human's behalf that users would notice, each a plain
-   statement they can overrule (`proposed` in its home, Rule status in
-   `ow-propose`), and engineering choices with recurring cost (polling or tick
-   cadence, payload size, log volume, retention), each with its rate. Name plan
-   misses: gaps that surfaced during implementation or review but planning should
-   have caught (a missing provider, a late decision, a foundational design
-   reworked), each with its cause. Propose recording a lesson that will recur in
-   this product, such as "verify host access before planning deploys", in the
-   project's policy, for the human to accept. Report one that shows a gap in
-   OW's own guidance to OW's maintainers.
+7. **Present need → outcome → evidence**, limitations, any `open` items this
+   result makes decidable, and the assumptions it proceeded on (Commit progressively
+   in `ow-plan`). Lead with the choices made on the human's behalf that users would
+   notice, each a plain statement they can overrule (`proposed` in its home, Rule
+   status in `ow-propose`), and engineering choices with recurring cost (polling or
+   tick cadence, payload size, log volume, retention), each with its rate. Name plan
+   misses (a missing provider, a late decision, a foundational design reworked),
+   each with its cause. A lesson that will recur replaces or sharpens a rule in the
+   project's policy, for the human to accept, rather than adding one; a gap in OW's
+   own guidance goes to OW's maintainers.
    - Default mode: ask once for human acceptance (A/B/C),
      after all available work is done. Only after actual acceptance:
      `ow close C-001 --by human`.
@@ -80,13 +74,16 @@ Load `ow-core`, then read `openwish/policy.md` and the actual diff.
   work against that list. A re-review checks the list, the correction's diff and its
   affected checks. It adds a blocker only for a regression the correction introduced
   or for a defect a listed check reveals, and it says which.
-- **What blocks.** A finding blocks when it shows behavior that violates the
-  acceptance or a current need, a risk to money, data, permissions, security or a
-  policy tenet, or a missing or wrong check for the acceptance or a credible failure
-  (Strategic verification in `ow-plan`). A gap reachable only through a non-credible
-  path, or a check Strategic verification excludes, is an observation and adds no
-  check. Check style, harnesses, evidence format and wording are observations unless
-  they hide such a failure.
+- **What blocks.** A finding blocks when it shows a failure: behavior that violates
+  a current need or the acceptance, a risk to money, data, permissions, security or
+  a policy tenet, or a missing or wrong check for the acceptance or a credible
+  failure (Strategic verification in `ow-plan`). Show it with a failing run or the
+  inputs that produce it through real entry points; an unproven absence of failure
+  is not a finding. Acceptance or approach wording stricter
+  than its need is corrected in the record, not built. A gap reachable only through
+  a non-credible path or a waiting quality (Stage in `ow-core`), contention a shared
+  retry resolves, a check Strategic verification excludes, and check style,
+  harnesses, evidence format and wording are observations and add no check.
 - **Pre-existing failures.** A check that fails the same way on the base revision is
   not this work's blocker. Record it with an owner (an open change or task) and
   continue.
@@ -121,6 +118,5 @@ Read both directions: requirements → code and checks, and consequential code
 choices → the intent that justifies them. Copies of a rule the change added to
 needs, READMEs or other changes become links (One home per fact in `ow-core`).
 Could a maintainer find, explain, verify and safely change this behavior with only
-the repository? The CLI checks that
-destinations exist and are fresh, not that they say the right thing. In submodule
-projects, inspect component diffs too.
+the repository? The CLI checks that destinations exist, not what they say. In
+submodule projects, inspect component diffs too.

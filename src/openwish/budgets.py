@@ -9,6 +9,7 @@ CODE_SUFFIXES = set(".py .pyi .js .jsx .mjs .cjs .ts .tsx .vue .svelte .go .rs .
                     ".ps1 .sql .ex .exs .erl .hrl .clj .cljs .dart .lua .r .R .pl .pm "
                     ".html .htm .css .scss .sass .less .sol .elm .hs .ml .mli .tf".split())
 DATA_SUFFIXES = {".json", ".jsonl", ".xml", ".csv", ".tsv", ".yaml", ".yml", ".toml", ".lock"}
+WORKING_DESIGN_TOKENS = 3000
 
 
 def check_budgets(project, *, code=True):
@@ -27,6 +28,7 @@ def check_budgets(project, *, code=True):
         tokens = estimate_tokens(text)
         if tokens >= 8000:
             warnings.append(f"{path.relative_to(root)}: ~{tokens} tokens; inspect scope and duplication, preserve meaning")
+    warnings.extend(working_design_warnings(project))
     warnings.extend(referenced_doc_warnings(project))
     context = needs_context(project)
     tokens = estimate_tokens(context)
@@ -72,6 +74,27 @@ def check_budgets(project, *, code=True):
         else:
             warnings.append(f"{relative}: {count} LOC; soft target is under 500")
     return errors, warnings
+
+
+def working_design_warnings(project):
+    """A change's design is decisions, about a page; a long one is a specification written before the code."""
+    root, warnings = project["root"], []
+    for key, change in sorted(project["changes"].items()):
+        if change["meta"]["status"] == "closed":
+            continue
+        tokens = 0
+        for path in sorted((root / "openwish" / "changes" / key).rglob("*")):
+            if not path.is_file() or path.is_symlink() or path.name in ("tasks.json", "review.json"):
+                continue
+            try:
+                tokens += estimate_tokens(path.read_text(encoding="utf-8"))
+            except UnicodeError:
+                continue
+        if tokens >= WORKING_DESIGN_TOKENS:
+            warnings.append(f"openwish/changes/{key}: working design ~{tokens} tokens (soft target under "
+                            f"{WORKING_DESIGN_TOKENS}); keep decisions, link rules to their docs, write precise "
+                            "shapes as code, or split the change")
+    return warnings
 
 
 def referenced_doc_warnings(project):

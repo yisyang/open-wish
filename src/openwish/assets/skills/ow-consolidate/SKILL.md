@@ -22,12 +22,11 @@ Load `ow-core`, read `openwish/policy.md` and run `ow status` and `ow context`. 
 3. **Check what survives.** Intent in needs, behavior in source, checks in tests,
    non-obvious rationale in nearby comments or ordinary docs, and future work in
    its own open changes. Inspect the review's handoff (Safe to forget in
-   `ow-review`). Rewrite successor prerequisites as delivered code, not the disposed
-   change's plan or files. Do not copy whole plans into docs. Investigation evidence
-   still worth keeping goes to a dated evidence doc, not a rule doc (Where knowledge
-   lives in `ow-core`). Where an `implemented` handoff item's design also sits in a
-   doc, cut that text to its decisions, rules and worked examples; code now carries
-   the rest (Size targets below).
+   `ow-review`). Rewrite successor prerequisites as delivered code. Never copy a
+   plan into docs: where a delivered design also sits in a doc, cut that text to
+   its decisions, rules and worked examples, since code now carries the rest.
+   Investigation evidence worth keeping goes to a dated evidence doc (Where
+   knowledge lives in `ow-core`).
 4. **Preview, then clean:** `ow clean C-001 --dry-run`, then `ow clean C-001`. Resolve
    what preflight reports: move useful unknown files deliberately; reconcile
    reviews that cite the batch and retained mentions of the change ID; replace a
@@ -48,7 +47,7 @@ Load `ow-core`, read `openwish/policy.md` and run `ow status` and `ow context`. 
 ## Compact needs
 
 Compact when asked, when `ow check` warns near the needs target, or when you notice
-overlap. Size is a prompt to look, not a cap.
+overlap.
 
 - Use Right-size intent in `ow-propose`: resolve duplicates, mechanism-sized needs,
   broad bundles and drift before shortening prose. Keep every acceptance criterion,
@@ -67,12 +66,12 @@ overlap. Size is a prompt to look, not a cap.
 
 **Size targets.** Current needs: 24,000 estimated tokens by default (configurable),
 with no line cap. Each OW artifact, and each text doc a current need references,
-warns at 8,000: keep a rule doc to decisions, rules and worked examples, and move
-working design to the change that will deliver it; once delivered, code carries it.
+warns at 8,000, and a change's working design at 3,000: keep a rule doc to
+decisions, rules and worked examples, and move working design to the change that
+will deliver it; once delivered, code carries it.
 These cover retained knowledge, not your working context, which follows Keep context
 small in `ow-core`.
 
-**Tests.** Keep small regression checks of lasting outcomes and consequential
-boundaries; delete temporary probes and the checks Strategic verification in
-`ow-plan` excludes; merge redundant or brittle tests only when their protection is
-preserved.
+**Tests.** Keep checks of lasting outcomes and consequential boundaries; delete
+those Strategic verification in `ow-plan` excludes; merge redundant or brittle tests
+only when their protection is preserved.

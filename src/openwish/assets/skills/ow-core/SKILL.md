@@ -33,6 +33,17 @@ with it, clarifies only what could change the work, designs with the Architectur
 rubric, verifies and reviews, in proportion to the ask: a typo needs a glance.
 Direct or managed delivery changes what is recorded, not the care taken.
 
+**Stage.** Rigor follows what a failure would cost today. The project policy states
+the product's stage; without one, treat it as released. Before first release nobody
+depends on the product or its data, and its features still change. The policy names
+the qualities that wait for release, typically recovery from crashes and retries,
+behavior under concurrent use, upgrades of stored data, abuse and scale. A waiting
+quality comes from shared mechanisms or not yet at all: no change builds, checks or
+reviews it feature by feature, and a finding about it is an observation. An
+acceptance criterion that binds only from release says so (`From release: …`).
+Until then it constrains only a choice that would be costly to reverse afterwards
+(Commit progressively in `ow-plan`).
+
 **Direct delivery** fits one coherent result finished and verified in this session,
 with no material open decision, nothing deferred, and no active change covering
 it. It records no change, tasks or acceptance step, though it may create or revise
@@ -119,31 +130,27 @@ their predecessors pass review (or are accepted, if `successors_wait_for` is
 
 ## Evidence and context
 
-- **Evidence is a short record.** Completion and review evidence names the command or
-  procedure, the revision it ran on, its result and where its log is. `ow run-check
-  --name unit --evidence DIR -- COMMAND` runs a check, keeps its log, writes that
-  record and prints the line to cite; a check that fails and then passes on a rerun
-  (`--attempts`) is `FLAKY`, never a pass. A run recorded at the reviewed revision is
-  evidence for the reviewer too; rerun only what is missing, stale or in doubt. Use
-  the project's own check commands. Build provenance machinery (hash manifests,
-  archived copies of the work, custom wrappers around checks) only when a result's
-  integrity is genuinely in question, and keep logs a record cites where they survive
-  a restart.
+- **Evidence is a short record:** the command or procedure, the revision it ran on,
+  its result and where its log is. `ow run-check --name unit --evidence DIR --
+  COMMAND` runs the project's check, keeps the log, writes that record and prints the
+  line to cite; a check that fails and then passes on a rerun (`--attempts`) is
+  `FLAKY`, never a pass. A run recorded at the reviewed revision serves the reviewer
+  too: rerun only what is missing, stale or in doubt. Write no narrative evidence,
+  summary files or provenance machinery (hash manifests, archived copies, wrappers
+  around checks) unless a result's integrity is genuinely in question. Keep cited
+  logs where they survive a restart.
 - **Keep context small.** Every step rereads the session's whole context, so a long
   session works several times slower than a fresh one. Read only what the step needs:
-  batch independent reads and searches, read a log's failing excerpt rather than all of
-  it, and leave large binary files unread unless the work is about them. Run `ow
-  context` once per session, and again only when needs or change records change or a
-  step needs the fuller form; a skill loaded later reuses it. To implement or review
-  one task of a planned change, `ow context C-001 --linked` is enough: its linked and
-  related needs in full, the others by title and outcome. Intake, alignment, planning
-  and a change's final review read every need. Read a large doc by section: `ow
-  section docs/rules.md` lists its sections with sizes, and `ow section
-  docs/rules.md#opening-hours` prints one. When a session passes about 200k tokens,
-  hand off to a fresh one with a short summary of state, evidence and next step. A
-  session rarely sees its own size, so whoever starts or resumes it (a coordinator, or
-  the human) checks it before sending more work, and asks a session past the limit to
-  hand off instead.
+  batch independent reads and searches, read a log's failing excerpt, and leave large
+  binary files unread unless the work is about them. Run `ow context` once per
+  session, and again only when needs or change records change; a skill loaded later
+  reuses it. One task of a planned change needs only `ow context C-001 --linked`
+  (linked and related needs in full, the others by title and outcome); intake,
+  alignment, planning and a change's review read every need. Read a large doc by
+  section: `ow section docs/rules.md` lists them with sizes, and adding
+  `#opening-hours` prints one. Past about 200k tokens, hand off to a fresh
+  session with a short summary of state, evidence and next step. A session rarely
+  sees its own size, so whoever starts or resumes it checks first.
 
 ## Skill map
 
@@ -155,6 +162,7 @@ read the owning section when a step calls for it.
 | Right-size intent, Rule status, Right-size delivery, relationships | `ow-propose` |
 | Architecture rubric, Future constraints | `ow-align` |
 | Task sizing, Commit progressively, Discover ahead of delivery, Plan a candidate, Promote direct work, Reconcile the plan, Strategic verification | `ow-plan` |
+| Leave nothing temporary | `ow-implement` |
 | Need assessment, Safe to forget, Blocking findings | `ow-review` |
 | Disposal, compaction, size targets | `ow-consolidate` |
 | Delegated acceptance | `ow-fast-forward` |

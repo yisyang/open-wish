@@ -35,4 +35,4 @@ per repository.
 7. **Present** the needs, assessment and proposal in conversation. Create changes
    only when planning, implementation or verification was requested; for broad
    requested plans, task only ready increments (Right-size delivery in `ow-propose`)
-   and keep the rest as concise open changes. End with the next useful action.
+   and keep the rest as concise open changes.

@@ -111,8 +111,7 @@ graph; list order is the scheduling preference.
 
 `kind` is `agent`, `manual` (an observation only a human can make) or `investigate`
 (findings and a decision or proposal, never delivered behavior). Investigations
-ignore the change's `after` gate, so a candidate's consequential unknowns can be
-settled before its predecessors pass; starting one leaves an `open` change open, and
+ignore the change's `after` gate; starting one leaves an `open` change open, and
 delivery tasks may depend on it. A question awaiting a human is an investigation
 marked `blocked` with the question as its evidence; `ow ready` lists it as `ASK`
 (`"ask": true` in JSON) and counts investigations in flight (in progress or `ASK`).
@@ -165,22 +164,19 @@ ow clean C-001
 **Freshness.** A passing review records digests of its inputs: the change (except
 status, closure fields and `after`), its tasks, every current and linked need (except
 `open`), the handoff and its destinations, config, project policy, and checked-out
-submodule revisions. Product files outside `openwish/` (Git tracked and unignored
-files, recursively including submodules; filesystem walk without Git) are recorded
-as one digest and, in a Git repository, the tree ID of their current content;
-schema-5 reviews keep their recorded per-file digests. Any difference makes the
-review stale; `ow summary` and `ow close` name changed paths from the tree
-difference, or report that product files changed. Staging or
-committing a parent gitlink that pins the reviewed checkout leaves the review fresh;
-both commands warn while a pin differs from its checkout. Missing or conflicted
-submodule checkouts prevent a fresh passing review.
+submodule revisions. Product files outside `openwish/` (tracked and unignored,
+including submodules) are recorded as one digest and, in a Git repository, the tree
+ID of their content. Any difference makes the review stale; `ow summary` and
+`ow close` name the changed paths. Committing a parent gitlink that pins the
+reviewed checkout leaves the review fresh; both commands warn while a pin differs
+from its checkout. Missing or conflicted submodule checkouts prevent a fresh
+passing review.
 
 **Cleanup.** `ow clean` removes only `change.md`, `tasks.json` and `review.json` of
 closed changes, after preflighting the whole batch. It refuses unknown files,
 symlinks, missing or ignored handoff destinations, destinations inside the batch,
-and other retained reviews that cite the batch. It warns about retained files that
-still mention a removed change ID. A closed review is historical: later code edits
-do not block cleanup.
+and retained reviews that cite the batch, and warns about retained files that still
+mention a removed change ID. Later code edits do not block cleanup.
 
 ## Check records
 
@@ -189,10 +185,8 @@ ow run-check --name unit --evidence ../evidence/C-001 -- python -m unittest disc
 ```
 
 Runs the command from the current directory, writes its whole output to `unit.log`
-and a record to `unit.json` in the evidence directory (`name`, `command`, `cwd`,
-`started_at`, `ended_at`, `seconds`, `status`, `exit_code`, `revision` with `head`
-and `dirty`, `log`), and prints one summary line plus, when it did not pass, the
-log's last 30 lines. `status` is `PASS`, `FAIL` or `FLAKY` (failed, then passed
+and a record to `unit.json` in the evidence directory, and prints one summary line
+plus, when it did not pass, the log's last 30 lines. `status` is `PASS`, `FAIL` or `FLAKY` (failed, then passed
 within `--attempts`; exit 4). A record still `RUNNING` whose `pid` is gone was
 killed. A second run under one name writes `unit-2`. The evidence directory is
 outside the repository or ignored by it, because logs inside it would make pending
@@ -217,11 +211,10 @@ the current directory upward. Status retention groups: `cleanup_candidates`,
 `awaiting_acceptance`, `blocked_changes`, `retired_needs`.
 
 **Trace.** `ow trace` scans code, tests and docs (not `openwish/` or installed
-guidance) for need IDs, and lists test locations separately. Mentioning a need ID
-in a test's name, docstring or comment links that check to the need. Missing traces
-do not prove a need is unprotected. `ow check` warns about mentions of unknown or
-retired needs, needs citing paths Git ignores, and changes linking to another
-change's files.
+guidance) for need IDs, and lists test locations separately. Missing traces do not
+prove a need is unprotected. `ow check` warns about mentions of unknown or retired
+needs, needs citing paths Git ignores, and changes linking to another change's
+files.
 
 ## Configuration and installation
 
@@ -230,7 +223,8 @@ target that warns at 80%), `source_hard_limit` (default 0 = off),
 `successors_wait_for` (`review`, the default, or `acceptance`), and
 `code_exceptions` (each with exact `path`, `kind` of `data`, `low-complexity` or
 `generated`, and `reason`). OW artifacts warn at 8,000 estimated tokens (UTF-8
-bytes/3); source warns at 500 nonblank lines. Excepted files still warn with their
+bytes/3); a change's working design (its files other than `tasks.json` and
+`review.json`) warns at 3,000; source warns at 500 nonblank lines. Excepted files still warn with their
 reason, except `generated` ones (tool output such as lockfile loaders or vendored
 releases), which are silent; every exception warns once its file is gone. Only a configured `source_hard_limit` makes size an error.
 
@@ -240,8 +234,5 @@ reference ships in `ow-core`), leaves equal versions untouched and asks before
 downgrades. `ow skills --harness NAME` uses the same installer.
 
 `ow init` migrates a schema-4 or schema-5 project to schema 6 after preflighting
-it. On the schema-4 path, OW-shipped text leaves `openwish/policy.md` and an
-unedited `openwish/artifacts.md` is removed, since both now ship in `ow-core`.
-Edited text is kept as the project's and reported. Recorded reviews are left as
-they are; the next recorded review uses the compact source form. Other commands
-on an older schema ask you to run `ow init`.
+it, keeping project-edited text and recorded reviews. Other commands on an older
+schema ask you to run `ow init`.

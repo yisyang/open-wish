@@ -21,6 +21,18 @@ class BudgetTests(ProjectCase):
         self.assertFalse(errors)
         self.assertIn("preserve meaning", "\n".join(warnings))
 
+    def test_a_changes_working_design_warns_before_it_becomes_a_specification(self):
+        self.fixture()
+        change = sorted((self.root / "openwish/changes").iterdir())[0]
+        errors, warnings = check_budgets(self.project())
+        self.assertNotIn("working design", "\n".join(warnings))
+        # Any file beside tasks and review counts: a spec folder is working design too.
+        (change / "spec").mkdir()
+        (change / "spec/spec.md").write_text("The reader locks rows in this order.\n" * 300, encoding="utf-8")
+        errors, warnings = check_budgets(self.project())
+        self.assertFalse(errors)
+        self.assertIn(f"openwish/changes/{change.name}: working design", "\n".join(warnings))
+
     def test_needs_token_budget_is_a_soft_target(self):
         self.fixture()
         self.edit_document("needs/N-001.md", outcome="long outcome " * 100)

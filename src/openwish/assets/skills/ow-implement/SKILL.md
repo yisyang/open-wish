@@ -19,13 +19,12 @@ change that covers the ask.
    resumption, changed scope or a revised predecessor, apply Reconcile the plan in
    `ow-plan`; plan a change without tasks first (Plan a candidate).
 2. **Pick ready work** in list order. Read its acceptance and motivating needs,
-   retrieve rule files listed by `ow context` (they are not loaded automatically),
-   and inspect the code. If finishing would require inventing product policy,
-   resolve that first (Task sizing in `ow-plan`). Run `ow task C-001/T-001
-   in-progress`. Ready investigations in other changes are planning (`ow-core`):
-   take them too, within the in-flight limit of Discover ahead of delivery in
-   `ow-plan`. Each ends with findings in their retained home, or `blocked` with
-   its question for the next batch.
+   retrieve the rule files `ow context` lists (it does not load them), and inspect
+   the code. If finishing would require inventing product policy, resolve that
+   first (Task sizing in `ow-plan`). Run `ow task C-001/T-001 in-progress`. Ready
+   investigations in other changes are planning: take them too, within the
+   in-flight limit of Discover ahead of delivery in `ow-plan`. Each ends with
+   findings in their retained home, or `blocked` with its question.
 3. **Implement** the smallest coherent solution that preserves current needs and
    existing user work. Follow the repository's structure and the Architecture
    rubric in `ow-align`: pure decisions, effects at the edges, no speculative
@@ -47,6 +46,10 @@ change that covers the ask.
    approved unfinished detail in its retained home now. Note in the change where
    each material rule landed; the review's handoff will reuse it. Change notes hold
    decisions and their homes, not progress logs, run transcripts or failure history.
+   **Leave nothing temporary.** Before a task is done, delete what only it needed:
+   probes, one-off scripts and fixtures, debug output, and checks written to
+   diagnose a failure or to show a reviewer. What stays is used by the product, by
+   later work or by a documented procedure.
 7. **Ask only when blocked.** When only human blockers remain, explain the need and
    outcome, then ask A/B/C questions. Never discard
    unfinished work to look complete.

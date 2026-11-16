@@ -2,6 +2,57 @@
 
 Release notes for OpenWish, newest first. Update this file for every release.
 
+## v1.0.0rc6
+
+Sixth release candidate for v1.0.0; its CLI and skills report `1.0.0-rc.6`. The
+schema stays at 6. The game project's rounds 31 and 32 took four days for three
+features and released nothing: about half of two weeks' commits touched no product
+code, one round recorded 73 hours of check runs and 95 review notes, and specs of
+500 to 900 lines turned each sentence into a contract that reviews enforced. The
+product was unreleased, its database reset at every release, and its features were
+still changing. These changes make rigor follow the product's stage, and move five
+rules that the project had kept as overrides of OW into OW.
+
+### Added
+
+- **Stage** (`ow-core`). The project policy states the product's stage and, before
+  first release, the qualities that wait for it (recovery from crashes and retries,
+  behavior under concurrent use, upgrades of stored data, abuse, scale). A waiting
+  quality is not built, checked or reviewed feature by feature, a finding about it is
+  an observation, and a criterion that binds only from release starts `From
+  release:`. Strategic verification, What blocks and Check the sequence refer to it.
+- `ow check` warns when a change's working design (its files other than `tasks.json`
+  and `review.json`) passes 3,000 estimated tokens.
+- **Leave nothing temporary** (`ow-implement`): a task deletes its probes, one-off
+  scripts, fixtures, debug output and diagnostic checks before it is done, and a
+  round's close-out deletes what only the round needed.
+- **A fixed defect earns no test by itself** (`ow-plan`): remove the cause where
+  structure can, and add a test only when the same wrong result could return
+  unnoticed and is a credible failure.
+
+### Changed
+
+- The working design records decisions and fits about a page; detail precise enough
+  to be code is written as code in a first task (`ow-align`). Task acceptance is
+  written at the need's precision, and behavior under failure joins the mechanisms
+  that needs do not state (`ow-plan`, `ow-propose`).
+- A blocking finding shows a failure, with a failing run or the inputs that produce it
+  through real entry points. Wording stricter than its need is corrected in the
+  record, and contention a shared retry resolves is an observation (`ow-review`).
+- A change gets one independent review when its tasks are done. A task is reviewed
+  earlier only when other work builds on a commitment point it sets
+  (`ow-coordinate`, `ow-review`).
+- In a round, a successor task may start on its predecessor's submitted work, a brief
+  that quotes the linked needs replaces a worker's `ow context`, and only the
+  coordinator runs `ow mode`, `record-review`, `close` and `clean` (`ow-coordinate`).
+- A shared mechanism that callers cannot skip needs no case in each caller, and a
+  module whose test lines exceed its source lines is pruned when it changes
+  (`ow-plan`). A composition that follows an approved style guide is built as
+  `proposed` and shown at handoff.
+- A lesson from a review replaces or sharpens a policy rule instead of adding one.
+- The skills hold 12,794 words against 12,702 before, inside the unchanged 12,800
+  ceiling: the new rules were paid for by trimming existing text.
+
 ## v1.0.0rc5
 
 Fifth release candidate for v1.0.0; its CLI and skills report `1.0.0-rc.5`. Projects

@@ -22,14 +22,12 @@ Load `ow-core`, then read `openwish/policy.md` and the affected source and tests
    `kind: "manual"`.
 3. **Plan verification** using Strategic verification below.
 4. **Check coverage.** Every delivers-now result and consequential constraint has
-   planned work or existing direct evidence; every task serves the scope. Note the
-   mapping in the change when it is not obvious. Run `ow check`; passing structure
-   does not make a plan feasible.
+   planned work or existing direct evidence; every task serves the scope. Run
+   `ow check`; passing structure does not make a plan feasible.
 5. **Challenge the plan.** Name the strongest plausible reason it would fail: a
-   capability nobody provides, a known later need it would force rework for, an
-   assumption nobody checked, an environment nobody has accessed, a surface the
-   human has not seen. Repair the plan,
-   or add an investigation (Discover ahead of delivery below).
+   capability nobody provides, a later need it would force rework for, an unchecked
+   assumption, an environment nobody has accessed, a surface the human has not
+   seen. Repair the plan, or add an investigation (Discover ahead of delivery below).
 6. **Stop or continue.** Plan-only requests present the increments, approach, tasks
    and open questions, then stop. Otherwise, if authority or a consequential choice
    is missing, ask once (Commit progressively below). A question holds only the
@@ -41,7 +39,10 @@ Load `ow-core`, then read `openwish/policy.md` and the affected source and tests
 A task is a concrete unit of implementation or investigation whose result can be
 checked directly. Its acceptance states one checkable behavior or piece of evidence
 in a sentence or two, not "build the subsystem and test it"; five criteria are
-usually several tasks. `files` names specific paths, or stays empty.
+usually several tasks. Write it at the need's precision, as an outcome its owner
+could observe: a mechanism named there (a function, an order across unrelated
+actors, an exact instant) becomes a contract that every review enforces. `files`
+names specific paths, or stays empty.
 
 **No invented policy.** Could an implementer finish the task without inventing a
 material product rule? Record the needed behavior, actors, exceptions, units,
@@ -65,8 +66,6 @@ feature claimed as delivered; delivery tasks that need its answer depend on it.
 
 ## Commit progressively
 
-Resolve uncertainty before the commitment it could disrupt, not before all work.
-
 - **Commitment points** are where a wrong answer becomes expensive: persisted data
   shapes and migrations of user data, rules that move money or grant permission,
   public or cross-component interfaces, deploys and other outward effects, and
@@ -86,12 +85,13 @@ Resolve uncertainty before the commitment it could disrupt, not before all work.
   static mock or a probe's screenshot) in an `investigate` task that awaits their
   reaction, and record the accepted composition in its retained home. A row,
   line or control added to an accepted surface is a reversible choice, not an
-  unseen surface.
-- **Costly investigations.** An investigation that will take hours of work, large
-  simulations or extensive evidence is itself a commitment point. Before starting
-  it, ask the open human questions whose answers would change what it measures
-  (cadence, scale, which options), in one batch. If one stays unanswered, keep the
-  investigation small or label every result that depends on the assumption.
+  unseen surface. Where the policy names an approved style guide, a composition
+  that follows it is built as `proposed` and first shown at handoff.
+- **Costly investigations.** An investigation needing hours of work, large
+  simulations or extensive evidence is itself a commitment point. First ask, in one
+  batch, the open questions whose answers would change what it measures (cadence,
+  scale, options). If one stays unanswered, keep it small or label every result that
+  depends on the assumption.
 - **Ask through cases.** Show an ordinary case, a boundary, competing claims, and a
   failure or recovery, each with the outcome every option produces. Cover the rule
   across its whole lifecycle (completion, cancellation, early end, failure) in one
@@ -108,10 +108,10 @@ Resolve uncertainty before the commitment it could disrupt, not before all work.
 
 ## Discover ahead of delivery
 
-For a sequence, look for consequential unknowns across every open change, not only
-the next one. Rank them by the cost of learning late: how much later work depends
-on the answer, whether it shapes persisted data or a public interface, how long
-finding out takes, and the last point it can arrive without disrupting work.
+For a sequence, look for consequential unknowns across every open change. Rank them
+by the cost of learning late: how much later work depends on the answer, whether it
+shapes persisted data or a public interface, how long finding out takes, and the
+last point it can arrive without disrupting work.
 
 Give each one an `investigate` task in the change whose result depends on it.
 Investigations run before that change's predecessors pass, and starting one does
@@ -189,44 +189,47 @@ not goals.
 - **Credible failures.** Cover credible costly failures (data loss, wrong charges,
   privacy leaks) even unrequested. Credible means reachable through the system's real
   inputs: client requests, concurrency and retries, crashes and restarts, recovery
-  and operator commands. The product's own code writing outside its owner module is
-  not; structure checks and review cover it. A threat model in the project policy
-  decides when there is one. Expand for risk, observed failures or explicit
-  requirements; honor requested coverage targets without treating 100% as correctness.
+  and operator commands. Before release, Stage in `ow-core` narrows this to wrong
+  results in ordinary use and actions without authority. The product's own code
+  writing outside its owner module is never credible; structure checks and review
+  cover it. A threat model in the project policy decides when there is one. Honor
+  requested coverage targets without treating 100% as correctness.
 - **Test shared mechanisms once,** where they are implemented (locking, idempotent
-  retry, recovery, authorization). A feature that uses one gets one case showing it
-  is wired in, not its own matrix.
-- **Checks that add no evidence.** Flagship agents read and review code as well as
-  they write it, so a check earns its run time and context only by catching what
-  types, lint and an independent review cannot. Do not write tests that restate the
+  retry, recovery, authorization). Make one hard to skip: a wrapper every caller goes
+  through, with types or one static check failing a bypass. Its users then need no
+  case of their own; otherwise each gets one case showing it is wired in, not its
+  own matrix.
+- **Checks that add no evidence.** A check earns its run time and context only by
+  catching what types, lint and an independent review cannot. Do not write tests that restate the
   implementation, its constants or generated output; a case for every input variant
   where one accepted and one rejected case per rule suffice; tests of framework,
   library or generated-code behavior; guards or tests against the product's own code
-  bypassing its owner module; a regression test for a slip that types, lint or an
-  existing check now catches; or checks kept only as review evidence (run them,
+  bypassing its owner module; or checks kept only as review evidence (run them,
   record the result and delete them).
+- **A fixed defect earns no test by itself.** "So it cannot happen again" is not a
+  reason: most such tests guard a slip nobody will repeat, and every later run pays
+  for them. Remove the cause where structure can (a type, a constraint, one shared
+  helper). Add a test only when the same wrong result could return unnoticed and is
+  a credible failure, preferably as a case in an existing test.
 - **Link checks to needs:** a retained test protecting a need-level outcome mentions
   the need ID in its name, docstring or comment for `ow trace`; source and helpers
   stay untagged.
 - **Recompute worked examples once.** A rule doc's worked examples get one retained
   check that reads their inputs and expected results from the doc; a value it must
-  restate quotes the doc text, so editing either side fails it. Before product code
-  exists, keep it small and outside shipped code; adding it is implementation, not
-  investigation (`ow-core`). It protects no delivered outcome, so it names no need
-  IDs. Once product tests replay an example (Architecture rubric in `ow-align`),
-  drop its recomputation and keep only the quote check for values those tests
-  restate. Run it when the doc, its data or the checked code changes; assessments
-  and reviews cite its passing run at the current revision instead of recomputing by
-  hand.
+  restate quotes the doc text, so editing either side fails it. Keep it small,
+  outside shipped code and without need IDs; adding it is implementation, not
+  investigation. Once product tests replay an example (Architecture rubric in
+  `ow-align`), keep only the quote check. Reviews cite its passing run instead of
+  recomputing by hand.
 - **Fix the bar when planning.** Each task's acceptance names the checks that settle
   it, with commands and thresholds where running cost, timing or recovery matter.
   Reviews judge against them (Blocking findings in `ow-review`). Repeat a run only
   to settle a known-flaky result, and add mutation matrices or repeated full-suite
   runs only when the acceptance needs them.
 - Keep routine verification under five minutes and name any slower checks needed.
-  Delete temporary probes once their findings are preserved. A change that edits
-  code deletes or merges the tests there that protect no credible failure, with no
-  replacement.
+  A change that edits code deletes or merges the tests there that protect no
+  credible failure, with no replacement; a module whose test lines exceed its source
+  lines gets this look whenever it changes.
 - Iterate on layout against a fixture page that renders the real components over
   in-memory data, and run the slower end-to-end check last. Split a check whose
   single run exceeds the routine budget so its parts run in parallel, and set

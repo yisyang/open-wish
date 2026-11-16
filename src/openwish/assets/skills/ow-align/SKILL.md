@@ -24,10 +24,15 @@ Load `ow-core`, then read `openwish/policy.md` and the affected code and tests.
    tests or operational constraints.
 4. **Test against future constraints** (below) whenever the work creates or reshapes
    something hard to change later.
-5. **Write the working design** in the change's Approach: responsibilities and data
-   ownership, dependency direction, where effects happen, alternatives that matter,
-   and how each preserved constraint will be verified. Check the boundary against
-   Right-size delivery in `ow-propose`.
+5. **Write the working design** in the change's Approach: the decisions an
+   implementer could not read from the needs and the code (responsibilities and data
+   ownership, dependency direction, where effects happen, the alternatives that
+   matter). It records decisions, not the code in prose, and fits about a page
+   (`ow check` warns past a few). Detail precise enough to be code, such as a
+   schema, type or signature other work builds on, is written as that code in a
+   first task; the rest is the implementer's to design. A design that keeps growing
+   hides an undecided rule (ask) or a change to split (Right-size delivery in
+   `ow-propose`).
    - Greenfield: a conventional minimal layout and one representative end-to-end
      slice; add boundaries when behavior demands them.
    - Later asks: look for duplicated rules, scattered responsibilities and effects
@@ -72,8 +77,7 @@ answer choose one, and say which in the Approach:
 
 **Effects.** Prefer pure functions for decisions, validation, transformations and
 state transitions. Pass time, randomness, configuration and external results in
-explicitly. Keep I/O and mutation at identifiable boundaries. Do not wrap effects
-elaborately just to look functional.
+explicitly, and keep I/O and mutation at identifiable boundaries.
 
 **Orientation comments.** A module header states, in a line or two, what the module
 owns and any non-obvious rule or boundary. A README belongs only at major boundaries

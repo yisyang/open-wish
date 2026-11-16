@@ -26,8 +26,6 @@ relevant code and tests.
 6. **Continue** to `ow-align` and `ow-plan`. Preparing a plan needs no approval;
    plan-only requests stop after planning.
 
-If nothing needs to change, explain the existing outcome and stop.
-
 ## Right-size intent
 
 A need is one coherent valuable outcome, independent of mechanism and effort.
@@ -63,10 +61,10 @@ Keep needs true as the product is tuned and rebuilt, and readable after a break:
   An unsettled value does not block its mechanism: a placeholder labeled `proposed` in
   its home may back schemas, interfaces and test fixtures, never shipped behavior that
   depends on the value. Record the question in `open`.
-- **Guarantees, not mechanisms.** Acceptance states what the actor can rely on, not
-  how the system computes it. Formulas, evaluation order, rounding and precision,
-  scheduling and state handling are mechanism: the change's approach designs it, then
-  code and tests carry it. A rule doc keeps rules and values, each with its status
+- **Guarantees, not mechanisms.** Acceptance states what the actor can rely on in
+  use, not how the system computes it or which paths produce it. Formulas,
+  evaluation order, rounding and precision, scheduling, state handling and behavior
+  under failure are mechanism: code and tests carry it. A rule doc keeps rules and values, each with its status
   (Rule status below), and worked examples, never pseudo-code. For a ferry waitlist, "a
   released seat goes to the passenger who has waited longest" is a guarantee; how the
   queue is scanned and timed is mechanism.
@@ -135,11 +133,10 @@ start with one clinician's bookable calendar that a patient can book end to end,
 reminders, then multi-site staffing.
 
 Write tasks only for **ready** increments expected to start soon: their prerequisite
-capabilities exist in the repository and no material decision is open. For a
-resumable plan, record the rest as open changes with scope, prerequisites,
-uncertainties, exit evidence and empty task lists, and say their planning is
-incomplete. Give consequential unknowns `investigate` tasks now, even in changes
-that wait (Discover ahead of delivery in `ow-plan`). Name each change's
+capabilities exist in the repository and no material decision is open. Record the
+rest as open changes with scope, prerequisites, uncertainties, exit evidence and
+empty task lists. Give consequential unknowns `investigate` tasks now, even in
+changes that wait (Discover ahead of delivery in `ow-plan`). Name each change's
 predecessors with `--after`: the changes whose delivered results it builds on, not
 merely earlier ones. It is planned once they pass (Plan a candidate in `ow-plan`).
 Prerequisites describe capabilities to verify in code and tests, never another
@@ -150,23 +147,20 @@ blocked ones will need re-planning, then comply.
 order. Structure checks cannot see these gaps:
 
 - **Providers.** Each prerequisite states the behavior needed, its provider
-  (existing code, or a change this one comes after, directly or transitively) and
-  how its presence is verified. A capability that no predecessor delivers, or that
-  a predecessor defers, is a gap even when `after` is valid: add it to a change's
-  delivers now and repair `after`. Once a provider is disposed, the prerequisite
-  names the delivered code and checks instead.
+  (existing code, or a change this one comes after) and how its presence is
+  verified. A capability no predecessor delivers, or one a predecessor defers, is a
+  gap even when `after` is valid: add it to a change's delivers now and repair
+  `after`. Once a provider is disposed, the prerequisite names the delivered code.
 - **Destinations.** Each deferral names where the work goes: a change that lists it
-  in delivers now, or an unplanned open change. A deferral without a destination
-  drops the result.
-- **Coverage.** Every acceptance criterion of the needs the ask covers is already
-  met in code (with retained checks, though its change is gone), delivered by a
-  change, or held by an unplanned open change that says why it waits. A need or
-  criterion with none of these is an omission, not a
-  deferral: give it a change, or ask whether it should wait or be retired.
-
+  in delivers now, or an unplanned open change. Without one, the result is dropped.
+- **Coverage.** Every acceptance criterion of the needs the ask covers is met in
+  code with retained checks, delivered by a change, held by an unplanned open change
+  that says why it waits, or waiting for release (Stage in `ow-core`). One with none
+  of these is an omission: give it a change, or ask whether it should wait or be
+  retired.
 - **Pressure.** Foundational changes (data models, identities, money and permission
-  rules, public interfaces) come early, so check each against the later needs it
-  will have to carry (Future constraints in `ow-align`).
+  rules, public interfaces) come early; check each against the later needs it must
+  carry (Future constraints in `ow-align`).
 
 When new requirements arrive, ask these questions again. Repair tasks within the
 current boundary; scope separately acceptable additions as new changes (Reconcile
