@@ -53,9 +53,7 @@ overlap.
   broad bundles and drift before shortening prose. Keep every acceptance criterion,
   constraint and meaningful exception.
 - Clarity is valid compaction even when it adds words: apply Right-size intent's
-  sentence, calibration, mechanism, setup and `open` rules, and replace a rule
-  restated from a rule doc or another need with a link to its one home. A value
-  moved into a referenced rule is kept, not weakened.
+  rules, and replace a restated rule with a link to its one home.
 - Merging, splitting or retiring changes intent: get a decision (A/B/C) and
   keep stable IDs where possible. Check `ow graph --json` and
   `ow trace` and reconcile relations, change references and need IDs mentioned in
@@ -69,8 +67,6 @@ with no line cap. Each OW artifact, and each text doc a current need references,
 warns at 8,000, and a change's working design at 3,000: keep a rule doc to
 decisions, rules and worked examples, and move working design to the change that
 will deliver it; once delivered, code carries it.
-These cover retained knowledge, not your working context, which follows Keep context
-small in `ow-core`.
 
 **Tests.** Keep checks of lasting outcomes and consequential boundaries; delete
 those Strategic verification in `ow-plan` excludes; merge redundant or brittle tests

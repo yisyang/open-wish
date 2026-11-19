@@ -16,15 +16,18 @@ contributors; architecture is in [design.md](design.md).
   `confirmed_at` covers every acceptance criterion; undecided product questions and
   proposals wait in a need's `open` list, which status surfaces until they are decided
   and context marks not binding; engineering unknowns wait in the change that depends
-  on them. Rule docs tag each rule confirmed, approved-initial, inferred, engineering,
-  proposed or open. A choice users would notice that intent leaves open is proposed, never
+  on them. Rule docs tag each rule confirmed, inferred, engineering, proposed or open.
+  A choice users would notice that intent leaves open is proposed, never
   engineering, and results lead with such choices so the human can overrule them.
   Translation preserves material conditions, exceptions, units and consequences.
 - Needs stay true while the product is tuned and rebuilt: acceptance holds the
   guarantees actors rely on and structural rules in readable sentences. How a rule is
   computed is designed in the change, then carried by code and tests; referenced rule
   docs keep tagged rules, calibration and worked examples, and ordinary docs keep
-  setup. Each fact has one home that other artifacts link to, and a rule several needs
+  setup. Calibration (prices, rates, durations, thresholds) is the agent's to set and
+  retune without approval or tags, and tests read it from its home; humans fix the
+  needs and the product's core design. Work that replaces a design updates every need
+  and doc that described the old one, and review checks it. Each fact has one home that other artifacts link to, and a rule several needs
   depend on lives in one of them; a doc view generated from domain data and kept
   current by a check is not a second home. Needs never depend on files a fresh clone
   lacks.
@@ -106,9 +109,10 @@ contributors; architecture is in [design.md](design.md).
 - Workflow guidance is concise, with one owner per rule, so agents spend their context
   on the product rather than on the framework. Agents read only what each step needs
   and hand off to a fresh session rather than working in a very large one.
-- Reports use the human's vocabulary and answer their direct questions. Retained
-  records hold decisions and their homes, never run logs, resource names or session
-  details.
+- Reports use the human's vocabulary and answer their direct questions. Screens,
+  docs and reports carry only the facts and actions asked for. Retained records hold
+  decisions and their homes, never run logs, resource names or session details, and
+  no record, hash or audit trail stays that no need, rule or check reads.
 
 ## Implementation and verification
 
@@ -125,7 +129,8 @@ contributors; architecture is in [design.md](design.md).
 - Modules carry short responsibility headers and major boundaries a README; neither
   holds IDs, statuses or dates.
 - Prefer functional cores, effects at boundaries, cohesive modules and explicit
-  dependencies, assessed with an evidence-based architecture rubric.
+  dependencies, assessed with an evidence-based architecture rubric. Each kind of
+  content has one obvious home and one path, so structure guides new work.
 - Greenfield work starts with a minimal structure and an end-to-end slice. Brownfield
   onboarding proposes refactoring only when it earns its cost, with human approval.
 - A change's final review assesses every current need: linked and other affected

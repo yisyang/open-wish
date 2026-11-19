@@ -56,16 +56,18 @@ Keep needs true as the product is tuned and rebuilt, and readable after a break:
   (prices, rates, durations, thresholds) live once in code, domain data or a
   referenced doc (`references = [...]`). Would
   retuning the value after a pilot change what the human wants? If not, it is
-  calibration. A boundary's meaning (is day 14 late?) stays with its rule. State a
-  rule shared by several kinds once, with each kind's values in its table row.
-  An unsettled value does not block its mechanism: a placeholder labeled `proposed` in
-  its home may back schemas, interfaces and test fixtures, never shipped behavior that
-  depends on the value. Record the question in `open`.
+  calibration, and the agent sets it: choose, ship and retune values without
+  approval, a tag or a question, and report them in a line. A human fixes the needs
+  and the product's core design (its central loop and defining principles), not its
+  numbers, unless they ask to. A boundary's meaning (is day 14
+  late?) stays with its rule. State a rule shared by several kinds once, with each
+  kind's values in its table row.
 - **Guarantees, not mechanisms.** Acceptance states what the actor can rely on in
   use, not how the system computes it or which paths produce it. Formulas,
   evaluation order, rounding and precision, scheduling, state handling and behavior
-  under failure are mechanism: code and tests carry it. A rule doc keeps rules and values, each with its status
-  (Rule status below), and worked examples, never pseudo-code. For a ferry waitlist, "a
+  under failure are mechanism: code and tests carry it. A rule doc keeps rules, each
+  with its status (Rule status below), values and worked examples, never
+  pseudo-code. For a ferry waitlist, "a
   released seat goes to the passenger who has waited longest" is a guarantee; how the
   queue is scanned and timed is mechanism.
 - **Outcomes, not setup.** Hosts, tools, sibling repositories and test accounts
@@ -73,11 +75,10 @@ Keep needs true as the product is tuned and rebuilt, and readable after a break:
 - **Sentences.** One observable criterion per acceptance item, in plain sentences
   its owner understands without the change; no slash-lists or shorthand.
 - **Confirmed means all of it.** Undecided product questions and proposed criteria
-  go in `open`, one sentence each, and do not bind; engineering unknowns do not
-  (Where knowledge lives in `ow-core`). Raise open items an ask touches in the
-  clarifying questions; once decided, move each to its one home (a guarantee into
-  acceptance, a detailed rule or value into its rule doc, rationale into the body)
-  or drop it. Approving rule-doc content adds at most one criterion, stating the
+  go in `open`, one sentence each, and do not bind; engineering unknowns go in the
+  change. Raise open items an ask touches in the clarifying questions; once
+  decided, move each to its one home or drop it. Approving rule-doc content adds at
+  most one criterion, stating the
   guarantee and linking the doc. Moving unapproved items into `open`, or rewording
   without changing meaning, keeps `confirmed_at`.
 
@@ -85,23 +86,20 @@ Keep needs true as the product is tuned and rebuilt, and readable after a break:
 
 Needs carry status in `confirmed_at` and `open`. A rule doc marks it per section: an
 opening `**Status:**` line lists tags, optionally scoped (`confirmed rules,
-approved-initial values`), and a sentence, bullet or row that differs starts with
-`[tag]`.
+engineering layout`), and a sentence, bullet or row that differs starts with
+`[tag]`. Values carry no tag (Rules, not calibration).
 
 - `confirmed`: a human stated or approved it.
-- `approved-initial`: a human approved it as a starting value that evidence, such as
-  a pilot, is expected to retune.
 - `inferred`: read from delivered behavior or context; it binds like an unconfirmed
   need until a human confirms or changes it.
 - `engineering`: chosen within confirmed intent; it may change without a new decision
   while that intent holds. A choice users would notice that intent leaves open, such
-  as an input limit, displayed format, wording, layout or tunable value, is
-  `proposed` instead.
+  as an input limit, displayed format, wording or layout, is `proposed` instead.
 - `proposed`: assumed or recommended for undecided behavior; it stands in for a rule
   only as Commit progressively in `ow-plan` allows.
 - `open`: undecided; the question lives in a need's `open` list or an investigation.
 
-Only a recorded human decision makes a rule `confirmed` or `approved-initial`.
+Only a recorded human decision makes a rule `confirmed`.
 
 ## Right-size delivery
 

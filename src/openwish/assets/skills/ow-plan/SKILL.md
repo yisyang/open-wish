@@ -79,19 +79,15 @@ feature claimed as delivered; delivery tasks that need its answer depend on it.
   keep the question in `open`, and name it in the next report. An assumption stands
   in for a product rule only as a labeled placeholder; it never decides the rule,
   and it never reaches a commitment point.
-- **Unseen surfaces.** A screen, page or other layout people will work in that the
-  human has not seen is costly to learn late; approved components or styles do not
-  approve its composition. Before building it out, show a quick preview (sketch,
-  static mock or a probe's screenshot) in an `investigate` task that awaits their
-  reaction, and record the accepted composition in its retained home. A row,
-  line or control added to an accepted surface is a reversible choice, not an
-  unseen surface. Where the policy names an approved style guide, a composition
-  that follows it is built as `proposed` and first shown at handoff.
-- **Costly investigations.** An investigation needing hours of work, large
-  simulations or extensive evidence is itself a commitment point. First ask, in one
-  batch, the open questions whose answers would change what it measures (cadence,
-  scale, options). If one stays unanswered, keep it small or label every result that
-  depends on the assumption.
+- **Unseen surfaces.** A screen people will work in that the human has not seen is
+  costly to learn late. Before building it out, show a quick preview (sketch, static
+  mock or screenshot) in an `investigate` task that awaits their reaction, and
+  record the accepted composition. A control added to an accepted surface, or a
+  composition that follows the policy's approved style guide, is a reversible
+  choice shown at handoff.
+- **Costly investigations.** An investigation needing hours of work or large
+  simulations is a commitment point: first ask the questions that would change
+  what it measures.
 - **Ask through cases.** Show an ordinary case, a boundary, competing claims, and a
   failure or recovery, each with the outcome every option produces. Cover the rule
   across its whole lifecycle (completion, cancellation, early end, failure) in one
@@ -179,7 +175,8 @@ not goals.
 - Check at levels that add distinct evidence: a few need-level outcomes, important
   pure decisions and invariants, and consequential integration contracts.
 - Derive expected results from intent, not from the implementation. A harmless
-  refactor should leave tests passing; violating a need should fail one.
+  refactor or a retuned value should leave tests passing; violating a need should
+  fail one. Tests read calibration from its home rather than restating values.
 - **Settle outcomes, not alternatives.** A check that accepts several outcomes for
   one input, such as a race that may end either way, is evidence only when intent
   allows each of them. When they differ in money, rights or data, the rule is

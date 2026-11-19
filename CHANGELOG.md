@@ -2,6 +2,29 @@
 
 Release notes for OpenWish, newest first. Update this file for every release.
 
+## Unreleased
+
+From the game project's one-game refactor (2026-11-18/19): its needs and rule docs
+kept designs the refactor replaced, values awaited approval tags, and the same
+action had a separate path per map.
+
+### Changed
+
+- Calibration is the agent's to set (`ow-propose`): it chooses, ships and retunes
+  values without approval, a tag or a question, and reports them in a line. Humans fix
+  the needs and the product's core design. The `approved-initial` tag is retired;
+  values carry no tag, and tests read them from their home (`ow-plan`).
+- **Keep requirements current** (`ow-implement`): work that replaces a design rewrites
+  every need criterion and doc that described the old one, and review checks that
+  none still does (`ow-review`).
+- The Architecture rubric asks whether each kind of content has one obvious home and
+  one path (`ow-align`).
+- Write only what the reader needs, and keep no record, hash or audit trail that
+  nothing reads (`ow-core`). The coordinator fixes plans, instructions and
+  coordination, never product files (`ow-coordinate`).
+- Unseen surfaces, costly investigations, compaction and core's commit-progressively
+  pointer are shorter.
+
 ## v1.0.0rc6
 
 Sixth release candidate for v1.0.0; its CLI and skills report `1.0.0-rc.6`. The

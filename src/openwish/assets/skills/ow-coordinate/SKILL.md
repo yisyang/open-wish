@@ -47,8 +47,9 @@ integration and a record, never authority.
    go back to a worker, then to re-review. A
    correction or re-review may continue in its own session while that session stays
    small (Keep context small in `ow-core`). Keep your context for coordination:
-   corrections, including those the human asks for after the round, also go to
-   workers and reviewers.
+   you fix plans, instructions and coordination, never product files, and
+   corrections, including those the human asks for after the round, go to workers
+   and reviewers.
    - **Gate questions.** Answer a worker's question from needs, rule docs, recorded
      decisions or code when they settle it, and decide a reversible choice without
      asking (Reversible choices in `ow-plan`). An unseen surface found during the

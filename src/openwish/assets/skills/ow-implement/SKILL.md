@@ -46,6 +46,9 @@ change that covers the ask.
    approved unfinished detail in its retained home now. Note in the change where
    each material rule landed; the review's handoff will reuse it. Change notes hold
    decisions and their homes, not progress logs, run transcripts or failure history.
+   **Keep requirements current.** Work that replaces a design rewrites every need
+   criterion and doc that described the old one; changing a criterion's meaning
+   beyond the accepted design needs a decision.
    **Leave nothing temporary.** Before a task is done, delete what only it needed:
    probes, one-off scripts and fixtures, debug output, and checks written to
    diagnose a failure or to show a reviewer. What stays is used by the product, by

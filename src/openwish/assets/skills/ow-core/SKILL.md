@@ -83,7 +83,8 @@ elsewhere. A rule several needs depend on lives in the need whose outcome it
 serves; the others cite its ID. A large table or roster lives in domain data; a doc
 may show a view generated from it, which a check keeps current and which changes
 only through the data. Commit what durable knowledge depends on, or document how to
-obtain it. Reference secrets by location, never by value. Git holds history, so state
+obtain it, and keep no record, hash or audit trail that no need, rule or check
+reads. Reference secrets by location, never by value. Git holds history, so state
 current decisions without supersession notes.
 
 Needs hold no execution status: closing a change neither retires a need nor proves
@@ -104,12 +105,10 @@ instruction faithfully needs no second approval round.
   intent or scope changes need a real human decision.
 - `ow context` and `ow ready` report scheduling, not permission. Loading a skill
   grants nothing.
-- An open question or unsettled value blocks only the work whose result depends
-  on it; continue the rest.
-- **Commit progressively.** Settle uncertainty before the commitment it could
-  disrupt, not before all work: investigate early what would be costly to learn
-  late, hold hard-to-reverse commitments for their decisions, and let reversible
-  choices proceed on a recorded assumption (Commit progressively in `ow-plan`).
+- An open question blocks only the work whose result depends on it; continue the
+  rest.
+- **Commit progressively** (`ow-plan`): settle uncertainty before the commitment it
+  could disrupt, not before all work.
 - Ask only questions that can materially change the work. Use numbered questions
   with two or three A/B/C options, put `(Recommended)` before the preferred option,
   and state each option's effect.
@@ -117,6 +116,9 @@ instruction faithfully needs no second approval round.
   observed from assumptions and checks you did not run. Use the human's vocabulary:
   explain or drop internal terms, and answer their direct questions in the final
   report, not only in interim messages.
+- Write only what the reader needs. Screens, docs, comments and reports carry the
+  facts and actions asked for, with no restatement, reassurance, history or banner
+  for a state already shown.
 
 **Acceptance.** By default a human reviews managed results, then the agent runs
 `ow close C-001 --by human`. Explicit fast-forward delegates acceptance for one

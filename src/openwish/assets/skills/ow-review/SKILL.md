@@ -115,7 +115,8 @@ per-function matrix.
 - `unresolved`: anything missing; the review stays blocked.
 
 Read both directions: requirements → code and checks, and consequential code
-choices → the intent that justifies them. Copies of a rule the change added to
+choices → the intent that justifies them. No need or doc still describes a design
+the change replaced. Copies of a rule the change added to
 needs, READMEs or other changes become links (One home per fact in `ow-core`).
 Could a maintainer find, explain, verify and safely change this behavior with only
 the repository? The CLI checks that destinations exist, not what they say. In
