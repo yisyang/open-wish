@@ -24,6 +24,7 @@ those rather than a duplicated table here. Dependency direction:
 ```text
 cli ─→ views ─→ workflow ─→ handoff, trace, repository ─→ storage
    └─→ scaffold, integrations, context, sections, checks, budgets, validation ─→ model ─→ storage
+       integrations, context, validation ─→ presets ─→ storage
 ```
 
 `model.py` holds pure projections and scheduling; filesystem effects stay in
@@ -173,7 +174,11 @@ Eleven canonical skills are packaged once, with thin adapters for OpenCode, Clau
 Codex and generic Agent Skills. OW owns only what it installs as skills; everything
 under `openwish/` is the project's, including `policy.md`, which `ow init` writes once
 from a short starter. `ow-core` carries OW's policy and the artifact reference, which
-documents the CLI and so upgrades with it. `migrations.py` brings older schemas
+documents the CLI and so upgrades with it, and every preset under `presets/`; the
+project's `config.json` selects which ones agents read, and `ow context` lists them.
+`presets.py` holds the defaults a project may replace and parses the `Overrides:` line
+that presets and project policy share; `ow check` rejects unknown presets, two presets
+replacing one default, and policy overrides of anything else. `migrations.py` brings older schemas
 forward: for schema-4 projects it drops policy blocks and references whose digests
 match text OW shipped under schema 4 (`assets/migrations/schema-4.json`) and keeps
 and reports everything else; schema-5 projects need only the version bump. In

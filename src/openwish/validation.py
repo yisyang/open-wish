@@ -5,6 +5,7 @@ import re
 
 from .model import (CHANGE_STATES, CURRENCY, MODES, RELATIONS, SEQUENCE_GATES, TASK_KINDS, TASK_STATES,
                     topological_order)
+from .presets import preset_errors
 from .repository import repository_snapshot
 from .storage import SCHEMA_VERSION, WishError, contained, repository_file
 
@@ -76,6 +77,7 @@ def validate(project):
             "config: source_hard_limit must be a nonnegative integer (0 disables enforcement)")
     require(config.get("successors_wait_for", "review") in SEQUENCE_GATES,
             "config: successors_wait_for must be review or acceptance")
+    errors.extend(preset_errors(project))
     exceptions = config.get("code_exceptions")
     require(isinstance(exceptions, list), "config: code_exceptions must be an array")
     for exception in exceptions if isinstance(exceptions, list) else []:

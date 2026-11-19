@@ -186,10 +186,9 @@ not goals.
 - **Credible failures.** Cover credible costly failures (data loss, wrong charges,
   privacy leaks) even unrequested. Credible means reachable through the system's real
   inputs: client requests, concurrency and retries, crashes and restarts, recovery
-  and operator commands. Before release, Stage in `ow-core` narrows this to wrong
-  results in ordinary use and actions without authority. The product's own code
-  writing outside its owner module is never credible; structure checks and review
-  cover it. A threat model in the project policy decides when there is one. Honor
+  and operator commands, narrowed before release by the `prerelease` preset. The
+  product's own code writing outside its owner module is never credible; structure
+  checks and review cover it. A threat model in the project policy decides when there is one. Honor
   requested coverage targets without treating 100% as correctness.
 - **Test shared mechanisms once,** where they are implemented (locking, idempotent
   retry, recovery, authorization). Make one hard to skip: a wrapper every caller goes

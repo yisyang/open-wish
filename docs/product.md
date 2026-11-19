@@ -16,7 +16,8 @@ contributors; architecture is in [design.md](design.md).
   `confirmed_at` covers every acceptance criterion; undecided product questions and
   proposals wait in a need's `open` list, which status surfaces until they are decided
   and context marks not binding; engineering unknowns wait in the change that depends
-  on them. Rule docs tag each rule confirmed, inferred, engineering, proposed or open.
+  on them. Rule docs tag each rule confirmed, approved-initial, inferred, engineering, proposed
+  or open.
   A choice users would notice that intent leaves open is proposed, never
   engineering, and results lead with such choices so the human can overrule them.
   Translation preserves material conditions, exceptions, units and consequences.
@@ -24,10 +25,10 @@ contributors; architecture is in [design.md](design.md).
   guarantees actors rely on and structural rules in readable sentences. How a rule is
   computed is designed in the change, then carried by code and tests; referenced rule
   docs keep tagged rules, calibration and worked examples, and ordinary docs keep
-  setup. Calibration (prices, rates, durations, thresholds) is the agent's to set and
-  retune without approval or tags, and tests read it from its home; humans fix the
-  needs and the product's core design. Work that replaces a design updates every need
-  and doc that described the old one, and review checks it. Each fact has one home that other artifacts link to, and a rule several needs
+  setup. By default a human approves calibration (prices, rates, durations,
+  thresholds); tests read it from its home, so a retune breaks none. Work that
+  replaces a design updates every need and doc that described the old one, and review
+  checks it. Each fact has one home that other artifacts link to, and a rule several needs
   depend on lives in one of them; a doc view generated from domain data and kept
   current by a check is not a second home. Needs never depend on files a fresh clone
   lacks.
@@ -174,11 +175,18 @@ contributors; architecture is in [design.md](design.md).
 - Python 3.11+, no third-party runtime dependencies, no model API calls.
 - Published as `openwish` with identical `ow` and `openwish` commands; package, module
   and bundled skill versions advance together.
-- Eleven canonical skills with thin OpenCode, Claude Code, Codex and generic adapters;
+- Eleven canonical skills, plus presets shipped beside `ow-core`, with thin OpenCode, Claude Code, Codex and generic adapters;
   interactive and explicit harness selection; preserving, version-aware reinstall.
 - Ownership is by location: OW owns what it installs as skills, including its policy
   and artifact reference in `ow-core`; everything under `openwish/` is the project's.
-  Project policy adds to OW's rules and overrides one only by naming it.
+  Project policy adds to OW's rules.
+- Projects tailor OW only at named defaults (stage, calibration, verification): with
+  presets that OW ships and the config selects, such as `prerelease` and
+  `game-balance`, or with a policy section that names the default it overrides.
+  `ow check` rejects any other override. Current needs, independent review, human
+  authority over intent, one home per fact and honest reports hold in every project.
+  OW's own evaluations run without presets, and each preset has scenarios with and
+  without it, so a preset cannot lower the default framework's quality.
 - Upgrades keep existing projects working: artifact format changes ship with a
   migration that `ow init` applies after preflighting the whole project. Projects on
   an older schema are told to run `ow init`; unknown schemas are rejected before any

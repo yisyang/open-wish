@@ -220,7 +220,8 @@ files.
 
 `config.json`: `version: 6`, `product`, `needs_token_budget` (default 24000, a soft
 target that warns at 80%), `source_hard_limit` (default 0 = off),
-`successors_wait_for` (`review`, the default, or `acceptance`), and
+`successors_wait_for` (`review`, the default, or `acceptance`), `presets` (Presets
+and overrides in `ow-core`), and
 `code_exceptions` (each with exact `path`, `kind` of `data`, `low-complexity` or
 `generated`, and `reason`). OW artifacts warn at 8,000 estimated tokens (UTF-8
 bytes/3); a change's working design (its files other than `tasks.json` and

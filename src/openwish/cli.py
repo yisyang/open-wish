@@ -256,6 +256,10 @@ def run(args):
             lines += readiness_lines(work["ready"], work["waiting"], work["unplanned"])
             lines += ["WARN " + warning for warning in work["warnings"]]
             print("\n# Work (readiness is not permission)\n" + ("\n".join(lines) or "No changes."))
+            presets = data.pop("presets")
+            if presets:
+                print("\n# Presets (read each; it replaces the OW defaults it names)\n" + "\n".join(
+                    f"{row['name']}: {row['path']} replaces {', '.join(row['overrides'])}" for row in presets))
             print("\n# Retrieval manifest and estimated size\n" + json.dumps(data, indent=2, ensure_ascii=False))
     elif args.command == "ready":
         ready, waiting = ready_tasks(project, args.selection)

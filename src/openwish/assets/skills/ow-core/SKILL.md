@@ -20,8 +20,7 @@ reviews. Humans review the results.
 
 Default to one product/domain per repository, including a monorepo. This skill is
 OW's and upgrades replace it. Also read the project's `openwish/policy.md`, which OW
-never edits: its rules add to these, and one that departs from an OW rule names the
-rule it overrides.
+never edits: its rules add to these (Presets and overrides).
 
 ## Adoption and proportion
 
@@ -32,17 +31,6 @@ Every product change recovers current intent (`ow context`), reconciles the ask
 with it, clarifies only what could change the work, designs with the Architecture
 rubric, verifies and reviews, in proportion to the ask: a typo needs a glance.
 Direct or managed delivery changes what is recorded, not the care taken.
-
-**Stage.** Rigor follows what a failure would cost today. The project policy states
-the product's stage; without one, treat it as released. Before first release nobody
-depends on the product or its data, and its features still change. The policy names
-the qualities that wait for release, typically recovery from crashes and retries,
-behavior under concurrent use, upgrades of stored data, abuse and scale. A waiting
-quality comes from shared mechanisms or not yet at all: no change builds, checks or
-reviews it feature by feature, and a finding about it is an observation. An
-acceptance criterion that binds only from release says so (`From release: …`).
-Until then it constrains only a choice that would be costly to reverse afterwards
-(Commit progressively in `ow-plan`).
 
 **Direct delivery** fits one coherent result finished and verified in this session,
 with no material open decision, nothing deferred, and no active change covering
@@ -138,9 +126,8 @@ their predecessors pass review (or are accepted, if `successors_wait_for` is
   line to cite; a check that fails and then passes on a rerun (`--attempts`) is
   `FLAKY`, never a pass. A run recorded at the reviewed revision serves the reviewer
   too: rerun only what is missing, stale or in doubt. Write no narrative evidence,
-  summary files or provenance machinery (hash manifests, archived copies, wrappers
-  around checks) unless a result's integrity is genuinely in question. Keep cited
-  logs where they survive a restart.
+  summaries or provenance machinery (One home per fact) unless a result's integrity
+  is genuinely in question. Keep cited logs where they survive a restart.
 - **Keep context small.** Every step rereads the session's whole context, so a long
   session works several times slower than a fresh one. Read only what the step needs:
   batch independent reads and searches, read a log's failing excerpt, and leave large
@@ -153,6 +140,23 @@ their predecessors pass review (or are accepted, if `successors_wait_for` is
   `#opening-hours` prints one. Past about 200k tokens, hand off to a fresh
   session with a short summary of state, evidence and next step. A session rarely
   sees its own size, so whoever starts or resumes it checks first.
+
+## Presets and overrides
+
+Projects change OW only at these defaults. `presets` in `openwish/config.json`
+selects OW presets; read each one `ow context` lists, in `presets/` beside this
+skill. A policy section may replace a default itself by opening with
+``Overrides: `stage` ``. `ow check` rejects unknown presets and overrides.
+
+| Default | Owner | Without a preset |
+| --- | --- | --- |
+| `stage` | This table | The product is released; every quality binds now. |
+| `calibration` | Rule status in `ow-propose` | A human approves each tunable value. |
+| `verification` | Strategic verification in `ow-plan` | As written there. |
+
+Nothing overrides the rest: current needs bind, consequential results get
+independent review, humans decide intent, scope and acceptance unless they delegate,
+each fact has one home, and reports say what ran and what did not.
 
 ## Skill map
 

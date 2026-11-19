@@ -3,6 +3,7 @@
 from .budgets import check_budgets
 from .model import (estimate_tokens, need_graph, needs_context, ready_tasks, review_needs, select_changes,
                     unplanned_changes)
+from .presets import preset_rows
 from .storage import WishError
 from .validation import knowledge_warnings
 from .views import change_rows, lazy_snapshot
@@ -67,6 +68,7 @@ def context_data(project, keys=(), linked=False):
     note = ("Linked and related needs are complete; other current needs are listed by title and still bind. "
             if linked else "All current needs are included. ")
     return {"needs": needs, "needs_scope": "linked" if linked else "all", "work": work_data(project, keys),
+            "presets": preset_rows(project["config"]),
             "changes": [{"id": cid, "needs": project["changes"][cid]["meta"]["needs"],
                          "review_needs": review_needs(project, cid)} for cid in selected],
             "retrieve": list(retrieve.values()), "estimated_tokens": estimates,

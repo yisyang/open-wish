@@ -4,6 +4,7 @@ from importlib.resources import files
 import json
 
 from . import __version__
+from .presets import available_presets
 from .storage import WishError, contained, read_json, write_json, write_text
 from .versions import declared_version, stamp, version_key
 
@@ -73,6 +74,10 @@ def integration_files(harnesses, version):
                 # The artifact reference documents this CLI, so it ships and upgrades with it.
                 outputs[f"{directory}/skills/ow-core/artifacts.md"] = stamp(
                     asset("skills/ow-core/artifacts.md"), version)
+                # Every preset ships; the project's config selects which ones agents read.
+                for preset in available_presets():
+                    outputs[f"{directory}/skills/ow-core/presets/{preset}.md"] = stamp(
+                        asset(f"skills/ow-core/presets/{preset}.md"), version)
                 continue
             if harness == "opencode":
                 prompt = (f"Follow the ow-{skill} skill in this project. "

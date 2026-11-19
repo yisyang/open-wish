@@ -242,13 +242,13 @@
       "name": "large-modernization-delivery-boundaries",
       "skills": ["ow-onboard", "ow-propose", "ow-align", "ow-plan"],
       "prompt": "The human asks: Use OW to prepare a resumable modernization plan from the supplied assessment and draft. I want the complete direction visible and a useful next step. Planning only; do not build the game yet. Inspect evals/fixtures/modernization/README.md, then save response.md with your assessment of the draft, proposed working-record actions, delivery sequence, and a concrete task plan for the next executable increment. Do not modify the source fixture or initialize OW in this checkout. You may write only your response in the assigned output directory. Distinguish supplied observations from any checks you perform.",
-      "expected_output": "Identify hidden subsystem-sized tasks despite a short pilot checklist. Preserve the current needs and constraints; propose independently reviewable increments with scoped contributions and exit evidence, integrated representative behavior early, and prerequisite capabilities. Write tasks only for work that is ready now (prerequisites present, its result not depending on an open material decision), record the sequence with change-level after predecessors, and keep later work in lightweight open changes with empty task lists for resumability. Stop at planning without invented verification.",
+      "expected_output": "Identify hidden subsystem-sized tasks despite a short pilot checklist. Preserve the current needs and constraints; propose independently reviewable increments with scoped contributions and exit evidence, integrated representative behavior early, and prerequisite capabilities. Write tasks only for work that is ready now (prerequisites present, its result not depending on an open material decision or unsettled value unless a labeled placeholder is recorded as open), record the sequence with change-level after predecessors, and keep later work in lightweight open changes with empty task lists for resumability. Stop at planning without invented verification.",
       "files": ["evals/fixtures/modernization/README.md"],
       "assertions": [
         "Explains why the pilot and at least two existing tasks conceal substantial separately reviewable work, rather than judging only the number of needs or tasks.",
         "Proposes multiple increments with observable outcomes and exit evidence that can be accepted while later work is postponed; does not simply rename the original program as a parent implementation change.",
         "Integrates a representative user path early instead of leaving all usable UI and integration until all backend subsystems exist; enabling work proves a concrete capability.",
-        "Details concrete verifiable tasks only for work that is ready now, never tasking work whose result depends on an open material decision, preserves exact/retry-safe state and isolation when applicable, and explicitly defers later portions of needs without retiring or weakening them.",
+        "Details concrete verifiable tasks only for work that is ready now, never tasking work that depends on an unresolved owner value without a labeled placeholder recorded as open, preserves exact/retry-safe state and isolation when applicable, and explicitly defers later portions of needs without retiring or weakening them.",
         "Keeps future obligations discoverable in concise open changes with empty task lists, links each to the needs it advances rather than every constraining need, uses change-level after predecessors, verifies prerequisite capabilities from delivered code/tests before planning them, and avoids task links across changes or a parent change containing the whole program.",
         "Honors plan-only scope and attributes fixture observations honestly without claiming implementation, checks, or acceptance occurred."
       ]
@@ -537,6 +537,35 @@
         "Leads the report with the 30-character stall-name limit as a proposed choice the organizer can overrule, and keeps C-004's closed records until the organizer responds.",
         "Plans close-out: update default branches, remove worktrees and branches only after confirming their content is integrated, and remove disposable resources.",
         "Makes no claim that reviews, checks, merges or the organizer's responses occurred."
+      ]
+    },
+    {
+      "id": 35,
+      "name": "game-balance-preset-agent-sets-values",
+      "skills": ["ow-core", "ow-propose", "ow-plan", "ow-review"],
+      "prompt": "Dry-run only; save response.md. A city-building game uses OW. Its openwish/config.json selects the game-balance preset, and its policy names the core design: build, produce, sell at a price the player sets against demand, then expand. The human asks for a sawmill that turns logs into planks. Comparable buildings cost $250,000 to $2M to build and the player starts with $1M. A worker's draft gives the sawmill a build cost of $25, an upkeep of $40,000 per day and an output of 3 planks per day, tags each value proposed and adds an open question asking the human to approve them. Review the draft and give your next actions and any record changes.",
+      "expected_output": "Apply the selected game-balance preset: the agent sets the sawmill's numbers itself, with no approval question, no open item and no status tag on the values, and reports them in a line with their home. It catches the $25 build cost as a defect by comparing it with similar buildings and starting cash, and checks the other values the same way. The human keeps the needs and the core design: no retune removes the price-versus-demand trade-off. Tests read the values from their home.",
+      "files": [],
+      "assertions": [
+        "Reads and applies the game-balance preset rather than the default human-approval rule, and removes the approval question and the per-value proposed tags.",
+        "Flags the $25 build cost (and any other value far from comparable buildings or starting cash) as a defect and picks a value that makes sense in play, without asking the human.",
+        "Reports each chosen or changed value in one line with where it lives.",
+        "Leaves the needs and the core design unchanged and does not treat them as tunable.",
+        "Does not claim a retune or check already ran."
+      ]
+    },
+    {
+      "id": 36,
+      "name": "no-preset-keeps-human-value-approval",
+      "skills": ["ow-core", "ow-propose", "ow-plan"],
+      "prompt": "Dry-run only; save response.md. A clinic booking product uses OW with no presets in openwish/config.json. The human asks for a late-cancellation fee. Nothing says what the fee is or when a cancellation counts as late. Plan the work and give any record changes.",
+      "expected_output": "Without a preset the default holds: a human approves tunable values. The fee amount and the lateness boundary are not invented as settled: the agent asks one numbered question set with a recommended option, or proceeds only on a labeled proposed placeholder recorded in the need's open list that backs schemas and fixtures but no shipped charge. The boundary's meaning (is the cut-off itself late?) stays with its rule. The game-balance preset is not applied.",
+      "files": [],
+      "assertions": [
+        "Does not ship a fee amount as decided without a human decision; any placeholder is labeled proposed and recorded in open.",
+        "Asks about the fee and the lateness boundary through cases with a recommended option, in one batch.",
+        "Does not apply the game-balance preset or claim agents may set the fee freely.",
+        "Keeps planning work that does not depend on the value moving."
       ]
     }
   ]

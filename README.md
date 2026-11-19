@@ -100,6 +100,15 @@ See [Workflows](docs/workflows.md) for onboarding, large work and the change lif
 | Non-obvious rationale, environments and setup | Nearby comments or ordinary docs |
 | Working design, tasks, latest review | `openwish/changes/C-001/` (deleted after acceptance) |
 | Project rules, engineering-requirements link, review lessons | `openwish/policy.md` (the project's; OW never edits it) |
+| Presets the project selects | `presets` in `openwish/config.json` |
+
+**Presets.** A project tailors OW only at named defaults. `"presets":
+["prerelease", "game-balance"]` in `openwish/config.json` selects presets OW ships
+beside `ow-core`: `prerelease` lets qualities such as crash recovery wait for release,
+and `game-balance` lets agents set and retune numbers that exist to be tuned while
+humans keep the needs and core design. A policy section may also replace a default by
+opening with ``Overrides: `verification` ``; `ow check` rejects overrides of anything
+else.
 
 Needs have no execution status; closing a change does not retire a need or claim it
 is complete. `confirmed_at` records that a human confirmed every acceptance criterion;

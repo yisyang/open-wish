@@ -6,24 +6,44 @@ Release notes for OpenWish, newest first. Update this file for every release.
 
 From the game project's one-game refactor (2026-11-18/19): its needs and rule docs
 kept designs the refactor replaced, values awaited approval tags, and the same
-action had a separate path per map.
+action had a separate path per map. Its fixes stay general: game-specific rules
+became a preset instead of OW defaults.
+
+### Added
+
+- **Presets** (`ow-core`, Presets and overrides): a project tailors OW only at named
+  defaults (`stage`, `calibration`, `verification`). `presets` in
+  `openwish/config.json` selects presets shipped beside `ow-core`, and `ow context`
+  lists them. A policy section may replace a listed default by opening with
+  ``Overrides: `name` ``; `ow check` rejects unknown presets, two presets replacing
+  one default, and policy overrides of anything else. Current needs, independent
+  review, human authority over intent, one home per fact and honest reports hold in
+  every project.
+- `prerelease` preset: the stage rule that rc.6 kept in `ow-core`. Before release,
+  the policy's waiting qualities are observations and credible failures narrow to
+  ordinary use and authority.
+- `game-balance` preset: agents set and retune tunable values without approval, tags
+  or questions, report them in a line, and check each against comparable values so it
+  makes sense in play. Needs, rule meaning, core design and scope stay human.
+- Evals 35 and 36: the game-balance preset applied, and the human-approval default
+  kept without it.
 
 ### Changed
 
-- Calibration is the agent's to set (`ow-propose`): it chooses, ships and retunes
-  values without approval, a tag or a question, and reports them in a line. Humans fix
-  the needs and the product's core design. The `approved-initial` tag is retired;
-  values carry no tag, and tests read them from their home (`ow-plan`).
+- **Stage moved to the `prerelease` preset.** A project whose policy states a stage
+  selects it in `config.json` (`"presets": ["prerelease"]`); without it the product
+  is treated as released.
 - **Keep requirements current** (`ow-implement`): work that replaces a design rewrites
   every need criterion and doc that described the old one, and review checks that
   none still does (`ow-review`).
 - The Architecture rubric asks whether each kind of content has one obvious home and
   one path (`ow-align`).
+- Tests read calibration from its home, so a retune breaks none (`ow-plan`).
 - Write only what the reader needs, and keep no record, hash or audit trail that
   nothing reads (`ow-core`). The coordinator fixes plans, instructions and
   coordination, never product files (`ow-coordinate`).
-- Unseen surfaces, costly investigations, compaction and core's commit-progressively
-  pointer are shorter.
+- Unseen surfaces, costly investigations, compaction, evidence and core's
+  commit-progressively pointer are shorter.
 
 ## v1.0.0rc6
 

@@ -32,7 +32,7 @@ def initialize(root, harnesses="generic", *, confirm_downgrade=None):
     for relative, content in outputs.items():
         write_text(contained(root, relative), content, create=True)
     write_json(config, {"version": SCHEMA_VERSION, "product": root.name, "needs_token_budget": 24000,
-                        "source_hard_limit": 0, "successors_wait_for": "review", "code_exceptions": []},
+                        "source_hard_limit": 0, "successors_wait_for": "review", "presets": [], "code_exceptions": []},
                create=True)
     return {"root": root, "initialized": True, "migration": None, **report}
 

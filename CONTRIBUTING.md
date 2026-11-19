@@ -40,6 +40,10 @@ For an installed executable, use a virtual environment and `python -m pip instal
 - Shipped guidance has a word budget (`tests/test_guidance.py`). A new rule replaces
   or merges an old one. Lower a ceiling whenever guidance shrinks; raise one only with
   the reason stated in the changelog.
+- A preset (`src/openwish/assets/skills/ow-core/presets/`) replaces only defaults
+  listed in `presets.py`, names them on its `Overrides:` line and ships with eval
+  scenarios run with and without it. Add a default only when a real project must
+  change it and the framework stays sound either way.
 - Keep workflow overhead proportional to the work. Test routine changes without
   creating OW records to manage the contribution.
 - For skill changes, run the executable scenarios with both arms
@@ -72,7 +76,8 @@ or adapters change so installations can receive the update.
 
 Publish from the source checkout only after tests and a wheel-install smoke test
 pass. Check package data contains the project-policy starter, the schema-4 migration
-digests and all eleven skills, including `ow-core` with its artifact reference.
+digests and all eleven skills, including `ow-core` with its artifact reference and
+presets.
 
 ## Releases
 

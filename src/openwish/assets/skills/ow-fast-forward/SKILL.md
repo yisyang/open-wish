@@ -24,8 +24,8 @@ Use only after explicit delegation; loading this skill grants nothing. Load
    then present only genuine blockers (conflicting intent, missing access, manual
    observations) as A/B/C questions.
 5. **Stay honest.** Never invent checks, mark manual work done, set
-   `confirmed_at` on inferred needs, or tag a rule `confirmed`. After a fresh
-   passing review: `ow close C-001 --by fast-forward`; dispose via `ow-consolidate`
-   once the human has seen the result.
+   `confirmed_at` on inferred needs, or tag a rule `confirmed` or
+   `approved-initial`. After a fresh passing review: `ow close C-001 --by
+   fast-forward`; dispose via `ow-consolidate` once the human has seen the result.
 6. **Report as in `ow-review` step 7**, including the choices made on the human's
    behalf, and attribute acceptance to delegation rather than human review.

@@ -81,7 +81,7 @@ Load `ow-core`, then read `openwish/policy.md` and the actual diff.
   inputs that produce it through real entry points; an unproven absence of failure
   is not a finding. Acceptance or approach wording stricter
   than its need is corrected in the record, not built. A gap reachable only through
-  a non-credible path or a waiting quality (Stage in `ow-core`), contention a shared
+  a non-credible path or a waiting quality (`prerelease` preset), contention a shared
   retry resolves, a check Strategic verification excludes, and check style,
   harnesses, evidence format and wording are observations and add no check.
 - **Pre-existing failures.** A check that fails the same way on the base revision is
@@ -100,9 +100,8 @@ Load `ow-core`, then read `openwish/policy.md` and the actual diff.
 ## Safe to forget
 
 Before passing, every material requirement or decision this change introduced has
-a retained home and evidence, so nobody needs the change or conversation later.
-Group related rules and reuse task evidence; this is a short assessment, not a
-per-function matrix.
+a retained home and evidence, so nobody needs the change or conversation later. Keep
+it short: group related rules and reuse task evidence.
 
 - `implemented`: behavior in product files, with independently expected checks or
   a repeatable manual procedure.
