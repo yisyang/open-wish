@@ -44,6 +44,10 @@ became a preset instead of OW defaults.
   coordination, never product files (`ow-coordinate`).
 - Unseen surfaces, costly investigations, compaction, evidence and core's
   commit-progressively pointer are shorter.
+- A published integration is ready to release only once its CI passes, and the
+  integration target is never merged back into a worker's branch, which would hide
+  the change's own diff from its review (`ow-coordinate`; the game project's round
+  39 marked a release ready before CI failed, and back-merged task branches).
 
 ## v1.0.0rc6
 

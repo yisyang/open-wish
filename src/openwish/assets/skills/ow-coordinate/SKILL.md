@@ -21,7 +21,7 @@ integration and a record, never authority.
 2. **Keep one round record** outside the repository: the human's brief verbatim,
    agreed scope and authority, bases, integration order and decisions. Read
    sessions, worktrees, branches, task states and check results from their own
-   stores instead of copying them into the record, where copies go stale. Re-read
+   stores; copies in the record go stale. Re-read
    the record and brief after compaction, interruption or resumption; never ask the
    human to resend them. Keep the round's evidence where it survives a restart, and
    restart nothing its sessions depend on until the record says the round is
@@ -58,9 +58,10 @@ integration and a record, never authority.
      one question with its cases, while work that does not depend on it continues.
 5. **Integrate one change at a time** on an integration branch: reconcile it with
    the current target, rerun affected checks, commit component revisions and their
-   pins, record or refresh the review (`ow-review`), then publish. Hold effects that
-   could disturb running checks (deploys, restarts, large transfers on a shared host)
-   until those checks finish.
+   pins, record or refresh the review (`ow-review`), then publish; it is ready to
+   release once its CI passes. Never merge the target into a worker's branch. Hold
+   effects that could disturb running checks (deploys, restarts, large transfers on
+   a shared host) until those checks finish.
 6. **Report and close out.** Report each change as in `ow-review` step 7, choices
    made on the human's behalf first. Closed changes wait for the human's response
    (Dispose closed changes in `ow-consolidate`). Once integrated work is published,

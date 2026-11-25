@@ -76,9 +76,9 @@ feature claimed as delivered; delivery tasks that need its answer depend on it.
   stored data, published contract or outward effect to migrate. Ask with a
   recommended option. If work reaches the choice unanswered, proceed on the
   recommendation: label it `proposed` in its home (Rule status in `ow-propose`),
-  keep the question in `open`, and name it in the next report. An assumption stands
-  in for a product rule only as a labeled placeholder; it never decides the rule,
-  and it never reaches a commitment point.
+  keep the question in `open`, and name it in the next report. An assumption is
+  only a labeled placeholder: it never decides the rule or reaches a commitment
+  point.
 - **Unseen surfaces.** A screen people will work in that the human has not seen is
   costly to learn late. Before building it out, show a quick preview (sketch, static
   mock or screenshot) in an `investigate` task that awaits their reaction, and
@@ -139,7 +139,7 @@ When direct work needs coordination (`ow-core`), create one change for the whole
 requested result, not only the remainder:
 
 1. Write scope, approach and exit evidence from the repository as it now is, not
-   as a history of the session.
+   as session history.
 2. Record completed work as done tasks only with direct evidence, carrying its
    checks forward; do not redo verified work.
 3. Add the remaining work as open, blocked or manual tasks, and new questions to
