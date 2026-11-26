@@ -30,6 +30,18 @@ became a preset instead of OW defaults.
 
 ### Changed
 
+- **Tests run by what changed** (game project, 2026-11-26): Strategic verification in
+  `ow-plan` runs the tests of the touched files, using a related-tests mode where the
+  runner has one, and widens to a module or suite only for shared code, setup,
+  configuration, dependencies or a public contract. Each check runs once, and
+  acceptance never asks for repeated runs, mutation matrices or case grids.
+- **Blockers stay failures** (`ow-review`): a missing test blocks only when the
+  acceptance names it. A blocker names one focused check, not a settling procedure.
+  Runs are judged by their recorded status, and an error line in a passing run's log
+  is an observation. A stale review records again with the latest run and reviews
+  only what changed. `ow-core` evidence reruns only what is missing or stale, and the
+  project policy says whether `FLAKY` blocks.
+
 - **Stage moved to the `prerelease` preset.** A project whose policy states a stage
   selects it in `config.json` (`"presets": ["prerelease"]`); without it the product
   is treated as released.

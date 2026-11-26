@@ -170,8 +170,14 @@ Choose the smallest set of fast, independent checks that protects the affected
 needs and the failures that would matter. Test count and coverage percentage are
 not goals.
 
-- Ask what important behavior could break, which checks already protect it, what
-  smallest check closes a real gap, and what stays unverified.
+- **Run what the change touches.** Run the tests of the files a change touched, with
+  the runner's related-tests mode where it has one, which also selects the tests of
+  code that imports them. Run a whole module or suite only when shared code, test
+  setup, configuration, dependencies or a public contract changes, and once before
+  release. Each check runs once; rerun it only after a change that could alter its
+  result.
+- Ask what important behavior could break, which checks already protect it, and
+  what stays unverified.
 - Check at levels that add distinct evidence: a few need-level outcomes, important
   pure decisions and invariants, and consequential integration contracts.
 - Derive expected results from intent, not from the implementation. A harmless
@@ -184,24 +190,22 @@ not goals.
 - Avoid asserting incidental wording, layout, helper names or private call order.
   Assert exact text, schema or layout narrowly when it is a real contract.
 - **Credible failures.** Cover credible costly failures (data loss, wrong charges,
-  privacy leaks) even unrequested. Credible means reachable through the system's real
-  inputs: client requests, concurrency and retries, crashes and restarts, recovery
-  and operator commands, narrowed before release by the `prerelease` preset. The
-  product's own code writing outside its owner module is never credible; structure
-  checks and review cover it. A threat model in the project policy decides when there is one. Honor
-  requested coverage targets without treating 100% as correctness.
+  privacy leaks) even unrequested: those reachable through real inputs such as
+  requests, concurrency, retries, crashes and operator commands, narrowed before
+  release by the `prerelease` preset. The product's own code writing outside its
+  owner module is never credible. A threat model in the project policy decides when
+  there is one. A coverage target is not correctness.
 - **Test shared mechanisms once,** where they are implemented (locking, idempotent
   retry, recovery, authorization). Make one hard to skip: a wrapper every caller goes
   through, with types or one static check failing a bypass. Its users then need no
   case of their own; otherwise each gets one case showing it is wired in, not its
   own matrix.
-- **Checks that add no evidence.** A check earns its run time and context only by
-  catching what types, lint and an independent review cannot. Do not write tests that restate the
-  implementation, its constants or generated output; a case for every input variant
-  where one accepted and one rejected case per rule suffice; tests of framework,
-  library or generated-code behavior; guards or tests against the product's own code
-  bypassing its owner module; or checks kept only as review evidence (run them,
-  record the result and delete them).
+- **Checks that add no evidence.** A check earns its run time only by catching what
+  types, lint and review cannot. Do not write tests that restate the implementation,
+  its constants or generated output; a case for every input variant where one
+  accepted and one rejected case per rule suffice; tests of framework, library or
+  generated-code behavior; guards against the product's own code bypassing its owner
+  module; or checks kept only as review evidence.
 - **A fixed defect earns no test by itself.** "So it cannot happen again" is not a
   reason: most such tests guard a slip nobody will repeat, and every later run pays
   for them. Remove the cause where structure can (a type, a constraint, one shared
@@ -219,13 +223,12 @@ not goals.
   recomputing by hand.
 - **Fix the bar when planning.** Each task's acceptance names the checks that settle
   it, with commands and thresholds where running cost, timing or recovery matter.
-  Reviews judge against them (Blocking findings in `ow-review`). Repeat a run only
-  to settle a known-flaky result, and add mutation matrices or repeated full-suite
-  runs only when the acceptance needs them.
+  Reviews judge against them (Blocking findings in `ow-review`). Acceptance asks for
+  each check to pass once, never for repeated runs, mutation matrices or grids of
+  cases.
 - Keep routine verification under five minutes and name any slower checks needed.
   A change that edits code deletes or merges the tests there that protect no
-  credible failure, with no replacement; a module whose test lines exceed its source
-  lines gets this look whenever it changes.
+  credible failure.
 - Iterate on layout against a fixture page that renders the real components over
   in-memory data, and run the slower end-to-end check last. Split a check whose
   single run exceeds the routine budget so its parts run in parallel, and set

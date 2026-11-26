@@ -28,13 +28,11 @@ Load `ow-core`, then read `openwish/policy.md` and the actual diff.
    - **Engineering requirements** the project policy links: check the diff against them.
    Compare results with delivers-now scope and exit evidence, not ticked tasks.
 2. **Judge the checks** (Strategic verification in `ow-plan`): would they catch a
-   need violation, survive a harmless refactor, and test intent rather than repeat
-   the code's own logic, and settle one outcome where outcomes differ in money,
-   rights or data? Ask what plausible wrong implementation would still pass through
-   a credible failure, and what is the strongest plausible reason the result would
-   fail in real use; check it, or report it as a limitation. Checks that add no
-   evidence, and anything temporary left behind (Leave nothing temporary in
-   `ow-implement`), are findings to remove, not gaps to fill.
+   need violation and survive a harmless refactor? Ask what would most plausibly fail
+   in real use; check it, or report it as a limitation. Judge a run by its recorded
+   status, and read its log only to explain a failure. Checks that add no evidence,
+   and anything temporary left behind (Leave nothing temporary in `ow-implement`),
+   are findings to remove, not gaps to fill.
 3. **Judge the structure** with the Architecture rubric in `ow-align` on the changed
    paths, including whether module headers and boundary READMEs still describe them.
 4. **Fix** within authorized intent and rerun affected checks, or, when another
@@ -46,8 +44,8 @@ Load `ow-core`, then read `openwish/policy.md` and the actual diff.
    [--affected N-003] --handoff FILE` (or `--handoff -` with JSON on stdin; format
    in the `ow-core` artifact reference). Unresolved findings use `--verdict blocked`.
    Passing needs every task done. If anything changes afterwards (successor work
-   often does), `ow summary C-001` names what made the review stale: rerun the
-   affected checks, confirm the outcome still holds, and record again.
+   often does), `ow summary C-001` names what made the review stale: record again
+   with the latest run of the affected checks, reviewing again only what changed.
 7. **Present need → outcome → evidence**, limitations, any `open` items this
    result makes decidable, and the assumptions it proceeded on (Commit progressively
    in `ow-plan`). Lead with the choices made on the human's behalf that users would
@@ -69,21 +67,22 @@ Load `ow-core`, then read `openwish/policy.md` and the actual diff.
 ## Blocking findings
 
 - **One complete list.** A blocked review lists every blocker against the whole
-  acceptance at once. Each blocker comes with the check that settles it (a command
-  or procedure, with its expected result or threshold) and its evidence. Corrections
+  acceptance at once. Each blocker names its evidence (a failed run, or the inputs
+  that produce the failure) and one focused check that will show it fixed. Corrections
   work against that list. A re-review checks the list, the correction's diff and its
   affected checks. It adds a blocker only for a regression the correction introduced
   or for a defect a listed check reveals, and it says which.
 - **What blocks.** A finding blocks when it shows a failure: behavior that violates
   a current need or the acceptance, a risk to money, data, permissions, security or
-  a policy tenet, or a missing or wrong check for the acceptance or a credible
-  failure (Strategic verification in `ow-plan`). Show it with a failing run or the
+  a policy tenet, or a check the acceptance names that is missing or wrong. Show it
+  with a failing run or the
   inputs that produce it through real entry points; an unproven absence of failure
   is not a finding. Acceptance or approach wording stricter
   than its need is corrected in the record, not built. A gap reachable only through
   a non-credible path or a waiting quality (`prerelease` preset), contention a shared
-  retry resolves, a check Strategic verification excludes, and check style,
-  harnesses, evidence format and wording are observations and add no check.
+  retry resolves, a missing test the acceptance does not name, an error line in the
+  log of a passing run, and check style, harnesses, evidence format and wording are
+  observations and add no check.
 - **Pre-existing failures.** A check that fails the same way on the base revision is
   not this work's blocker. Record it with an owner (an open change or task) and
   continue.

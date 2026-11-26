@@ -124,8 +124,9 @@ their predecessors pass review (or are accepted, if `successors_wait_for` is
   its result and where its log is. `ow run-check --name unit --evidence DIR --
   COMMAND` runs the project's check, keeps the log, writes that record and prints the
   line to cite; a check that fails and then passes on a rerun (`--attempts`) is
-  `FLAKY`, never a pass. A run recorded at the reviewed revision serves the reviewer
-  too: rerun only what is missing, stale or in doubt. Write no narrative evidence,
+  `FLAKY`, never a pass, and the project policy says whether it blocks. A run
+  recorded at the reviewed revision serves the reviewer too: rerun only what is
+  missing or stale. Write no narrative evidence,
   summaries or provenance machinery (One home per fact) unless a result's integrity
   is genuinely in question. Keep cited logs where they survive a restart.
 - **Keep context small.** Every step rereads the session's whole context, so a long
