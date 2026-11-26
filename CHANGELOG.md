@@ -2,7 +2,7 @@
 
 Release notes for OpenWish, newest first. Update this file for every release.
 
-## Unreleased
+## v1.0.0rc7
 
 From the game project's one-game refactor (2026-11-18/19): its needs and rule docs
 kept designs the refactor replaced, values awaited approval tags, and the same
