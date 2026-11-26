@@ -166,20 +166,21 @@ needs, scope, tasks, evidence and the actual repository:
 
 ## Strategic verification
 
-Choose the smallest set of fast, independent checks that protects the affected
-needs and the failures that would matter. Test count and coverage percentage are
-not goals.
+Scale checks to the change's complexity, impact and risk: choose the smallest set of
+fast, independent checks that protects the affected needs. A low-impact change, such
+as a wording fix, gets no permanent test. Test count and coverage percentage are not
+goals.
 
-- **Run what the change touches.** Run the tests of the files a change touched, with
-  the runner's related-tests mode where it has one, which also selects the tests of
-  code that imports them. Run a whole module or suite only when shared code, test
-  setup, configuration, dependencies or a public contract changes, and once before
-  release. Each check runs once; rerun it only after a change that could alter its
-  result.
-- Ask what important behavior could break, which checks already protect it, and
-  what stays unverified.
-- Check at levels that add distinct evidence: a few need-level outcomes, important
-  pure decisions and invariants, and consequential integration contracts.
+- **Run what the change touches.** Batch related edits, then run the tests of the
+  files they touched, with the runner's related-tests mode where it has one, which
+  also selects the tests of code that imports them. Run a whole module or suite only
+  when shared code, test setup, configuration, dependencies or a public contract
+  changes, and once before release. Rerun only failed cases, after a change that
+  could alter them. Stop when the acceptance and required gates pass.
+- Ask what could break, which checks already protect it, and what stays
+  unverified.
+- Check at levels that add distinct evidence: need-level outcomes, pure decisions
+  and consequential contracts.
 - Derive expected results from intent, not from the implementation. A harmless
   refactor or a retuned value should leave tests passing; violating a need should
   fail one. Tests read calibration from its home rather than restating values.
@@ -202,8 +203,8 @@ not goals.
   own matrix.
 - **Checks that add no evidence.** A check earns its run time only by catching what
   types, lint and review cannot. Do not write tests that restate the implementation,
-  its constants or generated output; a case for every input variant where one
-  accepted and one rejected case per rule suffice; tests of framework, library or
+  its constants or generated output; exhaustive input permutations where one case
+  per materially distinct scenario suffices; tests of framework, library or
   generated-code behavior; guards against the product's own code bypassing its owner
   module; or checks kept only as review evidence.
 - **A fixed defect earns no test by itself.** "So it cannot happen again" is not a
@@ -223,9 +224,8 @@ not goals.
   recomputing by hand.
 - **Fix the bar when planning.** Each task's acceptance names the checks that settle
   it, with commands and thresholds where running cost, timing or recovery matter.
-  Reviews judge against them (Blocking findings in `ow-review`). Acceptance asks for
-  each check to pass once, never for repeated runs, mutation matrices or grids of
-  cases.
+  Reviews judge against them (Blocking findings in `ow-review`). Acceptance never
+  asks for repeated runs or case grids.
 - Keep routine verification under five minutes and name any slower checks needed.
   A change that edits code deletes or merges the tests there that protect no
   credible failure.

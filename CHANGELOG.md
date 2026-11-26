@@ -33,8 +33,10 @@ became a preset instead of OW defaults.
 - **Tests run by what changed** (game project, 2026-11-26): Strategic verification in
   `ow-plan` runs the tests of the touched files, using a related-tests mode where the
   runner has one, and widens to a module or suite only for shared code, setup,
-  configuration, dependencies or a public contract. Each check runs once, and
-  acceptance never asks for repeated runs, mutation matrices or case grids.
+  configuration, dependencies or a public contract. Checks scale with a change's
+  risk (a wording fix gets no permanent test), cover distinct scenarios rather than
+  permutations, run once after batched edits, rerun only failed cases and stop when
+  the acceptance and required gates pass.
 - **Blockers stay failures** (`ow-review`): a missing test blocks only when the
   acceptance names it. A blocker names one focused check, not a settling procedure.
   Runs are judged by their recorded status, and an error line in a passing run's log
